@@ -9,6 +9,7 @@
   "author": "@DanielLarsenNZ",
   "license": "MIT",
   "dependencies": {
+    "@types/node": "^8.0.52",
     "botbuilder": "^3.11.0",
     "restify": "^6.3.1"
   }

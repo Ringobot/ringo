@@ -1,60 +1,68 @@
-//@ts-check
-var $http = require("http");
-var $https = require("https");
-var $url = require('url');
-
-module.exports.request = request;
-
-module.exports.get = function (url, options, callback) {
-if (!options) options = {};
-    options.method = 'GET';
-    request(url, null, options, callback);
+/// simple HTTPS wrapper for JSON request/response
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
 };
-
-module.exports.post = function (url, data, options, callback) {
-if (!options) options = {};
-
-options.method = 'POST';
-// default content type is form-urlencoded
-if (options.headers['Content-Type'] == undefined) {
-    options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+Object.defineProperty(exports, "__esModule", { value: true });
+const _https = require("https");
+const _url = require("url");
+// get
+function get(url, headers) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield request("GET", url);
+    });
 }
-request(url, data, options, callback);
-};
-
-
-var request = function (url, data, options, callback) {
-    var parsedUrl = $url.parse(url, true);
-    var http = parsedUrl.protocol == "https:" ? $https : $http;
-
-    options.hostname = parsedUrl.hostname;
-    options.port = parsedUrl.port;
-    options.path = parsedUrl.path;
-
+exports.get = get;
+;
+// post
+function post(url, data, headers) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // default content type is form-urlencoded
+        if (headers == undefined || headers["Content-Type"] == undefined) {
+            headers["Content-Type"] = 'application/x-www-form-urlencoded';
+        }
+        return yield request("POST", url, data, headers);
+    });
+}
+exports.post = post;
+;
+// request
+function request(method, url, data, headers) {
+    let parsedUrl = _url.parse(url, true);
+    let httpOptions = {
+        method: method,
+        headers: headers,
+        hostname: parsedUrl.hostname,
+        port: parseInt(parsedUrl.port),
+        path: parsedUrl.path
+    };
     console.log("httpjson request", url);
-
-    var req = http.request(options, function(res) {
-        var output = '';
-        res.setEncoding('utf8');
-
-        res.on('data', function(chunk) {
-            output += chunk;
+    return new Promise(function (httpOptions) {
+        let req = _https.request(httpOptions, function (res) {
+            let output = '';
+            res.setEncoding('utf8');
+            res.on('data', function (chunk) {
+                output += chunk;
+            });
+            res.on('end', function () {
+                if (res.statusCode != 200) {
+                    throw new Error(output);
+                }
+                var obj = JSON.parse(output);
+                return obj;
+            });
         });
-
-        res.on('end', function() {
-            if (res.statusCode != 200) {
-                callback(new Error(output));
-                return;
-            }
-            var obj = JSON.parse(output);
-            callback(null, obj);
+        req.on('error', function (err) {
+            throw err;
         });
+        if (data)
+            req.write(data.toString());
+        req.end();
     });
-
-    req.on('error', function(err) {
-        throw err;
-    });
-
-    if (data) req.write(data.toString());
-    req.end();
-};
+}
+;
