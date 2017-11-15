@@ -1,7 +1,7 @@
 import _spotify = require('./spotify');
 import builder = require('botbuilder');
 
-export async function getArtists (session, artists, callback) {
+export async function getArtists (session, artists) {
     var msg = new builder.Message(session);
     msg.attachmentLayout(builder.AttachmentLayout.carousel)
     msg.attachments([
@@ -26,5 +26,5 @@ export async function getArtists (session, artists, callback) {
             ])
     ]);
     
-    callback(null, msg);
+    return msg;
 };

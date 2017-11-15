@@ -2,6 +2,7 @@
 
 import * as _https from "https";
 import * as _url from "url";
+import { RequestOptions } from "https";
 
 // get
 export async function get(url: string, headers?) {
@@ -22,9 +23,9 @@ export async function post(url: string, data, headers?) {
 function request(method: string, url: string, data?, headers?: string[]) {
     let parsedUrl = _url.parse(url, true);
 
-    let httpOptions: _https.RequestOptions = {
+    let options:RequestOptions = {
         method: method,
-        headers: headers,
+        //headers: headers,
         hostname: parsedUrl.hostname,
         port: parseInt(parsedUrl.port),
         path: parsedUrl.path
@@ -32,9 +33,9 @@ function request(method: string, url: string, data?, headers?: string[]) {
 
     console.log("httpjson request", url);
 
-    return new Promise<any>(
-        function (httpOptions) {
-            let req = _https.request(httpOptions, function (res) {
+    return new Promise<any>(resolve =>
+        function (options) {
+            let req = _https.request(options, function (res) {
                 let output = '';
                 res.setEncoding('utf8');
 

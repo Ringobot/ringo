@@ -32,14 +32,13 @@ var bot = new builder.UniversalBot(connector, [
             + "I'm not really very smart so you may have to be patient with me :) If I start bugging out, just type 'help'.");
         builder.Prompts.text(session, "Who are your favourite artists and bands?");
     },
-    function (session, results) {
+    async function (session, results) {
         session.dialogData.artists = results.response.split(',');
         session.sendTyping();
-        cards.getArtists(session, session.dialogData.artists, function(error, msg) {
-            session.send(msg);
-            session.send(`234 of my friends listen to Radiohead! What is your favourite Radiohead album?`);
-            session.endDialog();                
-        });
+        let msg = await cards.getArtists(session, session.dialogData.artists);
+        session.send(msg);
+        session.send(`234 of my friends listen to Radiohead! What is your favourite Radiohead album?`);
+        session.endDialog();                
     }
 ]);
 

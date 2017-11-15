@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const builder = require("botbuilder");
-function getArtists(session, artists, callback) {
+function getArtists(session, artists) {
     return __awaiter(this, void 0, void 0, function* () {
         var msg = new builder.Message(session);
         msg.attachmentLayout(builder.AttachmentLayout.carousel);
@@ -31,7 +31,7 @@ function getArtists(session, artists, callback) {
                 builder.CardAction.messageBack(session, "This is not \"Massive Attack\"", "Nope")
             ])
         ]);
-        callback(null, msg);
+        return msg;
     });
 }
 exports.getArtists = getArtists;

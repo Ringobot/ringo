@@ -1,5 +1,13 @@
-/// <reference types="node" />
 "use strict";
+/// <reference types="node" />
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const restify = require("restify");
 const builder = require("botbuilder");
@@ -29,9 +37,10 @@ var bot = new builder.UniversalBot(connector, [
         builder.Prompts.text(session, "Who are your favourite artists and bands?");
     },
     function (session, results) {
-        session.dialogData.artists = results.response.split(',');
-        session.sendTyping();
-        cards.getArtists(session, session.dialogData.artists, function (error, msg) {
+        return __awaiter(this, void 0, void 0, function* () {
+            session.dialogData.artists = results.response.split(',');
+            session.sendTyping();
+            let msg = yield cards.getArtists(session, session.dialogData.artists);
             session.send(msg);
             session.send(`234 of my friends listen to Radiohead! What is your favourite Radiohead album?`);
             session.endDialog();

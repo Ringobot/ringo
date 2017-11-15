@@ -1,5 +1,5 @@
-/// simple HTTPS wrapper for JSON request/response
 "use strict";
+/// simple HTTPS wrapper for JSON request/response
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -34,16 +34,16 @@ exports.post = post;
 // request
 function request(method, url, data, headers) {
     let parsedUrl = _url.parse(url, true);
-    let httpOptions = {
+    let options = {
         method: method,
-        headers: headers,
+        //headers: headers,
         hostname: parsedUrl.hostname,
         port: parseInt(parsedUrl.port),
         path: parsedUrl.path
     };
     console.log("httpjson request", url);
-    return new Promise(function (httpOptions) {
-        let req = _https.request(httpOptions, function (res) {
+    return new Promise(resolve => function (options) {
+        let req = _https.request(options, function (res) {
             let output = '';
             res.setEncoding('utf8');
             res.on('data', function (chunk) {
