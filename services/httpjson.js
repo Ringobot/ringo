@@ -14,7 +14,7 @@ const _url = require("url");
 // get
 function get(url, headers) {
     return __awaiter(this, void 0, void 0, function* () {
-        return yield request("GET", url);
+        return yield request("GET", url, undefined, headers);
     });
 }
 exports.get = get;
@@ -23,7 +23,9 @@ exports.get = get;
 function post(url, data, headers) {
     return __awaiter(this, void 0, void 0, function* () {
         // default content type is form-urlencoded
-        if (headers == undefined || headers["Content-Type"] == undefined) {
+        if (headers == undefined)
+            headers = { "Content-Type": "application/x-www-form-urlencoded" };
+        if (headers["Content-Type"] == undefined) {
             headers["Content-Type"] = 'application/x-www-form-urlencoded';
         }
         return yield request("POST", url, data, headers);
@@ -36,13 +38,13 @@ function request(method, url, data, headers) {
     let parsedUrl = _url.parse(url, true);
     let options = {
         method: method,
-        //headers: headers,
+        headers: headers,
         hostname: parsedUrl.hostname,
         port: parseInt(parsedUrl.port),
         path: parsedUrl.path
     };
     console.log("httpjson request", url);
-    return new Promise(resolve => function (options) {
+    return new Promise((resolve, reject) => {
         let req = _https.request(options, function (res) {
             let output = '';
             res.setEncoding('utf8');
@@ -50,19 +52,23 @@ function request(method, url, data, headers) {
                 output += chunk;
             });
             res.on('end', function () {
-                if (res.statusCode != 200) {
-                    throw new Error(output);
+                if (res.statusCode < 200 || res.statusCode > 299) {
+                    reject(output);
+                    return;
                 }
                 var obj = JSON.parse(output);
-                return obj;
+                resolve(obj);
+                return;
             });
         });
         req.on('error', function (err) {
-            throw err;
+            reject(err);
+            return;
         });
         if (data)
             req.write(data.toString());
         req.end();
     });
 }
+exports.request = request;
 ;

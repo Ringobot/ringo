@@ -5,27 +5,29 @@ import * as _url from "url";
 import { RequestOptions } from "https";
 
 // get
-export async function get(url: string, headers?) {
-    return await request("GET", url);
+export async function get(url: string, headers?:any) {
+    return await request("GET", url, undefined, headers);
 };
 
 // post
-export async function post(url: string, data, headers?) {
+export async function post(url: string, data, headers?:any) {
     // default content type is form-urlencoded
-    if (headers == undefined || headers["Content-Type"] == undefined) {
+    if (headers == undefined) headers = {"Content-Type": "application/x-www-form-urlencoded"};
+    
+    if (headers["Content-Type"] == undefined) {
         headers["Content-Type"] = 'application/x-www-form-urlencoded';
-    } 
+    }
 
     return await request("POST", url, data, headers);
 };
 
 // request
-function request(method: string, url: string, data?, headers?: string[]) {
+export function request(method: string, url: string, data?, headers?: any) {
     let parsedUrl = _url.parse(url, true);
 
-    let options:RequestOptions = {
+    let options: RequestOptions = {
         method: method,
-        //headers: headers,
+        headers: headers,
         hostname: parsedUrl.hostname,
         port: parseInt(parsedUrl.port),
         path: parsedUrl.path
@@ -33,32 +35,34 @@ function request(method: string, url: string, data?, headers?: string[]) {
 
     console.log("httpjson request", url);
 
-    return new Promise<any>(resolve =>
-        function (options) {
-            let req = _https.request(options, function (res) {
-                let output = '';
-                res.setEncoding('utf8');
+    return new Promise<any>((resolve, reject) => {
+        let req = _https.request(options, function (res) {
+            let output = '';
+            res.setEncoding('utf8');
 
-                res.on('data', function (chunk) {
-                    output += chunk;
-                });
-
-                res.on('end', function () {
-                    if (res.statusCode != 200) {
-                        throw new Error(output);
-                    }
-
-                    var obj = JSON.parse(output);
-                    return obj;
-                });
+            res.on('data', function (chunk) {
+                output += chunk;
             });
 
-            req.on('error', function (err) {
-                throw err;
-            });
+            res.on('end', function () {
+                if (res.statusCode < 200 || res.statusCode > 299) {
+                    reject(output);
+                    return;
+                }
 
-            if (data) req.write(data.toString());
-            req.end();
-        }
-    )
+                var obj = JSON.parse(output);
+                resolve(obj);
+                return;
+            });
+        });
+
+        req.on('error', function (err) {
+            reject(err);
+            return;
+        });
+
+        if (data) req.write(data.toString());
+        req.end();
+    }
+    );
 };

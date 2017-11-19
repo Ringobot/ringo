@@ -30,15 +30,10 @@ var bot = new builder.UniversalBot(connector, [
         session.dialogData.name = results.response;
         session.send(`'Sup ${session.dialogData.name}! I love to discover new music and share my discoveries ;) ` 
             + "I'm not really very smart so you may have to be patient with me :) If I start bugging out, just type 'help'.");
-        builder.Prompts.text(session, "Who are your favourite artists and bands?");
+        session.beginDialog('fave_artists');
     },
-    async function (session, results) {
-        session.dialogData.artists = results.response.split(',');
-        session.sendTyping();
-        let msg = await cards.getArtists(session, session.dialogData.artists);
-        session.send(msg);
-        session.send(`234 of my friends listen to Radiohead! What is your favourite Radiohead album?`);
-        session.endDialog();                
+    function (session, results){
+        session.endDialog();
     }
 ]);
 
@@ -65,3 +60,19 @@ bot.dialog('quit', function (session, args, next) {
     matches: /^cancel$|^goodbye$|^quit$|^end$/i,
 });
 
+bot.dialog('fave_artists', [
+    function (session, results) {
+        builder.Prompts.text(session, "Who are your favourite artists and bands?");
+    },    
+    async function (session, results) {
+        var artists:string[] = results.response.split(',');
+        session.dialogData.artists = artists;
+        session.sendTyping();
+        let msg = await cards.getArtists(session, artists);
+        if (msg) session.send(msg);
+        else {
+            session.send(`I couldn't find anything for "${results.response}" 😞 Try using commas, like "Lorde, Taylor Swift"`);
+            session.beginDialog('fave_artists'); //TODO IS this correct?
+        }
+    }
+]);

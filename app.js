@@ -34,17 +34,10 @@ var bot = new builder.UniversalBot(connector, [
         session.dialogData.name = results.response;
         session.send(`'Sup ${session.dialogData.name}! I love to discover new music and share my discoveries ;) `
             + "I'm not really very smart so you may have to be patient with me :) If I start bugging out, just type 'help'.");
-        builder.Prompts.text(session, "Who are your favourite artists and bands?");
+        session.beginDialog('fave_artists');
     },
     function (session, results) {
-        return __awaiter(this, void 0, void 0, function* () {
-            session.dialogData.artists = results.response.split(',');
-            session.sendTyping();
-            let msg = yield cards.getArtists(session, session.dialogData.artists);
-            session.send(msg);
-            session.send(`234 of my friends listen to Radiohead! What is your favourite Radiohead album?`);
-            session.endDialog();
-        });
+        session.endDialog();
     }
 ]);
 // help dialog
@@ -68,3 +61,22 @@ bot.dialog('quit', function (session, args, next) {
     .triggerAction({
     matches: /^cancel$|^goodbye$|^quit$|^end$/i,
 });
+bot.dialog('fave_artists', [
+    function (session, results) {
+        builder.Prompts.text(session, "Who are your favourite artists and bands?");
+    },
+    function (session, results) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var artists = results.response.split(',');
+            session.dialogData.artists = artists;
+            session.sendTyping();
+            let msg = yield cards.getArtists(session, artists);
+            if (msg)
+                session.send(msg);
+            else {
+                session.send(`I couldn't find anything for "${results.response}" 😞 Try using commas, like "Lorde, Taylor Swift"`);
+                session.beginDialog('fave_artists'); //TODO IS this correct?
+            }
+        });
+    }
+]);

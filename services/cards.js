@@ -8,29 +8,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const _spotify = require("./spotify");
 const builder = require("botbuilder");
 function getArtists(session, artists) {
     return __awaiter(this, void 0, void 0, function* () {
-        var msg = new builder.Message(session);
+        let cards = new Array();
+        for (var i in artists) {
+            let artist = artists[i];
+            let artistData = yield _spotify.searchArtists(artist, 1);
+            if (artistData.artists.items.length > 0) {
+                let item = artistData.artists.items[0];
+                cards.push(new builder.HeroCard(session)
+                    .title(item.name)
+                    .text(`Do you like ${item.name}?`)
+                    .images([builder.CardImage.create(session, item.images[0].url)])
+                    .buttons([
+                    builder.CardAction.messageBack(session, `I like \"${item.name}\"!`, "👍"),
+                    builder.CardAction.messageBack(session, `I don't like \"${item.name}\"`, "👎")
+                ]));
+            }
+        }
+        if (cards.length == 0)
+            return;
+        let msg = new builder.Message(session);
         msg.attachmentLayout(builder.AttachmentLayout.carousel);
-        msg.attachments([
-            new builder.HeroCard(session)
-                .title("Radiohead")
-                .text("234 of my friends listen to Radiohead")
-                .images([builder.CardImage.create(session, 'https://i.scdn.co/image/afcd616e1ef2d2786f47b3b4a8a6aeea24a72adc')])
-                .buttons([
-                builder.CardAction.messageBack(session, "This is \"Radiohead\"", "Yep"),
-                builder.CardAction.messageBack(session, "This is not \"Radiohead\"", "Nope")
-            ]),
-            new builder.HeroCard(session)
-                .title("Massive Attack")
-                .text("2,011 of my friends listen to Massive Attack")
-                .images([builder.CardImage.create(session, 'https://i.scdn.co/image/c8bbeedb05f38ae5cb982a7daf4bf7129cca892c')])
-                .buttons([
-                builder.CardAction.messageBack(session, "This is \"Massive Attack\"", "Yep"),
-                builder.CardAction.messageBack(session, "This is not \"Massive Attack\"", "Nope")
-            ])
-        ]);
+        msg.attachments(cards);
         return msg;
     });
 }
