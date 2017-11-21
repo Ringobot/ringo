@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+require('dotenv').config();
 const restify = require("restify");
 const builder = require("botbuilder");
 const cards = require("./services/cards");
@@ -27,13 +28,13 @@ server.post('/api/messages', connector.listen());
 // main dialog
 var bot = new builder.UniversalBot(connector, [
     function (session) {
-        session.send("Hey! I'm Ringo, the music bot from Rdostr :]");
+        session.send("Hey! I'm Ringo, the music bot 😎🎧🎵");
         builder.Prompts.text(session, "What's your name?");
     },
     function (session, results) {
         session.dialogData.name = results.response;
-        session.send(`'Sup ${session.dialogData.name}! I love to discover new music and share my discoveries ;) `
-            + "I'm not really very smart so you may have to be patient with me :) If I start bugging out, just type 'help'.");
+        session.send(`'Sup ${session.dialogData.name}! I love to discover new music and share my discoveries ;) `);
+        //+ "I'm not really very smart so you may have to be patient with me :) If I start bugging out, just type 'help'.");
         session.beginDialog('fave_artists');
     },
     function (session, results) {
@@ -70,12 +71,19 @@ bot.dialog('fave_artists', [
             var artists = results.response.split(',');
             session.dialogData.artists = artists;
             session.sendTyping();
-            let msg = yield cards.getArtists(session, artists);
-            if (msg)
-                session.send(msg);
-            else {
-                session.send(`I couldn't find anything for "${results.response}" 😞 Try using commas, like "Lorde, Taylor Swift"`);
-                session.beginDialog('fave_artists'); //TODO IS this correct?
+            try {
+                let msg = yield cards.getArtists(session, artists);
+                if (msg)
+                    session.send(msg);
+                else {
+                    session.send(`I couldn't find anything for "${results.response}" 😞 Try using commas, like "Lorde, Taylor Swift"`);
+                    session.beginDialog('fave_artists'); //TODO IS this correct?
+                }
+            }
+            catch (e) {
+                console.error(e);
+                session.send(`Whoops! Something is wrong 😞 Please try again.`);
+                session.beginDialog('fave_artists');
             }
         });
     }
