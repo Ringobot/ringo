@@ -16,8 +16,8 @@ export async function getArtists(session, artists: string[]) {
                     // images 600 wide
                     .images([builder.CardImage.create(session, item.images[0].url)])
                     .buttons([
-                        builder.CardAction.messageBack(session, `I like \"${item.name}\"!`, "👍"),
-                        builder.CardAction.messageBack(session, `I don't like \"${item.name}\"`, "👎")
+                        builder.CardAction.messageBack(session, `I like ${item.name}`, "👍"),
+                        builder.CardAction.messageBack(session, `I don't like ${item.name}`, "👎")
                     ])
             );
         }

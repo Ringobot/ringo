@@ -13,6 +13,7 @@ require('dotenv').config();
 const restify = require("restify");
 const builder = require("botbuilder");
 const cards = require("./services/cards");
+const data = require("./services/userdata");
 // Setup Restify Server
 var server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3978, function () {
@@ -58,8 +59,7 @@ bot.dialog('help', function (session, args, next) {
 // quit dialog
 bot.dialog('quit', function (session, args, next) {
     session.endDialog("OK - see ya!");
-})
-    .triggerAction({
+}).triggerAction({
     matches: /^cancel$|^goodbye$|^quit$|^end$/i,
 });
 bot.dialog('fave_artists', [
@@ -88,3 +88,20 @@ bot.dialog('fave_artists', [
         });
     }
 ]);
+bot.dialog('like_artist', [function (session, results) {
+        let response = results.intent.matched.input;
+        // 'I really like Radiohead'
+        let artist = response.replace(/i\s(\w+\s)*(love|like)\s/i, '');
+        session.sendTyping();
+        try {
+            data.userLikesArtist('daniel', artist);
+            session.send(`I like ${artist} too!`);
+        }
+        catch (e) {
+            console.error(e);
+            session.send(`Whoops! Something is wrong 😞 Please try again.`);
+            session.beginDialog('fave_artists');
+        }
+    }]).triggerAction({
+    matches: /i\s(\w+\s)*(love|like)\s/i
+});
