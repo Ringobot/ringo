@@ -9,11 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const _table = require("./tablestorage");
+const _canonical = require("./canonicalisation");
 function userLikesArtist(user, artist) {
     return __awaiter(this, void 0, void 0, function* () {
         let entity = {
             PartitionKey: user.toLowerCase(),
-            RowKey: artist.toLowerCase(),
+            RowKey: _canonical.getArtistId(artist).Id,
             User: user,
             Artist: artist,
             WhenLiked: new Date()
