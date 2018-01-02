@@ -23,8 +23,7 @@ function getArtists(session, artists) {
                     .text(`Do you like ${item.name}?`)
                     .images([builder.CardImage.create(session, item.images[0].url)])
                     .buttons([
-                    builder.CardAction.messageBack(session, `I like ${item.name}`, "👍"),
-                    builder.CardAction.messageBack(session, `I don't like ${item.name}`, "👎")
+                    builder.CardAction.imBack(session, `I like ${item.name}`, `I like ${item.name}`)
                 ]));
             }
         }

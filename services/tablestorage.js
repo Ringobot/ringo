@@ -18,7 +18,7 @@ function insert(table, entity, insertOrReplace = false) {
                     reject(error);
                     return;
                 }
-                console.log("tablestorage inserted into ", table);
+                console.log(`tablestorage ${insertOrReplace ? 'insertOrReplace' : 'insert'} into ${table}`);
                 resolve();
                 return;
             };

@@ -24,7 +24,7 @@ export function insert(table: string, entity: TableEntity, insertOrReplace: bool
                     reject(error);
                     return;
                 }
-                console.log("tablestorage inserted into ", table);
+                console.log(`tablestorage ${insertOrReplace?'insertOrReplace':'insert'} into ${table}`);
                 resolve();
                 return;
             };

@@ -13,7 +13,8 @@ require('dotenv').config();
 const restify = require("restify");
 const builder = require("botbuilder");
 const cards = require("./services/cards");
-const data = require("./services/userdata");
+const userdata = require("./services/userdata");
+const statedata = require("./services/statedata");
 // Setup Restify Server
 var server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3978, function () {
@@ -33,15 +34,15 @@ var bot = new builder.UniversalBot(connector, [
         builder.Prompts.text(session, "What's your name?");
     },
     function (session, results) {
-        session.dialogData.name = results.response;
-        session.send(`'Sup ${session.dialogData.name}! I love to discover new music and share my discoveries ;) `);
+        session.userData.username = results.response;
+        session.send(`'Sup ${results.response}! I love to discover new music and share my discoveries ;) `);
         //+ "I'm not really very smart so you may have to be patient with me :) If I start bugging out, just type 'help'.");
         session.beginDialog('fave_artists');
     },
     function (session, results) {
         session.endDialog();
     }
-]);
+]).set('storage', statedata.getAzureBotStorage()); // use Table Storage for state data
 // help dialog
 // The dialog stack is cleared and this dialog is invoked when the user enters 'help'.
 bot.dialog('help', function (session, args, next) {
@@ -89,13 +90,15 @@ bot.dialog('fave_artists', [
     }
 ]);
 bot.dialog('like_artist', [function (session, results) {
+        // get the raw input
         let response = results.intent.matched.input;
-        // 'I really like Radiohead'
+        // strip the match, leaving the artist
         let artist = response.replace(/i\s(\w+\s)*(love|like)\s/i, '');
         session.sendTyping();
         try {
-            data.userLikesArtist('daniel', artist);
-            session.send(`I like ${artist} too!`);
+            // save the like
+            userdata.userLikesArtist(session.userData.username, artist);
+            session.endDialog(`I like ${artist} too!`);
         }
         catch (e) {
             console.error(e);
@@ -103,5 +106,7 @@ bot.dialog('like_artist', [function (session, results) {
             session.beginDialog('fave_artists');
         }
     }]).triggerAction({
+    // https://regex101.com/r/VO2I8r/1
+    // 'I really like Radiohead'
     matches: /i\s(\w+\s)*(love|like)\s/i
 });

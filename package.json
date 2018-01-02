@@ -13,6 +13,7 @@
     "azure-common": "^0.9.19",
     "azure-storage": "^2.7.0",
     "botbuilder": "^3.11.0",
+    "botbuilder-azure": "^3.0.4",
     "dotenv": "^4.0.0",
     "restify": "^6.3.1"
   },
