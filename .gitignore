@@ -1,3 +1,4 @@
 docs/live.pdf
 node_modules
 .env
+.vscode

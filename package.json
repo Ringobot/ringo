@@ -15,6 +15,7 @@
     "botbuilder": "^3.11.0",
     "botbuilder-azure": "^3.0.4",
     "dotenv": "^4.0.0",
+    "gremlin": "^2.6.0",
     "restify": "^6.3.1"
   },
   "devDependencies": {

@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const httpj = require("../../services/httpjson");
 const chai_1 = require("chai");
 require("mocha");
+require("./helper");
 describe('httpjson.request', () => {
     it('returns response from GET /posts', () => __awaiter(this, void 0, void 0, function* () {
         let response = yield httpj.request("get", "https://jsonplaceholder.typicode.com/posts");

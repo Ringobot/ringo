@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const spotify = require("../../services/spotify");
 const chai_1 = require("chai");
 require("mocha");
+require("./helper");
 describe('spotify.getAuthToken', () => {
     it('should return a token', () => __awaiter(this, void 0, void 0, function* () {
         let token = yield spotify.getAuthToken();

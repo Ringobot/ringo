@@ -1,6 +1,7 @@
 import * as httpj from "../../services/httpjson";
 import { expect } from 'chai';
 import 'mocha';
+import './helper';
 
 describe('httpjson.request', () => {
 

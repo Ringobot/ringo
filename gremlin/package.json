@@ -1,0 +1,38 @@
+{
+  "name": "@types/gremlin",
+  "version": "2.0.0",
+  "description": "Types for https://github.com/jbmusso/gremlin-javascript",
+  "typings": "index.d.ts",
+  "scripts": {
+    "lint": "tslint \"**/*.ts\" -e \"node_modules/**\" -e \"typings/**\" -e bundle.d.ts",
+    "bundle": "typings bundle -o bundle.d.ts",
+    "exec": "tsc",
+    "test": "npm run lint && npm run bundle && npm run exec",
+    "prepublish": "typings install",
+    "postpublish": "greenkeeper-postpublish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/types/npm-gremlin.git"
+  },
+  "author": {
+    "name": "Blake Embrey",
+    "email": "hello@blakeembrey.com",
+    "url": "http://blakeembrey.me"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/types/npm-gremlin/issues"
+  },
+  "homepage": "https://github.com/types/npm-gremlin#readme",
+  "devDependencies": {
+    "greenkeeper-postpublish": "^1.0.1",
+    "gremlin": "^2.3.2",
+    "scmp": "^2.0.0",
+    "ts-node": "^4.0.0",
+    "tslint": "^5.0.0",
+    "tslint-config-typings": "^0.3.0",
+    "typescript": "^2.0.3",
+    "typings": "^2.0.0"
+  }
+}
