@@ -1,5 +1,11 @@
 # Ringo
 
+## Getting started on Linux (Ubuntu)
+
+Install latest nodejs and npm: <https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions>
+
+    curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash - sudo apt-get install -y nodejs
+
 ## Links
 
 Spotify Developer: <https://developer.spotify.com/web-api/console/get-search-item/#complete>

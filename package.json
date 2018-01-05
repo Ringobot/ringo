@@ -4,7 +4,8 @@
   "description": "Ringo Music Bot",
   "main": "app.js",
   "scripts": {
-    "test": "mocha -r ts-node/register tests/**/*.tests.ts"
+    "test": "mocha -r ts-node/register tests/**/*.tests.ts",
+    "start": "node app.js"
   },
   "author": "@DanielLarsenNZ",
   "license": "MIT",
