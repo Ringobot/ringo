@@ -11,8 +11,6 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-RUN npm test
-
 EXPOSE 3978
 
 CMD ["npm", "start"]
