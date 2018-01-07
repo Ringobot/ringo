@@ -24,8 +24,8 @@ describe('addVertex1', () => {
 });
 */
 
-describe('addVertex() results', () => {
-    this.timeout = 10000;
+describe('addVertex() results', function () {
+    this.timeout(10000);
     let name = helper.newGuid();
 
     let vertex = {
@@ -38,24 +38,24 @@ describe('addVertex() results', () => {
 
     var results;
 
-    before(async () => {
+    before(async function () {
         results = await _graphDb.addVertex(client, vertex);
         console.log(results);
     });
 
-    it('has label', () => {
+    it('has label', function () {
         expect(results[0].label).equals(name);
     });
 
-    it('has Country property', () => {
+    it('has Country property', function () {
         expect(results[0].properties.Country[0].value).equals("UK");
     });
 
-    it('has Genre property', () => {
+    it('has Genre property', function () {
         expect(results[0].properties.Genre[0].value).equals("Alternative");
     });
 
-    after(() => {
+    after(function () {
         // TODO: delete Vertex
     });
 });
