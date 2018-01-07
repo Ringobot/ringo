@@ -63,6 +63,5 @@ export function request(method: string, url: string, data?, headers?: any) {
 
         if (data) req.write(data.toString());
         req.end();
-    }
-    );
+    });
 };

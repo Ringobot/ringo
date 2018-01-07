@@ -2,18 +2,19 @@
 
 import _gremlin = require('gremlin');
 
-export function createClient() {
+export function createClient(dbId?: string, collectionId?: string) {
     return _gremlin.createClient(
         443,
         process.env.GRAPH_ENDPOINT,
         {
             "session": false,
             "ssl": true,
-            "user": `/dbs/${process.env.GRAPH_DATABASE_ID}/colls/${process.env.GRAPH_COLLECTION_ID}`,
+            "user": `/dbs/${dbId || process.env.GRAPH_DATABASE_ID}/colls/${collectionId || process.env.GRAPH_COLLECTION_ID}`,
             "password": process.env.GRAPH_ACCESS_KEY
         });
 }
 
+/*
 export function dropGraph(client, callback) {
     console.log('Running Drop');
     client.execute('g.V().drop()', {}, (err, results) => {
@@ -25,6 +26,50 @@ export function dropGraph(client, callback) {
         callback(null)
     });
 }
+*/
+
+interface Vertex {
+    Name: string,
+    Properties: VertexProperty[]
+}
+
+interface VertexProperty {
+    Key: string,
+    Value: string
+}
+
+interface Edge {
+    FromVertex: string,
+    Relationship: string,
+    ToVertex: string
+}
+
+export function addVertex(client, vertex: Vertex) {
+    var query = "g.addV(_Vertex_Name)";
+    var bindings = { _Vertex_Name: vertex.Name };
+
+    for (var i = 0; i < vertex.Properties.length; i++) {
+        query += `.property(_Property_${vertex.Properties[i].Key}, _Property_${vertex.Properties[i].Key}_Value)`;
+        bindings[`_Property_${vertex.Properties[i].Key}`] = vertex.Properties[i].Key;
+        bindings[`_Property_${vertex.Properties[i].Key}_Value`] = vertex.Properties[i].Value;
+    }
+
+    console.log('graphstorage.addVertex', 'vertex.Name', vertex.Name);
+    console.debug('graphstorage.addVertex', 'query', query);
+    console.debug('graphstorage.addVertex', 'bindings', bindings);
+
+    return new Promise<any>((resolve, reject) => {
+        client.execute(query, bindings, function (err, results) {
+            if (err) {
+                reject(err);
+                return;
+            }
+
+            resolve(results);
+            return;
+        });
+    });
+};
 
 export function addVertex1(client, callback) {
     console.log('Running Add Vertex1');

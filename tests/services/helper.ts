@@ -1,3 +1,6 @@
 require('dotenv').config();
+import crypto = require("crypto");
 
-console.log('helper');
+export function newGuid(): string {
+    return crypto.randomBytes(16).toString("hex");
+}
