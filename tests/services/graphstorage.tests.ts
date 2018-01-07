@@ -25,23 +25,24 @@ describe('addVertex1', () => {
 */
 
 describe('addVertex() results', () => {
+    this.timeout = 10000;
     let name = helper.newGuid();
 
-        let vertex = {
-            Name: name,
-            Properties: [
-                { Key: "Country", Value: "UK" },
-                { Key: "Genre", Value: "Alternative" }
-            ]
-        };
+    let vertex = {
+        Name: name,
+        Properties: [
+            { Key: "Country", Value: "UK" },
+            { Key: "Genre", Value: "Alternative" }
+        ]
+    };
 
     var results;
 
-    before(async ()=>{
+    before(async () => {
         results = await _graphDb.addVertex(client, vertex);
         console.log(results);
     });
-    
+
     it('has label', () => {
         expect(results[0].label).equals(name);
     });

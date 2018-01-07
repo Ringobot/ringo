@@ -32,6 +32,7 @@ describe('addVertex1', () => {
 });
 */
 describe('addVertex() results', () => {
+    this.timeout = 10000;
     let name = helper.newGuid();
     let vertex = {
         Name: name,
