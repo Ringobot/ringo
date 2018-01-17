@@ -13,7 +13,6 @@ require('dotenv').config();
 const restify = require("restify");
 const builder = require("botbuilder");
 const cards = require("./services/cards");
-const userdata = require("./services/userdata");
 const statedata = require("./services/statedata");
 // Setup Restify Server
 var server = restify.createServer();
@@ -27,8 +26,25 @@ var connector = new builder.ChatConnector({
 });
 // Listen for messages from users 
 server.post('/api/messages', connector.listen());
-// main dialog
-var bot = new builder.UniversalBot(connector, [
+//setup botstate and main dialog
+var bot = new builder.UniversalBot(connector);
+bot.set('storage', statedata.getAzureBotStorage());
+// Setup LUIS Model and Intent Dialogs
+var model = process.env.LUIS_MODEL_URL;
+var recognizer = new builder.LuisRecognizer(model);
+var intents = new builder.IntentDialog({ recognizers: [recognizer] });
+bot.dialog('/', intents);
+// Welcome message
+bot.on('conversationUpdate', function (session) {
+    if (session.membersAdded) {
+        session.membersAdded.forEach((identity) => {
+            if (identity.id === session.address.bot.id) {
+                bot.beginDialog(session.address, 'Welcome');
+            }
+        });
+    }
+});
+bot.dialog('Welcome', [
     function (session) {
         session.send("Hey! I'm Ringo, the music bot 😎🎧🎵");
         builder.Prompts.text(session, "What's your name?");
@@ -37,32 +53,50 @@ var bot = new builder.UniversalBot(connector, [
         session.userData.username = results.response;
         session.send(`'Sup ${results.response}! I love to discover new music and share my discoveries ;) `);
         //+ "I'm not really very smart so you may have to be patient with me :) If I start bugging out, just type 'help'.");
-        session.beginDialog('fave_artists');
-    },
-    function (session, results) {
+        //session.beginDialog('fave_artists');
+        builder.Prompts.text(session, "Who are your favourite artists and bands?");
         session.endDialog();
+    },
+]);
+intents.matches('Help', [
+    function (session, args, next) {
+        session.endDialog("Ringo is a bot that aims to discover music by asking you a series of questions about your music tastes."
+            + "You can type 'quit' at any time to quit and resume the conversation later.");
     }
-]).set('storage', statedata.getAzureBotStorage()); // use Table Storage for state data
-// help dialog
-// The dialog stack is cleared and this dialog is invoked when the user enters 'help'.
-bot.dialog('help', function (session, args, next) {
-    session.endDialog("Ringo is a bot that aims to discover music by asking you a series of questions about your music tastes."
-        + "You can type 'quit' at any time to quit and resume the conversation later.");
-})
-    .triggerAction({
-    matches: /^help$/i,
-    onSelectAction: (session, args, next) => {
-        // Add the help dialog to the dialog stack 
-        // (override the default behavior of replacing the stack)
-        session.beginDialog(args.action, args);
-    }
-});
-// quit dialog
-bot.dialog('quit', function (session, args, next) {
+]);
+intents.matches('Quit', function (session, args, next) {
     session.endDialog("OK - see ya!");
-}).triggerAction({
-    matches: /^cancel$|^goodbye$|^quit$|^end$/i,
 });
+intents.onDefault([
+    function (session) {
+        session.send('Sorry!! I didn\'t understand, try something like \'I like metallica \'');
+    }
+]);
+intents.matches('Artist', (session, args, next) => __awaiter(this, void 0, void 0, function* () {
+    if (args.entities == null) {
+        session.send('LUIS unable to detect entity');
+    }
+    else {
+        // Resolve and store any HomeAutomation.Device entity passed from LUIS.
+        var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'ArtistNameSimple');
+        session.sendTyping();
+        try {
+            let msg = yield cards.getArtists(session, artistsName.entity);
+            if (msg) {
+                session.send(msg);
+                session.beginDialog('fave_artists');
+            }
+            else {
+                session.send(`Sorry I couldn't find anything for "${artistsName.entity}" 😞 Try something like, "I like Metallica"`);
+            }
+        }
+        catch (e) {
+            console.error(e);
+            session.send(`Whoops! Something is wrong 😞 Please try again.`);
+        }
+    }
+    ;
+}));
 bot.dialog('fave_artists', [
     function (session, results) {
         builder.Prompts.text(session, "Who are your favourite artists and bands?");
@@ -78,35 +112,14 @@ bot.dialog('fave_artists', [
                     session.send(msg);
                 else {
                     session.send(`I couldn't find anything for "${results.response}" 😞 Try using commas, like "Lorde, Taylor Swift"`);
-                    session.beginDialog('fave_artists'); //TODO IS this correct?
+                    //session.beginDialog('fave_artists'); //TODO IS this correct?
                 }
             }
             catch (e) {
                 console.error(e);
                 session.send(`Whoops! Something is wrong 😞 Please try again.`);
-                session.beginDialog('fave_artists');
+                //session.beginDialog('fave_artists');
             }
         });
     }
 ]);
-bot.dialog('like_artist', [function (session, results) {
-        // get the raw input
-        let response = results.intent.matched.input;
-        // strip the match, leaving the artist
-        let artist = response.replace(/i\s(\w+\s)*(love|like)\s/i, '');
-        session.sendTyping();
-        try {
-            // save the like
-            userdata.userLikesArtist(session.userData.username, artist);
-            session.endDialog(`I like ${artist} too!`);
-        }
-        catch (e) {
-            console.error(e);
-            session.send(`Whoops! Something is wrong 😞 Please try again.`);
-            session.beginDialog('fave_artists');
-        }
-    }]).triggerAction({
-    // https://regex101.com/r/VO2I8r/1
-    // 'I really like Radiohead'
-    matches: /i\s(\w+\s)*(love|like)\s/i
-});
