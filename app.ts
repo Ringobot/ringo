@@ -84,7 +84,6 @@ intents.matches('Artist',
                 session.send('LUIS unable to detect entity');
             }
             else {
-            // Resolve and store any HomeAutomation.Device entity passed from LUIS.
                 var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'ArtistNameSimple');
                 session.sendTyping();
                 try {
