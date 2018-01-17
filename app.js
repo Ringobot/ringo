@@ -13,6 +13,7 @@ require('dotenv').config();
 const restify = require("restify");
 const builder = require("botbuilder");
 const cards = require("./services/cards");
+const userdata = require("./services/userdata");
 const statedata = require("./services/statedata");
 // Setup Restify Server
 var server = restify.createServer();
@@ -123,3 +124,24 @@ bot.dialog('fave_artists', [
         });
     }
 ]);
+intents.matches('Like_Artist', (session, args, next) => __awaiter(this, void 0, void 0, function* () {
+    if (args.entities == null) {
+        session.send('LUIS unable to detect entity');
+    }
+    else {
+        // Resolve and store any HomeAutomation.Device entity passed from LUIS.
+        var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'ArtistNameSimple');
+        session.sendTyping();
+        try {
+            // save the like
+            userdata.userLikesArtist(session.userData.username, artistsName.entity);
+            session.endDialog(`I like ${artistsName.entity} too!`);
+        }
+        catch (e) {
+            console.error(e);
+            session.send(`Whoops! Something is wrong 😞 Please try again.`);
+            session.beginDialog('fave_artists');
+        }
+    }
+    ;
+}));

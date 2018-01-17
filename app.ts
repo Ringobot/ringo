@@ -128,3 +128,26 @@ bot.dialog('fave_artists', [
         }
     }
 ]);
+
+intents.matches('Like_Artist', 
+        async (session, args, next) => {
+            if (args.entities == null) {
+                session.send('LUIS unable to detect entity');
+            }
+            else {
+            // Resolve and store any HomeAutomation.Device entity passed from LUIS.
+                var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'ArtistNameSimple');
+                session.sendTyping();
+                try {
+                    // save the like
+                    userdata.userLikesArtist(session.userData.username, artistsName.entity);
+                    session.endDialog(`I like ${artistsName.entity} too!`);
+                }
+                catch (e) {
+                    console.error(e);
+                    session.send(`Whoops! Something is wrong 😞 Please try again.`);
+                    session.beginDialog('fave_artists');
+                }
+            };
+    }
+);
