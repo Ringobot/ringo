@@ -85,10 +85,11 @@ intents.matches('Artist', (session, args, next) => __awaiter(this, void 0, void 
             let msg = yield cards.getArtists(session, artistsName.entity);
             if (msg) {
                 session.send(msg);
-                session.beginDialog('fave_artists');
+                session.endDialog();
             }
             else {
-                session.send(`Sorry I couldn't find anything for "${artistsName.entity}" 😞 Try something like, "I like Metallica"`);
+                session.send(`Sorry I couldn't find anything for "${artistsName.entity}" 😞 Try something like, "Metallica, Ed Sheeran"`);
+                session.endDialog();
             }
         }
         catch (e) {
@@ -98,32 +99,6 @@ intents.matches('Artist', (session, args, next) => __awaiter(this, void 0, void 
     }
     ;
 }));
-bot.dialog('fave_artists', [
-    function (session, results) {
-        builder.Prompts.text(session, "Who are your favourite artists and bands?");
-    },
-    function (session, results) {
-        return __awaiter(this, void 0, void 0, function* () {
-            var artists = results.response.split(',');
-            session.dialogData.artists = artists;
-            session.sendTyping();
-            try {
-                let msg = yield cards.getArtists(session, artists);
-                if (msg)
-                    session.send(msg);
-                else {
-                    session.send(`I couldn't find anything for "${results.response}" 😞 Try using commas, like "Lorde, Taylor Swift"`);
-                    //session.beginDialog('fave_artists'); //TODO IS this correct?
-                }
-            }
-            catch (e) {
-                console.error(e);
-                session.send(`Whoops! Something is wrong 😞 Please try again.`);
-                //session.beginDialog('fave_artists');
-            }
-        });
-    }
-]);
 intents.matches('Like_Artist', (session, args, next) => __awaiter(this, void 0, void 0, function* () {
     if (args.entities == null) {
         session.send('LUIS unable to detect entity');
@@ -140,7 +115,6 @@ intents.matches('Like_Artist', (session, args, next) => __awaiter(this, void 0, 
         catch (e) {
             console.error(e);
             session.send(`Whoops! Something is wrong 😞 Please try again.`);
-            session.beginDialog('fave_artists');
         }
     }
     ;

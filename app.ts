@@ -91,10 +91,11 @@ intents.matches('Artist',
                     let msg = await cards.getArtists(session, artistsName.entity);
                     if (msg) {
                         session.send(msg);
-                        session.beginDialog('fave_artists');
+                        session.endDialog();
                     }
                     else {
-                        session.send(`Sorry I couldn't find anything for "${artistsName.entity}" 😞 Try something like, "I like Metallica"`);
+                        session.send(`Sorry I couldn't find anything for "${artistsName.entity}" 😞 Try something like, "Metallica, Ed Sheeran"`);
+                        session.endDialog();
                     }
                 }
                 catch (e) {
@@ -104,30 +105,6 @@ intents.matches('Artist',
             };
     }
 );
-
-bot.dialog('fave_artists', [
-    function (session, results) {
-        builder.Prompts.text(session, "Who are your favourite artists and bands?");
-    },
-    async function (session, results) {
-        var artists: string[] = results.response.split(',');
-        session.dialogData.artists = artists;
-        session.sendTyping();
-        try {
-            let msg = await cards.getArtists(session, artists);
-            if (msg) session.send(msg);
-            else {
-                session.send(`I couldn't find anything for "${results.response}" 😞 Try using commas, like "Lorde, Taylor Swift"`);
-                //session.beginDialog('fave_artists'); //TODO IS this correct?
-            }
-        }
-        catch (e) {
-            console.error(e);
-            session.send(`Whoops! Something is wrong 😞 Please try again.`);
-            //session.beginDialog('fave_artists');
-        }
-    }
-]);
 
 intents.matches('Like_Artist', 
         async (session, args, next) => {
@@ -146,7 +123,6 @@ intents.matches('Like_Artist',
                 catch (e) {
                     console.error(e);
                     session.send(`Whoops! Something is wrong 😞 Please try again.`);
-                    session.beginDialog('fave_artists');
                 }
             };
     }
