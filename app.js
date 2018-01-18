@@ -71,6 +71,7 @@ intents.matches('Quit', function (session, args, next) {
 intents.onDefault([
     function (session) {
         session.send('Sorry!! I didn\'t understand, try something like \'I like metallica \'');
+        session.endDialog();
     }
 ]);
 intents.matches('Artist', (session, args, next) => __awaiter(this, void 0, void 0, function* () {
@@ -78,22 +79,24 @@ intents.matches('Artist', (session, args, next) => __awaiter(this, void 0, void 
         session.send('LUIS unable to detect entity');
     }
     else {
-        var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'ArtistNameSimple');
+        var artistsEntity = builder.EntityRecognizer.findEntity(args.entities, 'ArtistNameSimple');
+        var artistsName = [];
+        artistsName.push(artistsEntity.entity);
         session.sendTyping();
         try {
-            let msg = yield cards.getArtists(session, artistsName.entity);
+            let msg = yield cards.getArtists(session, artistsName);
             if (msg) {
                 session.send(msg);
                 session.endDialog();
             }
             else {
-                session.send(`Sorry I couldn't find anything for "${artistsName.entity}" 😞 Try something like, "Metallica, Ed Sheeran"`);
+                session.send(`Sorry I couldn't find anything for "${artistsName}" 😞 Try something like, "Metallica, Ed Sheeran"`);
                 session.endDialog();
             }
         }
         catch (e) {
             console.error(e);
-            session.send(`Whoops! Something is wrong 😞 Please try again.`);
+            session.send(`Whoops! Something is wrong 😞 in the Artist diaglog, please try again.`);
         }
     }
     ;
@@ -113,7 +116,7 @@ intents.matches('Like_Artist', (session, args, next) => __awaiter(this, void 0, 
         }
         catch (e) {
             console.error(e);
-            session.send(`Whoops! Something is wrong 😞 Please try again.`);
+            session.send(`Whoops! Something is wrong 😞 in the Like_Artist diaglog, please try again.`);
         }
     }
     ;
