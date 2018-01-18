@@ -27,6 +27,15 @@ export async function getPlaylists(username: string, offset: number) {
     return response;
 };
 
+export async function getRecommendation(artistSeed:string, limit?:number) {
+    let token = await getAuthToken();
+
+    let response = await _httpj.get(baseUrl + '/recommendations' + `?seed_artists=${artistSeed}` + `&limit=${limit}`, 
+    { 'Authorization': 'Bearer ' + token });
+
+    return response;
+};
+
 export async function getAuthToken() {
     let now = new Date();
 

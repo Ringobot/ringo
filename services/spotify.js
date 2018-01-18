@@ -34,6 +34,15 @@ function getPlaylists(username, offset) {
 }
 exports.getPlaylists = getPlaylists;
 ;
+function getRecommendation(artistSeed, limit) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let token = yield getAuthToken();
+        let response = yield _httpj.get(baseUrl + '/recommendations' + `?seed_artists=${artistSeed}` + `&limit=${limit}`, { 'Authorization': 'Bearer ' + token });
+        return response;
+    });
+}
+exports.getRecommendation = getRecommendation;
+;
 function getAuthToken() {
     return __awaiter(this, void 0, void 0, function* () {
         let now = new Date();

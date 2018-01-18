@@ -53,7 +53,6 @@ bot.dialog('Welcome', [
             session.userData.username = results.response;
             session.send(`'Sup ${results.response}! I love to discover new music and share my discoveries ;) `);
             //+ "I'm not really very smart so you may have to be patient with me :) If I start bugging out, just type 'help'.");
-            //session.beginDialog('fave_artists');
             builder.Prompts.text(session, "Who are your favourite artists and bands?");
             session.endDialog();
     },
@@ -85,9 +84,11 @@ intents.matches('Artist',
                 session.send('LUIS unable to detect entity');
             }
             else {
-                var artistsEntity = builder.EntityRecognizer.findEntity(args.entities, 'ArtistNameSimple');
                 var artistsName = [];
-                artistsName.push(artistsEntity.entity);
+                args.entities.forEach(ent => {
+                    //var artistsEntity = builder.EntityRecognizer.findEntity(e, 'ArtistNameSimple');
+                    artistsName.push(ent.entity);
+                });
                 session.sendTyping();
                 try {
                     let msg = await cards.getArtists(session, artistsName);
@@ -114,13 +115,20 @@ intents.matches('Like_Artist',
                 session.send('LUIS unable to detect entity');
             }
             else {
-            // Resolve and store any HomeAutomation.Device entity passed from LUIS.
+
                 var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'ArtistNameSimple');
                 session.sendTyping();
                 try {
                     // save the like
                     userdata.userLikesArtist(session.userData.username, artistsName.entity);
-                    session.endDialog(`I like ${artistsName.entity} too!`);
+                    session.send(`I like ${artistsName.entity} too!`);
+                    session.send(`Here are some recommended albums and tracks based on your intrests`);
+                    var aritistSeed = session.userData.faveArtist.artists.items[0].id;
+                    let msg = await cards.getRecommendations(session, aritistSeed);
+                    if (msg) {
+                        session.send(msg);
+                        session.endDialog();
+                    }
                 }
                 catch (e) {
                     console.error(e);

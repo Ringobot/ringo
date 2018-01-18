@@ -8,6 +8,7 @@ export async function getArtists(session, artists: string[]) {
         let artist = artists[i];
         let artistData = await _spotify.searchArtists(artist, 1);
         if (artistData.artists.items.length > 0) {
+            session.userData.faveArtist = artistData;
             let item = artistData.artists.items[0];
             cards.push(
                 new builder.HeroCard(session)
@@ -21,6 +22,33 @@ export async function getArtists(session, artists: string[]) {
             );
         }
     }
+
+    if (cards.length == 0) return;
+
+    let msg = new builder.Message(session);
+    msg.attachmentLayout(builder.AttachmentLayout.carousel);
+    msg.attachments(cards);
+    return msg;
+};
+
+export async function getRecommendations(session, artistSeed: string) {
+    let cards = new Array<builder.AttachmentType>();
+
+    let recommendationData = await _spotify.getRecommendation(artistSeed, 5);
+    if (recommendationData.tracks.length > 0) {
+        recommendationData.tracks.forEach(album => {
+            cards.push(
+                new builder.HeroCard(session)
+                    .title(album.name)
+                    .text(`Do you like ${album.name}?`)
+                    // images 600 wide
+                    //.images([builder.CardImage.create(session, item.images[0].url)])
+                    .buttons([
+                        builder.CardAction.imBack(session, `I like album ${album.name}`, `I like album ${album.name}`)
+                    ])
+                );
+            });
+    };
 
     if (cards.length == 0) return;
 

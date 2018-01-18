@@ -17,6 +17,7 @@ function getArtists(session, artists) {
             let artist = artists[i];
             let artistData = yield _spotify.searchArtists(artist, 1);
             if (artistData.artists.items.length > 0) {
+                session.userData.faveArtist = artistData;
                 let item = artistData.artists.items[0];
                 cards.push(new builder.HeroCard(session)
                     .title(item.name)
@@ -36,4 +37,29 @@ function getArtists(session, artists) {
     });
 }
 exports.getArtists = getArtists;
+;
+function getRecommendations(session, artistSeed) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let cards = new Array();
+        let recommendationData = yield _spotify.getRecommendation(artistSeed, 5);
+        if (recommendationData.tracks.length > 0) {
+            recommendationData.tracks.forEach(album => {
+                cards.push(new builder.HeroCard(session)
+                    .title(album.name)
+                    .text(`Do you like ${album.name}?`)
+                    .buttons([
+                    builder.CardAction.imBack(session, `I like album ${album.name}`, `I like album ${album.name}`)
+                ]));
+            });
+        }
+        ;
+        if (cards.length == 0)
+            return;
+        let msg = new builder.Message(session);
+        msg.attachmentLayout(builder.AttachmentLayout.carousel);
+        msg.attachments(cards);
+        return msg;
+    });
+}
+exports.getRecommendations = getRecommendations;
 ;
