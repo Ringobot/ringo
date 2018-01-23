@@ -36,7 +36,7 @@ function addVertex(client, vertex) {
 exports.addVertex = addVertex;
 ;
 function addEdgeLike(client, edge) {
-    var query = `g.V(${edge.FromVertex}).addE(${edge.Relationship}).to(g.V(${edge.ToVertex}))`;
+    var query = `g.V('${edge.FromVertex}').addE('${edge.Relationship}').to(g.V('${edge.ToVertex}'))`;
     console.log('graphstorage.addEdgeLike', 'FromVertex', edge.FromVertex);
     console.log('graphstorage.addEdgeLike', 'Relationship', edge.Relationship);
     console.log('graphstorage.addEdgeLike', 'ToVertex', edge.ToVertex);
