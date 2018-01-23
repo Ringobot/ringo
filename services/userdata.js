@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const _table = require("./tablestorage");
+const _graph = require("./graphstorage");
 const _canonical = require("./canonicalisation");
 function userLikesArtist(user, artist) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -20,6 +21,24 @@ function userLikesArtist(user, artist) {
             WhenLiked: new Date()
         };
         yield _table.insert('UserLikesArtist', entity, true);
+        var graphClient = _graph.createClient();
+        var userVertex = {
+            Name: user,
+            Properties: []
+        };
+        var artistVertex = {
+            Name: artist,
+            Properties: []
+        };
+        //ToDo make this accept vertex vs string
+        var likesEdge = {
+            FromVertex: userVertex.Name,
+            Relationship: 'likes',
+            ToVertex: artistVertex.Name
+        };
+        yield _graph.addVertex(graphClient, userVertex);
+        yield _graph.addVertex(graphClient, artistVertex);
+        yield _graph.addEdgeLike(graphClient, likesEdge);
     });
 }
 exports.userLikesArtist = userLikesArtist;
