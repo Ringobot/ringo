@@ -34,15 +34,19 @@ export async function getArtists(session, artists: string[]) {
 export async function getRecommendations(session, artistSeed: string) {
     let cards = new Array<builder.AttachmentType>();
 
-    let recommendationData = await _spotify.getRecommendation(artistSeed, 5);
+    let recommendationData = await _spotify.getRecommendation(artistSeed, 3);
     if (recommendationData.tracks.length > 0) {
+
+        //let data = new Array(recommendationData.tracks);
+        //let album = data.filter(item => item.
+
         recommendationData.tracks.forEach(album => {
             cards.push(
                 new builder.HeroCard(session)
                     .title(album.name)
-                    .text(`Do you like ${album.name}?`)
+                    .text(`Do you like ${album.name} by ${album.artists[0].name}?`)
                     // images 600 wide
-                    //.images([builder.CardImage.create(session, item.images[0].url)])
+                    .images([builder.CardImage.create(session, album.album.images[0].url)])
                     .buttons([
                         builder.CardAction.imBack(session, `I like album ${album.name}`, `I like album ${album.name}`)
                     ])

@@ -41,12 +41,15 @@ exports.getArtists = getArtists;
 function getRecommendations(session, artistSeed) {
     return __awaiter(this, void 0, void 0, function* () {
         let cards = new Array();
-        let recommendationData = yield _spotify.getRecommendation(artistSeed, 5);
+        let recommendationData = yield _spotify.getRecommendation(artistSeed, 3);
         if (recommendationData.tracks.length > 0) {
+            //let data = new Array(recommendationData.tracks);
+            //let album = data.filter(item => item.
             recommendationData.tracks.forEach(album => {
                 cards.push(new builder.HeroCard(session)
                     .title(album.name)
-                    .text(`Do you like ${album.name}?`)
+                    .text(`Do you like ${album.name} by ${album.artists[0].name}?`)
+                    .images([builder.CardImage.create(session, album.album.images[0].url)])
                     .buttons([
                     builder.CardAction.imBack(session, `I like album ${album.name}`, `I like album ${album.name}`)
                 ]));
