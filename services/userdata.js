@@ -30,14 +30,14 @@ function userLikesArtist(user, artist) {
             Name: artist,
             Properties: []
         };
+        var userVertexResult = yield _graph.addVertex(graphClient, userVertex);
+        var artistVertexResult = yield _graph.addVertex(graphClient, artistVertex);
         //ToDo make this accept vertex vs string
         var likesEdge = {
-            FromVertex: userVertex.Name,
+            FromVertex: userVertexResult[0].id,
             Relationship: 'likes',
-            ToVertex: artistVertex.Name
+            ToVertex: artistVertexResult[0].id
         };
-        yield _graph.addVertex(graphClient, userVertex);
-        yield _graph.addVertex(graphClient, artistVertex);
         yield _graph.addEdgeLike(graphClient, likesEdge);
     });
 }

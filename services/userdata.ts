@@ -26,15 +26,16 @@ export async function userLikesArtist(user: string, artist: string) {
         Properties: []
     }
 
-    //ToDo make this accept vertex vs string
+    var userVertexResult = await _graph.addVertex(graphClient, userVertex)
+    var artistVertexResult = await _graph.addVertex(graphClient, artistVertex)
+
+        //ToDo make this accept vertex vs string
     var likesEdge = {
-        FromVertex: userVertex.Name,
+        FromVertex: userVertexResult[0].id,
         Relationship: 'likes',
-        ToVertex: artistVertex.Name
+        ToVertex: artistVertexResult[0].id
     }
 
-    await _graph.addVertex(graphClient, userVertex)
-    await _graph.addVertex(graphClient, artistVertex)
     await _graph.addEdgeLike(graphClient, likesEdge)
 
 };
