@@ -11,6 +11,23 @@ function createClient(dbId, collectionId) {
     });
 }
 exports.createClient = createClient;
+function getVertexByName(client, name) {
+    var query = `g.V().hasLabel('${name}')`;
+    console.log('graphstorage.getVertexByName', 'vertex.Name', name);
+    console.debug('graphstorage.addVertex', 'query', query);
+    return new Promise((resolve, reject) => {
+        client.execute(query, function (err, results) {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve(results);
+            return;
+        });
+    });
+}
+exports.getVertexByName = getVertexByName;
+;
 function addVertex(client, vertex) {
     var query = "g.addV(_Vertex_Name)";
     var bindings = { _Vertex_Name: vertex.Name };

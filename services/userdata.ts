@@ -26,8 +26,21 @@ export async function userLikesArtist(user: string, artist: string) {
         Properties: []
     }
 
-    var userVertexResult = await _graph.addVertex(graphClient, userVertex)
-    var artistVertexResult = await _graph.addVertex(graphClient, artistVertex)
+    var queryUserVertx = await _graph.getVertexByName(graphClient, userVertex.Name);
+    console.log(queryUserVertx);
+    if (queryUserVertx.length == 0){
+        var userVertexResult = await _graph.addVertex(graphClient, userVertex);
+    }
+    else var userVertexResult = queryUserVertx;
+    console.log(userVertexResult);
+    
+    var queryArtistVertx = await _graph.getVertexByName(graphClient, artistVertex.Name);
+    console.log(queryArtistVertx);
+    if (queryArtistVertx.length == 0){
+        var artistVertexResult = await _graph.addVertex(graphClient, artistVertex);
+    }
+    else var artistVertexResult = queryArtistVertx;
+    console.log(artistVertexResult);
 
         //ToDo make this accept vertex vs string
     var likesEdge = {
@@ -36,6 +49,6 @@ export async function userLikesArtist(user: string, artist: string) {
         ToVertex: artistVertexResult[0].id
     }
 
-    await _graph.addEdgeLike(graphClient, likesEdge)
+    await _graph.addEdgeLike(graphClient, likesEdge);
 
 };

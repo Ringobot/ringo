@@ -44,6 +44,25 @@ interface Edge {
     ToVertex: string
 }
 
+export function getVertexByName(client, name: string) {
+    var query = `g.V().hasLabel('${name}')`;
+
+    console.log('graphstorage.getVertexByName', 'vertex.Name', name);
+    console.debug('graphstorage.addVertex', 'query', query);
+
+    return new Promise<any>((resolve, reject) => {
+        client.execute(query, function (err, results) {
+            if (err) {
+                reject(err);
+                return;
+            }
+
+            resolve(results);
+            return;
+        });
+    });
+};
+
 export function addVertex(client, vertex: Vertex) {
     var query = "g.addV(_Vertex_Name)";
     var bindings = { _Vertex_Name: vertex.Name };

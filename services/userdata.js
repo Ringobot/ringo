@@ -30,8 +30,22 @@ function userLikesArtist(user, artist) {
             Name: artist,
             Properties: []
         };
-        var userVertexResult = yield _graph.addVertex(graphClient, userVertex);
-        var artistVertexResult = yield _graph.addVertex(graphClient, artistVertex);
+        var queryUserVertx = yield _graph.getVertexByName(graphClient, userVertex.Name);
+        console.log(queryUserVertx);
+        if (queryUserVertx.length == 0) {
+            var userVertexResult = yield _graph.addVertex(graphClient, userVertex);
+        }
+        else
+            var userVertexResult = queryUserVertx;
+        console.log(userVertexResult);
+        var queryArtistVertx = yield _graph.getVertexByName(graphClient, artistVertex.Name);
+        console.log(queryArtistVertx);
+        if (queryArtistVertx.length == 0) {
+            var artistVertexResult = yield _graph.addVertex(graphClient, artistVertex);
+        }
+        else
+            var artistVertexResult = queryArtistVertx;
+        console.log(artistVertexResult);
         //ToDo make this accept vertex vs string
         var likesEdge = {
             FromVertex: userVertexResult[0].id,
