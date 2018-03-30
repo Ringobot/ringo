@@ -17,7 +17,7 @@
     "botbuilder-azure": "^3.0.4",
     "dotenv": "^4.0.0",
     "gremlin": "^2.6.0",
-    "restify": "^6.3.1"
+    "restify": "^6.4.0"
   },
   "devDependencies": {
     "@types/chai": "^4.0.5",
