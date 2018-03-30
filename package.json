@@ -10,7 +10,7 @@
   "author": "@DanielLarsenNZ",
   "license": "MIT",
   "dependencies": {
-    "@types/node": "^8.0.52",
+    "@types/node": "^8.10.1",
     "azure-common": "^0.9.19",
     "azure-storage": "^2.7.0",
     "botbuilder": "^3.11.0",
