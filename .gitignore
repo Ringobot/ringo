@@ -2,3 +2,6 @@ docs/live.pdf
 node_modules
 .env
 .vscode
+*.js.map
+package-lock.json
+*.pptx
