@@ -9,7 +9,8 @@ import statedata = require('./services/statedata');
 
 // Setup Restify Server
 var server = restify.createServer();
-server.listen(process.env.port || process.env.PORT || 3978, function () {
+server.listen(process.env.port || process.env.PORT || 3978, function (e) {
+    if (e) throw e;
     console.log('%s listening to %s', server.name, server.url);
 });
 
