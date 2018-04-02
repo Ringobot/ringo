@@ -32,15 +32,24 @@ console.log('server.toString()', server.toString());
 var bot = new builder.UniversalBot(connector);
 bot.set('storage', statedata.getAzureBotStorage());
 
+console.log('botstate set');
+
 // Setup LUIS Model and Intent Dialogs
 var model = process.env.LUIS_MODEL_URL;
 var recognizer = new builder.LuisRecognizer(model);
 
+console.log('LUIS recognizer', recognizer);
+
 var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 bot.dialog('/', intents);
 
+console.log('default intents', intents);
+
 // Welcome message
 bot.on('conversationUpdate', function (session) {
+
+    console.log('bot.on conversationUpdate', session);
+
     if (session.membersAdded) {
         session.membersAdded.forEach((identity) => {
             if (identity.id === session.address.bot.id) {
