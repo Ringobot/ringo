@@ -49,7 +49,9 @@ bot.on('conversationUpdate', function (session) {
     console.log('bot.on conversationUpdate', session);
     if (session.membersAdded) {
         session.membersAdded.forEach((identity) => {
+            console.log('DEBUG: identity.id, session.address.bot.id', identity.id, session.address.bot.id);
             if (identity.id === session.address.bot.id) {
+                console.log('DEBUG session.address', session.address);
                 bot.beginDialog(session.address, 'Welcome');
             }
         });
@@ -57,6 +59,7 @@ bot.on('conversationUpdate', function (session) {
 });
 bot.dialog('Welcome', [
     function (session) {
+        console.log('DEBUG bot.dialog Welcome', session);
         session.send("Hey! I'm Ringo, the music bot 😎🎧🎵");
         builder.Prompts.text(session, "What's your name?");
     },
