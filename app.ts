@@ -24,6 +24,10 @@ var connector = new builder.ChatConnector({
 // Listen for messages from users 
 server.post('/api/messages', connector.listen());
 
+// debug
+console.log('server.getDebugInfo()', server.getDebugInfo());
+console.log('server.toString()', server.toString());
+
 //setup botstate and main dialog
 var bot = new builder.UniversalBot(connector);
 bot.set('storage', statedata.getAzureBotStorage());
