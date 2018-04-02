@@ -13,19 +13,29 @@ const builder = require("botbuilder");
 function getArtists(session, artists) {
     return __awaiter(this, void 0, void 0, function* () {
         let cards = new Array();
+        let result = { msg: null, oneResult: false };
         for (var i in artists) {
             let artist = artists[i];
-            let artistData = yield _spotify.searchArtists(artist, 1);
+            let artistData = yield _spotify.searchArtists(artist, 3);
             if (artistData.artists.items.length > 0) {
-                session.userData.faveArtist = artistData;
-                let item = artistData.artists.items[0];
-                cards.push(new builder.HeroCard(session)
-                    .title(item.name)
-                    .text(`Do you like ${item.name}?`)
-                    .images([builder.CardImage.create(session, item.images[0].url)])
-                    .buttons([
-                    builder.CardAction.imBack(session, `I like ${item.name}`, `I like ${item.name}`)
-                ]));
+                session.userData.faveArtist = artistData; // ??
+                result.oneResult = artistData.artists.items.filter(i => i.images.length > 0).length === 1;
+                for (var j in artistData.artists.items) {
+                    let item = artistData.artists.items[j];
+                    // skip items with no images
+                    if (item.images.length === 0)
+                        continue;
+                    let card = new builder.HeroCard(session)
+                        .title(item.name)
+                        .images([builder.CardImage.create(session, item.images[0].url)]);
+                    if (!result.oneResult) {
+                        card.text(`Do you like ${item.name}?`);
+                        card.buttons([
+                            builder.CardAction.imBack(session, `I like ${item.name}`, `I like ${item.name}`)
+                        ]);
+                    }
+                    cards.push(card);
+                }
             }
         }
         if (cards.length == 0)
@@ -33,7 +43,8 @@ function getArtists(session, artists) {
         let msg = new builder.Message(session);
         msg.attachmentLayout(builder.AttachmentLayout.carousel);
         msg.attachments(cards);
-        return msg;
+        result.msg = msg;
+        return result;
     });
 }
 exports.getArtists = getArtists;
