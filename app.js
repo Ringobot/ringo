@@ -23,11 +23,17 @@ server.listen(process.env.port || process.env.PORT || 3978, function (e) {
     console.log('process.env.port || process.env.PORT', process.env.port, process.env.PORT);
     console.log('%s listening to %s', server.name, server.url);
 });
+server.get(/\/(.*)?.*/, restify.plugins.serveStatic({
+    directory: './static',
+    default: 'index.html'
+}));
 // Create chat connector for communicating with the Bot Framework Service
 var connector = new builder.ChatConnector({
-    appId: process.env.MICROSOFT_APP_ID,
-    appPassword: process.env.MICROSOFT_APP_PASSWORD
+    appId: process.env.MicrosoftAppId,
+    appPassword: process.env.MicrosoftAppPassword,
+    openIdMetadata: process.env.BotOpenIdMetadata
 });
+console.log('DEBUG connector', connector);
 // Listen for messages from users 
 server.post('/api/messages', connector.listen());
 // debug
