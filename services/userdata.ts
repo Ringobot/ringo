@@ -4,6 +4,8 @@ import _canonical = require('./canonicalisation');
 import { createClient } from '../gremlin/index';
 
 export async function userLikesArtist(user: string, artist: string) {
+    if (!user) throw 'user cannot be null';
+    
     let entity = {
         PartitionKey: user.toLowerCase(),
         RowKey: _canonical.getArtistId(artist).Id,

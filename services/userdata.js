@@ -13,6 +13,8 @@ const _graph = require("./graphstorage");
 const _canonical = require("./canonicalisation");
 function userLikesArtist(user, artist) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (!user)
+            throw 'user cannot be null';
         let entity = {
             PartitionKey: user.toLowerCase(),
             RowKey: _canonical.getArtistId(artist).Id,

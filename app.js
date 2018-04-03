@@ -92,9 +92,11 @@ intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, 
     }
     else {
         //console.log('DEBUG: session', session);
-        console.log('DEBUG: session.message.address.user', session.message.address.user);
-        console.log('DEBUG: session.message.address.bot', session.message.address.bot);
+        //console.log('DEBUG: session.message.address.user', session.message.address.user);                
+        //console.log('DEBUG: session.message.address.bot', session.message.address.bot);                
         //console.log('DEBUG: args', args);
+        //TODO: Switch off last session logging
+        session.userData.lastSession = session.message;
         var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'Music.ArtistName');
         // 1. lookup the artist
         session.sendTyping();
@@ -124,7 +126,7 @@ intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, 
         session.sendTyping();
         try {
             // save the like
-            userdata.userLikesArtist(session.userData.username, artistsName.entity);
+            userdata.userLikesArtist(session.message.user.id, artistsName.entity);
             session.send(`I like ${artistsName.entity} too!`);
             session.send(`Here are some recommended albums and tracks based on your interests`);
             var aritistSeed = session.userData.faveArtist.artists.items[0].id;
