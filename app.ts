@@ -113,7 +113,8 @@ intents.matches('Like Artist',
                 //console.log('DEBUG: args', args);
                 
                 //TODO: Switch off last session logging
-                session.userData.lastSession = session.message;
+                session.userData.lastSessionMessage = session.message;
+                session.userData.lastArgs = args;
 
                 var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'Music.ArtistName');
 
