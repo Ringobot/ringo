@@ -101,43 +101,15 @@ intents.onDefault([
 	}
 ]);
 
-intents.matches('XXX Like Artist', 
-        async (session, args, next) => {
-            if (args.entities == null) {
-                session.send('LUIS unable to detect entity');
-            }
-            else {
-                var artistsName = [];
-                args.entities.forEach(ent => {
-                    //var artistsEntity = builder.EntityRecognizer.findEntity(e, 'ArtistNameSimple');
-                    artistsName.push(ent.entity);
-                });
-                session.sendTyping();
-                try {
-                    let msg = await cards.getArtists(session, artistsName);
-                    if (msg) {
-                        session.send(msg.msg);
-                        session.endDialog();
-                    }
-                    else {
-                        session.send(`Sorry I couldn't find anything for "${artistsName}" 😞 Try something like, "Metallica, Ed Sheeran"`);
-                        session.endDialog();
-                    }
-                }
-                catch (e) {
-                    console.error(e);
-                    session.send(`Whoops! Something is wrong 😞 in the Artist diaglog, please try again.`);
-                }
-            };
-    }
-);
-
 intents.matches('Like Artist', 
         async (session, args, next) => {
             if (args.entities == null) {
                 session.send('LUIS unable to detect entity');
             }
             else {
+                console.log('DEBUG: session', session);
+                console.log('DEBUG: args', args);
+
                 var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'Music.ArtistName');
 
                 // 1. lookup the artist
