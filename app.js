@@ -83,6 +83,12 @@ intents.matches('Quit', function (session, args, next) {
 });
 intents.onDefault([
     function (session, args) {
+        // if in a group and the bot is not mentioned, ignore this dialog
+        if (helpers.isGroup(session.message) && !helpers.isMentioned(session.message)) {
+            console.log('DEBUG: Ignoring Group conversation without bot mentioned');
+            return;
+        }
+        ;
         session.send('Sorry!! I didn\'t understand, try something like \'I like metallica \'');
         session.endDialog();
     }

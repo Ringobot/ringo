@@ -18,10 +18,10 @@ server.listen(process.env.port || process.env.PORT || 3978, function (e) {
 server.get(
     /\/(.*)?.*/,
     restify.plugins.serveStatic({
-      directory: './static',
-      default: 'index.html'
+        directory: './static',
+        default: 'index.html'
     })
-  );
+);
 
 
 // Create chat connector for communicating with the Bot Framework Service
@@ -52,120 +52,126 @@ bot.on('conversationUpdate', function (session) {
         session.membersAdded.forEach((identity) => {
 
             if (identity.id === session.address.bot.id) {
-				bot.beginDialog(session.address, 'Welcome');
+                bot.beginDialog(session.address, 'Welcome');
             }
         });
     }
 });
 
-bot.dialog('Welcome', [ 
-        function (session){
-            session.send(
-                "Hey! I'm Ringo, the music bot 😎🎧🎵\r\nI love to discover new music and share my discoveries. "
-                + "Tell me about Artists and Bands that you like, for example:\r\n"
-                + "`I like Metallica`.\r\n"
-                + "And you can type `help` or `quit` at any time."
-            );
+bot.dialog('Welcome', [
+    function (session) {
+        session.send(
+            "Hey! I'm Ringo, the music bot 😎🎧🎵\r\nI love to discover new music and share my discoveries. "
+            + "Tell me about Artists and Bands that you like, for example:\r\n"
+            + "`I like Metallica`.\r\n"
+            + "And you can type `help` or `quit` at any time."
+        );
 
-            //builder.Prompts.text(session, "What's your name?");
-            session.endDialog();
-        }
-        
-        /*
-        ,
-        function (session, results) {
-            session.userData.username = results.response;
-            session.send(`'Sup ${results.response}! I love to discover new music and share my discoveries ;) `);
-            //+ "I'm not really very smart so you may have to be patient with me :) If I start bugging out, just type 'help'.");
-            builder.Prompts.text(session, "Who are your favourite artists and bands?");
-            session.endDialog();
-    },*/
+        //builder.Prompts.text(session, "What's your name?");
+        session.endDialog();
+    }
+
+    /*
+    ,
+    function (session, results) {
+        session.userData.username = results.response;
+        session.send(`'Sup ${results.response}! I love to discover new music and share my discoveries ;) `);
+        //+ "I'm not really very smart so you may have to be patient with me :) If I start bugging out, just type 'help'.");
+        builder.Prompts.text(session, "Who are your favourite artists and bands?");
+        session.endDialog();
+},*/
 ]);
 
-intents.matches('Help', [ 
+intents.matches('Help', [
     function (session, args, next) {
-            session.endDialog("Ringo is a bot that aims to discover music by asking you a series of questions about your music tastes."
-                + "You can type 'quit' at any time to quit and resume the conversation later.");
+        session.endDialog("Ringo is a bot that aims to discover music by asking you a series of questions about your music tastes."
+            + "You can type 'quit' at any time to quit and resume the conversation later.");
     }
 ]);
 
-intents.matches('Quit', 
+intents.matches('Quit',
     function (session, args, next) {
         session.endDialog("OK - see ya!");
     }
 );
 
 intents.onDefault([
-    function(session, args){
-        session.send('Sorry!! I didn\'t understand, try something like \'I like metallica \'' );
+    function (session, args) {
+        // if in a group and the bot is not mentioned, ignore this dialog
+        if (helpers.isGroup(session.message) && !helpers.isMentioned(session.message)) {
+            console.log('DEBUG: Ignoring Group conversation without bot mentioned');
+            return
+        };
+
+        session.send('Sorry!! I didn\'t understand, try something like \'I like metallica \'');
         session.endDialog();
-	}
+    }
 ]);
 
-intents.matches('Like Artist', 
-        async (session, args, next) => {
-            // Session logging
-            //TODO: Switch off last session logging
-            session.userData.lastSessionMessage = session.message;
-            session.userData.lastArgs = args;
+intents.matches('Like Artist',
+    async (session, args, next) => {
+        // Session logging
+        //TODO: Switch off last session logging
+        session.userData.lastSessionMessage = session.message;
+        session.userData.lastArgs = args;
 
-            // if in a group and the bot is not mentioned, ignore this dialog
-            if (helpers.isGroup(session.message) && !helpers.isMentioned(session.message)) {
-                console.log('DEBUG: Ignoring Group conversation without bot mentioned');
-                return
-            };
+        // if in a group and the bot is not mentioned, ignore this dialog
+        if (helpers.isGroup(session.message) && !helpers.isMentioned(session.message)) {
+            console.log('DEBUG: Ignoring Group conversation without bot mentioned');
+            return
+        };
 
-            if (args.entities == null) {
-                session.send('LUIS unable to detect entity');
-            }
-            else {
-                var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'Music.ArtistName');
+        if (args.entities == null) {
+            session.send('LUIS unable to detect entity');
+        }
+        else {
+            var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'Music.ArtistName');
 
-                // 1. lookup the artist
-                session.sendTyping();
-                try {
-                    let msg = await cards.getArtists(session, [artistsName.entity]);
-                    if (msg.msg) {
-                        if (!msg.oneResult) {
-                            session.send(`Which ${artistsName.entity}?`)
-                            session.send(msg.msg);
-                            session.endDialog();
-                            return;
-                        }
-        
+            // 1. lookup the artist
+            session.sendTyping();
+            try {
+                let msg = await cards.getArtists(session, [artistsName.entity]);
+                if (msg.msg) {
+                    if (!msg.oneResult) {
+                        session.send(`Which ${artistsName.entity}?`)
                         session.send(msg.msg);
-                    }
-                    else {
-                        session.send(`Sorry I couldn't find anything for "${artistsName}" 😞 Try something like, "Metallica, Ed Sheeran"`);
                         session.endDialog();
                         return;
                     }
-                }
-                catch (e) {
-                    console.error(e);
-                    session.endDialog(`Whoops! Something is wrong 😞 in the Like Artist dialog, please try again.`);
-                    return;
-                }
 
-                // 2. recommend
-                session.sendTyping();
-                try {
-                    // save the like
-                    userdata.userLikesArtist(session.message.user.id, artistsName.entity);
-                    session.send(`I like ${artistsName.entity} too!`);
-                    session.send(`Here are some recommended albums and tracks based on your interests`);
-                    var aritistSeed = session.userData.faveArtist.artists.items[0].id;
-                    let msg = await cards.getRecommendations(session, aritistSeed);
-                    if (msg) {
-                        session.send(msg);
-                        session.endDialog();
-                    }
+                    session.send(msg.msg);
                 }
-                catch (e) {
-                    console.error(e);
-                    session.endDialog(`Whoops! Something is wrong 😞 in the Like Artist dialog, please try again.`);
+                else {
+                    session.send(`Sorry I couldn't find anything for "${artistsName}" 😞 Try something like, "Metallica, Ed Sheeran"`);
+                    session.endDialog();
                     return;
                 }
-            };
+            }
+            catch (e) {
+                console.error(e);
+                session.endDialog(`Whoops! Something is wrong 😞 in the Like Artist dialog, please try again.`);
+                return;
+            }
+
+            // 2. recommend
+            session.sendTyping();
+            try {
+                // save the like
+                userdata.userLikesArtist(session.message.user.id, artistsName.entity);
+                session.send(`I like ${artistsName.entity} too!`);
+                session.send(`Here are some recommended albums and tracks based on your interests`);
+                var aritistSeed = session.userData.faveArtist.artists.items[0].id;
+                let msg = await cards.getRecommendations(session, aritistSeed);
+                if (msg) {
+                    session.send(msg);
+                    session.endDialog();
+                }
+            }
+            catch (e) {
+                console.error(e);
+                session.endDialog(`Whoops! Something is wrong 😞 in the Like Artist dialog, please try again.`);
+                return;
+            }
+        };
     }
 );
