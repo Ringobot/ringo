@@ -107,8 +107,10 @@ intents.matches('Like Artist',
                 session.send('LUIS unable to detect entity');
             }
             else {
-                console.log('DEBUG: session', session);
-                console.log('DEBUG: args', args);
+                //console.log('DEBUG: session', session);
+                console.log('DEBUG: session.message.address.user', session.message.address.user);                
+                console.log('DEBUG: session.message.address.bot', session.message.address.bot);                
+                //console.log('DEBUG: args', args);
 
                 var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'Music.ArtistName');
 
