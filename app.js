@@ -15,6 +15,7 @@ const builder = require("botbuilder");
 const cards = require("./services/cards");
 const userdata = require("./services/userdata");
 const statedata = require("./services/statedata");
+const helpers = require("./helpers");
 // Setup Restify Server
 var server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3978, function (e) {
@@ -87,17 +88,20 @@ intents.onDefault([
     }
 ]);
 intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, void 0, function* () {
+    // Session logging
+    //TODO: Switch off last session logging
+    session.userData.lastSessionMessage = session.message;
+    session.userData.lastArgs = args;
+    // if in a group and the bot is not mentioned, ignore this dialog
+    if (helpers.isGroup(session.message) && !helpers.isMentioned(session.message)) {
+        console.log('DEBUG: Ignoring Group conversation without bot mentioned');
+        return;
+    }
+    ;
     if (args.entities == null) {
         session.send('LUIS unable to detect entity');
     }
     else {
-        //console.log('DEBUG: session', session);
-        //console.log('DEBUG: session.message.address.user', session.message.address.user);                
-        //console.log('DEBUG: session.message.address.bot', session.message.address.bot);                
-        //console.log('DEBUG: args', args);
-        //TODO: Switch off last session logging
-        session.userData.lastSessionMessage = session.message;
-        session.userData.lastArgs = args;
         var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'Music.ArtistName');
         // 1. lookup the artist
         session.sendTyping();
