@@ -111,7 +111,7 @@ intents.onDefault([
 intents.matches('Like Artist',
     async (session, args, next) => {
         // Session logging
-        //TODO: Switch off last session logging
+        //TODO: #340 Switch off last session logging
         session.userData.lastSessionMessage = session.message;
         session.userData.lastArgs = args;
 
@@ -129,20 +129,21 @@ intents.matches('Like Artist',
 
             // 1. lookup the artist
             session.sendTyping();
+            var result = null;
             try {
-                let msg = await cards.getArtists(session, [artistsName.entity]);
-                if (msg.msg) {
-                    if (!msg.oneResult) {
+                result = await cards.getArtists(session, [artistsName.entity]);
+                if (result.msg) {
+                    if (!result.matched) {
                         session.send(`Which ${artistsName.entity}?`)
-                        session.send(msg.msg);
+                        session.send(result.msg);
                         session.endDialog();
                         return;
                     }
 
-                    session.send(msg.msg);
+                    session.send(result.msg);
                 }
                 else {
-                    session.send(`Sorry I couldn't find anything for "${artistsName}" 😞 Try something like, "Metallica, Ed Sheeran"`);
+                    session.send(`Sorry I couldn't find anything for "${artistsName.entity}" 😞 Try something like, "Metallica, Ed Sheeran"`);
                     session.endDialog();
                     return;
                 }
@@ -154,14 +155,16 @@ intents.matches('Like Artist',
             }
 
             // 2. recommend
-            session.sendTyping();
+            
             try {
                 // save the like
-                userdata.userLikesArtist(session.message.user.id, artistsName.entity);
-                session.send(`I like ${artistsName.entity} too!`);
-                session.send(`Here are some recommended albums and tracks based on your interests`);
-                var aritistSeed = session.userData.faveArtist.artists.items[0].id;
-                let msg = await cards.getRecommendations(session, aritistSeed);
+                session.send(`You are my first friend to like ${result.match.artistName}!`);
+                session.sendTyping();
+                userdata.userLikesArtist(session.message.user.id, result.match.artistName);
+                
+                // get recommendation
+                let msg = await cards.getRelatedArtists(session, result.match.artistId, 1);
+
                 if (msg) {
                     session.send(msg);
                     session.endDialog();

@@ -15,9 +15,11 @@ function userLikesArtist(user, artist) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!user)
             throw 'user cannot be null';
+        let userId = user;
+        let artistId = `${artist.toLowerCase()}:${_canonical.getArtistId(artist).Id}`;
         let entity = {
-            PartitionKey: user.toLowerCase(),
-            RowKey: _canonical.getArtistId(artist).Id,
+            PartitionKey: userId,
+            RowKey: artistId,
             User: user,
             Artist: artist,
             WhenLiked: new Date()
@@ -25,14 +27,17 @@ function userLikesArtist(user, artist) {
         yield _table.insert('UserLikesArtist', entity, true);
         var graphClient = _graph.createClient();
         var userVertex = {
+            Id: userId,
             Name: user,
             Properties: []
         };
         var artistVertex = {
+            Id: artistId,
             Name: artist,
             Properties: []
         };
-        var queryUserVertx = yield _graph.getVertexByName(graphClient, userVertex.Name);
+        // TODO: Get vertex by Id?
+        var queryUserVertx = yield _graph.getVertexById(graphClient, userVertex.Id);
         console.log(queryUserVertx);
         if (queryUserVertx.length == 0) {
             var userVertexResult = yield _graph.addVertex(graphClient, userVertex);
@@ -40,7 +45,7 @@ function userLikesArtist(user, artist) {
         else
             var userVertexResult = queryUserVertx;
         console.log(userVertexResult);
-        var queryArtistVertx = yield _graph.getVertexByName(graphClient, artistVertex.Name);
+        var queryArtistVertx = yield _graph.getVertexById(graphClient, artistVertex.Id);
         console.log(queryArtistVertx);
         if (queryArtistVertx.length == 0) {
             var artistVertexResult = yield _graph.addVertex(graphClient, artistVertex);

@@ -29,6 +29,7 @@ export function dropGraph(client, callback) {
 */
 
 interface Vertex {
+    Id: string,
     Name: string,
     Properties: VertexProperty[]
 }
@@ -63,9 +64,29 @@ export function getVertexByName(client, name: string) {
     });
 };
 
+export function getVertexById(client, id:string){
+    // g.V().hasId('123')
+    var query = `g.V().hasId('${id}')`;
+
+    console.log('graphstorage.getVertexByName', 'vertex.Id', id);
+    console.debug('graphstorage.addVertex', 'query', query);
+
+    return new Promise<any>((resolve, reject) => {
+        client.execute(query, function (err, results) {
+            if (err) {
+                reject(err);
+                return;
+            }
+
+            resolve(results);
+            return;
+        });
+    });
+}
+
 export function addVertex(client, vertex: Vertex) {
-    var query = "g.addV(_Vertex_Name)";
-    var bindings = { _Vertex_Name: vertex.Name };
+    var query = "g.addV(T.Id, _Id)";
+    var bindings = { _Id: vertex.Id };
 
     for (var i = 0; i < vertex.Properties.length; i++) {
         query += `.property(_Property_${vertex.Properties[i].Key}, _Property_${vertex.Properties[i].Key}_Value)`;
@@ -73,7 +94,7 @@ export function addVertex(client, vertex: Vertex) {
         bindings[`_Property_${vertex.Properties[i].Key}_Value`] = vertex.Properties[i].Value;
     }
 
-    console.log('graphstorage.addVertex', 'vertex.Name', vertex.Name);
+    console.log('graphstorage.addVertex', 'vertex.Id', vertex.Id);
     console.debug('graphstorage.addVertex', 'query', query);
     console.debug('graphstorage.addVertex', 'bindings', bindings);
 

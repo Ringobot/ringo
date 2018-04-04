@@ -1,17 +1,27 @@
 import _spotify = require('./spotify');
 import builder = require('botbuilder');
 
+function findMatch(items: any, result: any) {
+    let itemsWithImages = items.filter(i => i.images.length > 0);
+    result.matched = itemsWithImages.length === 1;
+    if (result.matched) result.match = {
+        artistName: itemsWithImages[0].name,
+        artistId: itemsWithImages[0].id,
+        artistUri: itemsWithImages[0].uri
+    };
+}
+
 export async function getArtists(session, artists: string[]) {
     let cards = new Array<builder.AttachmentType>();
-    let result = { msg: null, oneResult: false };
+    let result = { msg: null, matched: false, match: { artistName: null, artistUid: null } };
 
     for (var i in artists) {
         let artist = artists[i];
         let artistData = await _spotify.searchArtists(artist, 3);
         if (artistData.artists.items.length > 0) {
-            session.userData.faveArtist = artistData; // ??
+            //session.userData.faveArtist = artistData; // ??
 
-            result.oneResult = artistData.artists.items.filter(i=> i.images.length > 0).length === 1;
+            findMatch(artistData.artists.items, result);
 
             for (var j in artistData.artists.items) {
 
@@ -25,7 +35,7 @@ export async function getArtists(session, artists: string[]) {
                     // images 600 wide
                     .images([builder.CardImage.create(session, item.images[0].url)])
 
-                if (!result.oneResult) {
+                if (!result.matched) {
                     card.text(`Do you like ${item.name}?`);
                     card.buttons([
                         builder.CardAction.imBack(session, `I like ${item.name}`, `I like ${item.name}`)
@@ -37,7 +47,7 @@ export async function getArtists(session, artists: string[]) {
         }
     }
 
-    if (cards.length == 0) return;
+    if (cards.length == 0) return result;
 
     let msg = new builder.Message(session);
     msg.attachmentLayout(builder.AttachmentLayout.carousel);
@@ -45,6 +55,39 @@ export async function getArtists(session, artists: string[]) {
     result.msg = msg;
     return result;
 };
+
+export async function getRelatedArtists(session, artistId: string, limit: number = 1) {
+    let cards = new Array<builder.AttachmentType>();
+
+    let result = await _spotify.getRelatedArtists(artistId);
+    if (result.artists.length == 0) return null;
+
+    // filter out artists without images and sort by popularity desc
+    let artists = result.artists.filter(a => a.images.length > 0).sort((a, b)=>{
+        if (a.popularity > b.popularity) return -1;
+        if (a.popularity < b.popularity) return 1;
+        return 0;
+    });
+
+    for (var i = 0; i < limit; i++) {
+        cards.push(
+            new builder.HeroCard(session)
+                .title(artists[i].name)
+                .text(`Do you like ${artists[i].name}?`)
+                // images 600 wide
+                .images([builder.CardImage.create(session, artists[i].images[0].url)])
+                .buttons([
+                    builder.CardAction.imBack(session, `I like ${artists[i].name}`, `I like ${artists[i].name}`)
+                ])
+        );
+    }
+
+    let msg = new builder.Message(session);
+    msg.attachmentLayout(builder.AttachmentLayout.carousel);
+    msg.attachments(cards);
+    return msg;
+};
+
 
 export async function getRecommendations(session, artistSeed: string) {
     let cards = new Array<builder.AttachmentType>();

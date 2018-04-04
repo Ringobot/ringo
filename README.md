@@ -12,6 +12,10 @@ Spotify Developer: <https://developer.spotify.com/web-api/console/get-search-ite
 
 Emojipedia: <https://emojipedia.org/people/>
 
+### Bot Framework
+
+Connect a bot to Slack: <https://docs.microsoft.com/en-us/azure/bot-service/bot-service-channel-connect-slack>
+
 ### Typescript
 
 Downlevel Async Functions: <https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-1.html>
