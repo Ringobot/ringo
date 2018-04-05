@@ -11,9 +11,10 @@
   "license": "MIT",
   "dependencies": {
     "@types/node": "^8.10.1",
+    "applicationinsights": "^1.0.2",
     "azure-common": "^0.9.19",
     "azure-storage": "^2.7.0",
-    "botbuilder": "^3.11.0",
+    "botbuilder": "^3.14.1",
     "botbuilder-azure": "^3.0.4",
     "dotenv": "^4.0.0",
     "gremlin": "^2.6.0",

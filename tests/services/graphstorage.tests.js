@@ -35,6 +35,7 @@ describe('addVertex() results', function () {
     this.timeout(10000);
     let name = helper.newGuid();
     let vertex = {
+        Id: name,
         Name: name,
         Properties: [
             { Key: "Country", Value: "UK" },

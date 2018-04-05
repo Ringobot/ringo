@@ -38,7 +38,7 @@ export async function getArtists(session, artists: string[]) {
                 if (!result.matched) {
                     card.text(`Do you like ${item.name}?`);
                     card.buttons([
-                        builder.CardAction.imBack(session, `I like ${item.name}`, `I like ${item.name}`)
+                        builder.CardAction.imBack(session, `I like ${item.uri}`, `I like ${item.name}`)
                     ]);
                 }
 

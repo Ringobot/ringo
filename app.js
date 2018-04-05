@@ -10,6 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require('dotenv').config();
+const appInsights = require("applicationinsights");
+appInsights.setup();
+appInsights.start();
 const restify = require("restify");
 const builder = require("botbuilder");
 const cards = require("./services/cards");
@@ -108,31 +111,38 @@ intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, 
         session.send('LUIS unable to detect entity');
     }
     else {
-        var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'Music.ArtistName');
-        // 1. lookup the artist
-        session.sendTyping();
-        var result = null;
-        try {
-            result = yield cards.getArtists(session, [artistsName.entity]);
-            if (result.msg) {
-                if (!result.matched) {
-                    session.send(`Which ${artistsName.entity}?`);
+        // I like spotify:artist:25IG9fa7cbdmCIy3OnuH57
+        var spotifyUri = builder.EntityRecognizer.findEntity(args.entities, 'spotifyUri');
+        if (spotifyUri) {
+        }
+        else {
+            var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'Music.ArtistName');
+            if (!artistsName)
+                // 1. lookup the artist
+                session.sendTyping();
+            var result = null;
+            try {
+                result = yield cards.getArtists(session, [artistsName.entity]);
+                if (result.msg) {
+                    if (!result.matched) {
+                        session.send(`Which ${artistsName.entity}?`);
+                        session.send(result.msg);
+                        session.endDialog();
+                        return;
+                    }
                     session.send(result.msg);
+                }
+                else {
+                    session.send(`Sorry I couldn't find anything for "${artistsName.entity}" 😞 Try something like, "Metallica, Ed Sheeran"`);
                     session.endDialog();
                     return;
                 }
-                session.send(result.msg);
             }
-            else {
-                session.send(`Sorry I couldn't find anything for "${artistsName.entity}" 😞 Try something like, "Metallica, Ed Sheeran"`);
-                session.endDialog();
+            catch (e) {
+                console.error(e);
+                session.endDialog(`Whoops! Something is wrong 😞 in the Like Artist dialog, please try again.`);
                 return;
             }
-        }
-        catch (e) {
-            console.error(e);
-            session.endDialog(`Whoops! Something is wrong 😞 in the Like Artist dialog, please try again.`);
-            return;
         }
         // 2. recommend
         try {
