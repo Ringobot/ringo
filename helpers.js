@@ -9,3 +9,8 @@ function isMentioned(message) {
         && message.entities.filter(e => e.type == 'mention').find(e => e.mentioned.id == message.address.bot.id) !== undefined;
 }
 exports.isMentioned = isMentioned;
+function getEntityText(message, entity) {
+    // https://github.com/Microsoft/BotBuilder/issues/963
+    return message.text.substr(entity.startIndex, entity.endIndex - entity.startIndex + 1);
+}
+exports.getEntityText = getEntityText;

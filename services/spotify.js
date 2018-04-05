@@ -53,6 +53,16 @@ function getRelatedArtists(artistId) {
 }
 exports.getRelatedArtists = getRelatedArtists;
 ;
+function getArtist(artistId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // GET https://api.spotify.com/v1/artists/{id}
+        let token = yield getAuthToken();
+        let response = yield _httpj.get(`${baseUrl}/artists/${artistId}`, { 'Authorization': 'Bearer ' + token });
+        return response;
+    });
+}
+exports.getArtist = getArtist;
+;
 function getAuthToken() {
     return __awaiter(this, void 0, void 0, function* () {
         let now = new Date();

@@ -47,6 +47,17 @@ export async function getRelatedArtists(artistId:string) {
     return response;
 };
 
+export async function getArtist(artistId:string) {
+    // GET https://api.spotify.com/v1/artists/{id}
+    
+    let token = await getAuthToken();
+
+    let response = await _httpj.get(`${baseUrl}/artists/${artistId}`, 
+        { 'Authorization': 'Bearer ' + token });
+
+    return response;
+};
+
 export async function getAuthToken() {
     let now = new Date();
 

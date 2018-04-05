@@ -11,6 +11,44 @@ function findMatch(items: any, result: any) {
     };
 }
 
+export async function getArtistByUri(session, uri: string) {
+    let cards = new Array<builder.AttachmentType>();
+    let result = { msg: null, matched: false, match: { } };
+
+    let spotifyArtistRegex = /spotify:artist:[A-Za-z0-9]{22}/
+
+    if (!spotifyArtistRegex.test(uri)) {
+        throw 'Only Spotify URIs in the format spotify:artist:[A-Za-z0-9]{22} are currently supported';
+    }
+
+    let artistId = uri.split(":")[2]; 
+
+    let artistData = await _spotify.getArtist(artistId);
+
+    result.matched = true;
+    result.match = {
+        artistName: artistData.name,
+        artistId: artistData.id,
+        artistUri: artistData.uri
+    };
+
+    let card = new builder.HeroCard(session)
+        .title(artistData.name)
+        // images 600 wide
+        .images([builder.CardImage.create(session, artistData.images[0].url)])
+
+    cards.push(card);
+
+    if (cards.length == 0) return result;
+
+    let msg = new builder.Message(session);
+    msg.attachmentLayout(builder.AttachmentLayout.carousel);
+    msg.attachments(cards);
+    result.msg = msg;
+    return result;
+};
+
+
 export async function getArtists(session, artists: string[]) {
     let cards = new Array<builder.AttachmentType>();
     let result = { msg: null, matched: false, match: { artistName: null, artistUid: null } };
@@ -77,7 +115,7 @@ export async function getRelatedArtists(session, artistId: string, limit: number
                 // images 600 wide
                 .images([builder.CardImage.create(session, artists[i].images[0].url)])
                 .buttons([
-                    builder.CardAction.imBack(session, `I like ${artists[i].name}`, `I like ${artists[i].name}`)
+                    builder.CardAction.imBack(session, `I like ${artists[i].uri}`, `I like ${artists[i].name}`)
                 ])
         );
     }

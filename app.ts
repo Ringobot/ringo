@@ -107,10 +107,14 @@ intents.onDefault([
             return
         };
 
-        session.send('Sorry!! I didn\'t understand, try something like \'I like metallica \'');
+        sorry(session);
         session.endDialog();
     }
 ]);
+
+function sorry(session){
+    session.send('Sorry!! I didn\'t understand, try something like \'I like metallica \'');
+}
 
 intents.matches('Like Artist',
     async (session, args, next) => {
@@ -133,11 +137,18 @@ intents.matches('Like Artist',
             var spotifyUri = builder.EntityRecognizer.findEntity(args.entities, 'spotifyUri');
 
             if (spotifyUri) {
-
+                // extract the entity with case preserved
+                let uri = helpers.getEntityText(session.message, spotifyUri);
+                result = await cards.getArtistByUri(session, uri);
+                session.send(result.msg);
             } else {
                 var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'Music.ArtistName');
 
-                if (!artistsName)
+                if (!artistsName) {
+                    sorry(session);
+                    session.endDialog();
+                    return;
+                }
 
                 // 1. lookup the artist
                 session.sendTyping();
@@ -155,7 +166,7 @@ intents.matches('Like Artist',
                         session.send(result.msg);
                     }
                     else {
-                        session.send(`Sorry I couldn't find anything for "${artistsName.entity}" 😞 Try something like, "Metallica, Ed Sheeran"`);
+                        sorry(session);
                         session.endDialog();
                         return;
                     }
@@ -172,7 +183,7 @@ intents.matches('Like Artist',
             
             try {
                 // save the like
-                session.send(`You are my first friend to like ${result.match.artistName}!`);
+                session.send(`I like ${result.match.artistName} too!`);
                 session.sendTyping();
                 userdata.userLikesArtist(session.message.user.id, result.match.artistName);
                 
