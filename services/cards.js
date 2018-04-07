@@ -36,12 +36,19 @@ function getArtistByUri(session, uri) {
             artistId: artistData.id,
             artistUri: artistData.uri
         };
+        //https://p.scdn.co/mp3-preview/b03b646746bdfabed6a121f888d7de360302d8c9?cid=774b29d4f13844c495f206cafdad9c86
         let card = new builder.HeroCard(session)
             .title(artistData.name)
             .images([builder.CardImage.create(session, artistData.images[0].url)]);
         cards.push(card);
-        if (cards.length == 0)
-            return result;
+        let audioCard = new builder.AudioCard(session)
+            .image(builder.CardImage.create(session, artistData.images[0].url))
+            .media([{ url: 'https://p.scdn.co/mp3-preview/b03b646746bdfabed6a121f888d7de360302d8c9?cid=774b29d4f13844c495f206cafdad9c86', profile: "" }])
+            .subtitle('subtitle')
+            .text('text')
+            .title(artistData.name)
+            .shareable(false);
+        cards.push(audioCard);
         let msg = new builder.Message(session);
         msg.attachmentLayout(builder.AttachmentLayout.carousel);
         msg.attachments(cards);
