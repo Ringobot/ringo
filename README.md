@@ -41,3 +41,7 @@ Mocha async: <https://mochajs.org/#asynchronous-code>
 ### Nodejs on Docker
 
 Dockerizing a Node.js web app: <https://nodejs.org/en/docs/guides/nodejs-docker-webapp/>
+
+### Application insights
+
+<https://github.com/Microsoft/ApplicationInsights-node.js/>

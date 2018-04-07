@@ -141,6 +141,7 @@ intents.matches('Like Artist',
                 let uri = helpers.getEntityText(session.message, spotifyUri);
                 result = await cards.getArtistByUri(session, uri);
                 session.send(result.msg);
+                session.send(`https://open.spotify.com/artist/${result.match.artistId}`);
             } else {
                 var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'Music.ArtistName');
 
@@ -164,6 +165,8 @@ intents.matches('Like Artist',
                         }
     
                         session.send(result.msg);
+                        session.send(`https://open.spotify.com/artist/${result.match.artistId}`)
+                        //https://open.spotify.com/artist/0PK0Dx3s9et0Uf4XbdFpiW
                     }
                     else {
                         sorry(session);
