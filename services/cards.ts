@@ -1,51 +1,32 @@
 import builder = require('botbuilder');
 
-/*
-export function getAudioCard(session: builder.Session, artist:any, track:any): builder.AttachmentType {
-    if (!(track && track.name && track.preview_url)) throw "Expecting track {name:string, preview_url:string}";
-
-    let audioCard = new builder.AudioCard(session)
-        .image(builder.CardImage.create(session, artist.images[0].url))
-        .media([{url:track.preview_url, profile:""}])
-        .title(artist.name)
-        .subtitle(track.name)
-        .shareable(false);
-
-    cards.push(audioCard);
-
-    let msg = new builder.Message(session);
-    msg.attachmentLayout(builder.AttachmentLayout.carousel);
-    msg.attachments(cards);
-    return msg;
-}
-*/
-
 /**
  * Creates a simple Artist Hero Card
  * @param session 
  * @param artist 
  */
-export function artist(session, artist: any) : builder.AttachmentType {
-
+export function artist(session, artist: any, likeButton: boolean = false): builder.AttachmentType {
     let card = new builder.HeroCard(session)
         .title(artist.name);
 
-    if (artist.images.length > 0){
+    if (artist.images.length > 0) {
         // images 600 wide
         card.images([builder.CardImage.create(session, artist.images[0].url)]);
     }
 
-    /*
-    card.buttons([
-        builder.CardAction.imBack(session, `I like ${artist.uri}`, `I like ${artist.name}`)
-    ]);
-    */
-   
+    let buttons = [];
+    if (likeButton){
+        buttons.push(builder.CardAction.imBack(session, `I like ${artist.uri}`, `I like ${artist.name} ❤️`));
+    }
+
+    buttons.push(builder.CardAction.imBack(session, `Play ${artist.uri}`, `Play ${artist.name} now 🎵`));
+    card.buttons(buttons);
+
     return card;
 };
 
 
-export function artists(session, artists: any) : builder.AttachmentType[] {
+export function artists(session, artists: any): builder.AttachmentType[] {
     let cards = new Array<builder.AttachmentType>();
 
     for (var j in artists.artists.items) {
@@ -64,7 +45,7 @@ export function artists(session, artists: any) : builder.AttachmentType[] {
                 builder.CardAction.imBack(session, `I like ${item.uri}`, `I like ${item.name} ❤️`),
                 builder.CardAction.imBack(session, `Play ${item.uri}`, `Play ${item.name} now 🎵`)
             ]);
-        
+
         cards.push(card);
     }
 

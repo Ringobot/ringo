@@ -17,7 +17,7 @@ export function getEntityText(message: builder.IMessage, entity: builder.IEntity
 export function findMatch(artists: any) {
     let result = {matched: false, artist: null};
     
-    let artistsWithImages = artists.filter(i => i.images.length > 0);
+    let artistsWithImages = artists.artists.items.filter(i => i.images.length > 0);
     result.matched = artistsWithImages.length === 1;
     
     if (result.matched) result.artist = artistsWithImages[0];

@@ -125,10 +125,10 @@ intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, 
                 let msg = _messages.artist(session, artist);
                 msg.text(`I like ${artist.name} too!`);
                 session.send(msg);
-                // save the like
-                //session.send(`I like ${result.match.artistName} too!`);
-                //session.sendTyping();
-                userdata.userLikesArtist(session.message.user.id, artist.name);
+                session.sendTyping();
+                yield userdata.userLikesArtist(session.message.user.id, artist.name);
+                let msg2 = yield _messages.recommendArtist(session, artist.id);
+                session.endDialog(msg2);
             }
             catch (e) {
                 _messages.whoops(session, e);
@@ -162,7 +162,10 @@ intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, 
                     let msg = _messages.artist(session, match.artist);
                     msg.text(`I like ${match.artist.name} too!`);
                     session.send(msg);
-                    userdata.userLikesArtist(session.message.user.id, match.artist.name);
+                    session.sendTyping();
+                    yield userdata.userLikesArtist(session.message.user.id, match.artist.name);
+                    let msg2 = yield _messages.recommendArtist(session, match.artist.id);
+                    session.endDialog(msg2);
                 }
                 else {
                     // Which artist?

@@ -16,9 +16,14 @@ function artist(session, artist) {
     let msg = new builder.Message(session);
     //msg.attachmentLayout(builder.AttachmentLayout.carousel);
     msg.attachments([card]);
-    msg.suggestedActions(builder.SuggestedActions.create(session, [
-        builder.CardAction.imBack(session, `Play ${artist.uri}`, `Play ${artist.name} now`)
-    ]));
+    /*
+    msg.suggestedActions(
+        builder.SuggestedActions.create(
+            session, [
+                builder.CardAction.imBack(session, `Play ${artist.uri}`, `Play ${artist.name} now`)
+            ])
+    );
+    */
     return msg;
 }
 exports.artist = artist;
@@ -38,10 +43,11 @@ function recommendArtist(session, artistId) {
             // filter out artists without images and sort by popularity desc
             let sorted = artists.artists.filter(a => a.images.length > 0).sort(popularityDesc);
             let artist = sorted[0];
-            let card = _cards.artist(session, artist);
+            let card = _cards.artist(session, artist, true);
             let msg = new builder.Message(session);
             //msg.attachmentLayout(builder.AttachmentLayout.carousel);
             msg.attachments([card]);
+            msg.text(`Do you like ${artist.name}?`);
             return msg;
         }
         catch (e) {

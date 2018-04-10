@@ -1,42 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const builder = require("botbuilder");
-/*
-export function getAudioCard(session: builder.Session, artist:any, track:any): builder.AttachmentType {
-    if (!(track && track.name && track.preview_url)) throw "Expecting track {name:string, preview_url:string}";
-
-    let audioCard = new builder.AudioCard(session)
-        .image(builder.CardImage.create(session, artist.images[0].url))
-        .media([{url:track.preview_url, profile:""}])
-        .title(artist.name)
-        .subtitle(track.name)
-        .shareable(false);
-
-    cards.push(audioCard);
-
-    let msg = new builder.Message(session);
-    msg.attachmentLayout(builder.AttachmentLayout.carousel);
-    msg.attachments(cards);
-    return msg;
-}
-*/
 /**
  * Creates a simple Artist Hero Card
  * @param session
  * @param artist
  */
-function artist(session, artist) {
+function artist(session, artist, likeButton = false) {
     let card = new builder.HeroCard(session)
         .title(artist.name);
     if (artist.images.length > 0) {
         // images 600 wide
         card.images([builder.CardImage.create(session, artist.images[0].url)]);
     }
-    /*
-    card.buttons([
-        builder.CardAction.imBack(session, `I like ${artist.uri}`, `I like ${artist.name}`)
-    ]);
-    */
+    let buttons = [];
+    if (likeButton) {
+        buttons.push(builder.CardAction.imBack(session, `I like ${artist.uri}`, `I like ${artist.name} ❤️`));
+    }
+    buttons.push(builder.CardAction.imBack(session, `Play ${artist.uri}`, `Play ${artist.name} now 🎵`));
+    card.buttons(buttons);
     return card;
 }
 exports.artist = artist;
