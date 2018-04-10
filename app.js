@@ -15,7 +15,9 @@ appInsights.setup();
 appInsights.start();
 const restify = require("restify");
 const builder = require("botbuilder");
-const cards = require("./services/cards");
+const _artists = require("./services/artists");
+const _cards = require("./services/cards");
+const _messages = require("./services/messages");
 const userdata = require("./services/userdata");
 const statedata = require("./services/statedata");
 const helpers = require("./helpers");
@@ -92,14 +94,12 @@ intents.onDefault([
             return;
         }
         ;
-        sorry(session);
+        _messages.sorry(session);
         session.endDialog();
     }
 ]);
-function sorry(session) {
-    session.send('Sorry!! I didn\'t understand, try something like \'I like metallica \'');
-}
 intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, void 0, function* () {
+    //TODO: Channel handlers for Slack, Web, Teams, Skype, etc
     // Session logging
     //TODO: #340 Switch off last session logging
     session.userData.lastSessionMessage = session.message;
@@ -114,68 +114,72 @@ intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, 
         session.send('LUIS unable to detect entity');
     }
     else {
-        // I like spotify:artist:25IG9fa7cbdmCIy3OnuH57
         var spotifyUri = builder.EntityRecognizer.findEntity(args.entities, 'spotifyUri');
         if (spotifyUri) {
+            // I like spotify:artist:25IG9fa7cbdmCIy3OnuH57
             // extract the entity with case preserved
             let uri = helpers.getEntityText(session.message, spotifyUri);
-            result = yield cards.getArtistByUri(session, uri);
-            session.send(result.msg);
-            session.send(`https://open.spotify.com/artist/${result.match.artistId}`);
+            session.sendTyping();
+            try {
+                let artist = yield _artists.getArtistByUri(uri);
+                let msg = _messages.artist(session, artist);
+                msg.text(`I like ${artist.name} too!`);
+                session.send(msg);
+                // save the like
+                //session.send(`I like ${result.match.artistName} too!`);
+                //session.sendTyping();
+                userdata.userLikesArtist(session.message.user.id, artist.name);
+            }
+            catch (e) {
+                _messages.whoops(session, e);
+                return;
+            }
+            /*
+            // if slack just send a URL
+            if (session.message.source === 'slack' && result.match.artistSpotifyUrl){
+                session.send(result.match.artistSpotifyUrl)
+            } else {
+                let audioCard = await cards.getAudioCard(session, artist);
+                session.send(audioCard);
+            }
+            */
         }
         else {
+            // I like Radiohead
             var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'Music.ArtistName');
             if (!artistsName) {
-                sorry(session);
+                _messages.sorry(session);
                 session.endDialog();
                 return;
             }
             // 1. lookup the artist
-            session.sendTyping();
-            var result = null;
             try {
-                result = yield cards.getArtists(session, [artistsName.entity]);
-                if (result.msg) {
-                    if (!result.matched) {
-                        session.send(`Which ${artistsName.entity}?`);
-                        session.send(result.msg);
-                        session.endDialog();
-                        return;
-                    }
-                    session.send(result.msg);
-                    session.send(`https://open.spotify.com/artist/${result.match.artistId}`);
-                    //https://open.spotify.com/artist/0PK0Dx3s9et0Uf4XbdFpiW
+                session.sendTyping();
+                let artists = yield _artists.searchArtists(artistsName.entity, 3);
+                let match = helpers.findMatch(artists);
+                if (match.matched) {
+                    // exact match
+                    let msg = _messages.artist(session, match.artist);
+                    msg.text(`I like ${match.artist.name} too!`);
+                    session.send(msg);
+                    userdata.userLikesArtist(session.message.user.id, match.artist.name);
                 }
                 else {
-                    sorry(session);
+                    // Which artist?
+                    let cards = _cards.artists(session, artists);
+                    let msg = new builder.Message(session);
+                    msg.attachmentLayout(builder.AttachmentLayout.carousel);
+                    msg.attachments(cards);
+                    msg.text(`Which ${artistsName.entity}?`);
+                    session.send(msg);
                     session.endDialog();
                     return;
                 }
             }
             catch (e) {
-                console.error(e);
-                session.endDialog(`Whoops! Something is wrong 😞 in the Like Artist dialog, please try again.`);
+                _messages.whoops(session, e);
                 return;
             }
         }
-        // 2. recommend
-        try {
-            // save the like
-            session.send(`I like ${result.match.artistName} too!`);
-            session.sendTyping();
-            userdata.userLikesArtist(session.message.user.id, result.match.artistName);
-            // get recommendation
-            let msg = yield cards.getRelatedArtists(session, result.match.artistId, 1);
-            if (msg) {
-                session.send(msg);
-                session.endDialog();
-            }
-        }
-        catch (e) {
-            console.error(e);
-            session.endDialog(`Whoops! Something is wrong 😞 in the Like Artist dialog, please try again.`);
-            return;
-        }
     }
-    ;
 }));

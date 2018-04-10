@@ -1,0 +1,202 @@
+{
+    "lastSessionMessage": {
+        "type": "message",
+        "timestamp": "2018-04-07T12:02:36.508Z",
+        "text": "I like spotify:artist:0PK0Dx3s9et0Uf4XbdFpiW",
+        "entities": [
+            {
+                "mentioned": {
+                    "id": "B9ZDXALCQ:TA0VBN61L",
+                    "name": "ringo"
+                },
+                "text": "@ringo",
+                "type": "mention"
+            }
+        ],
+        "sourceEvent": {
+            "Payload": {
+                "type": "interactive_message",
+                "actions": [
+                    {
+                        "name": "imBack",
+                        "type": "button",
+                        "value": "I like spotify:artist:0PK0Dx3s9et0Uf4XbdFpiW"
+                    }
+                ],
+                "callback_id": "B9ZDXALCQ:TA0VBN61L",
+                "team": {
+                    "id": "TA0VBN61L",
+                    "domain": "ringobot"
+                },
+                "channel": {
+                    "id": "DA102TY3G",
+                    "name": "directmessage"
+                },
+                "user": {
+                    "id": "U9ZDS52G0",
+                    "name": "daniel"
+                },
+                "action_ts": "1523102556.507688",
+                "message_ts": "1523102542.000062",
+                "attachment_id": "9",
+                "token": "arQmtvSCH2DysMpC2tAofQC0",
+                "is_app_unfurl": false,
+                "original_message": {
+                    "text": "",
+                    "username": "Ringo",
+                    "bot_id": "B9ZDXALCQ",
+                    "mrkdwn": true,
+                    "attachments": [
+                        {
+                            "fallback": "640x639px image",
+                            "image_url": "https://i.scdn.co/image/ff3635e66b2bba386d27877abfa0d0614b6227ad",
+                            "image_width": 640,
+                            "image_height": 639,
+                            "image_bytes": 62005,
+                            "callback_id": "B9ZDXALCQ:TA0VBN61L",
+                            "id": 1
+                        },
+                        {
+                            "callback_id": "B9ZDXALCQ:TA0VBN61L",
+                            "text": "Do you like Sons Of Maria?",
+                            "pretext": "Sons Of Maria",
+                            "id": 2,
+                            "fallback": "Do you like Sons Of Maria?"
+                        },
+                        {
+                            "callback_id": "B9ZDXALCQ:TA0VBN61L",
+                            "id": 3,
+                            "actions": [
+                                {
+                                    "id": "1",
+                                    "name": "imBack",
+                                    "text": "I like Sons Of Maria",
+                                    "type": "button",
+                                    "value": "I like spotify:artist:2SfhiNVhk8w8xCQ89P3NPU",
+                                    "style": "default"
+                                }
+                            ],
+                            "fallback": "[no preview available]"
+                        },
+                        {
+                            "fallback": "640x639px image",
+                            "image_url": "https://i.scdn.co/image/4cc7d2653048611b9d179f85f9c95bc16dd2fbde",
+                            "image_width": 640,
+                            "image_height": 639,
+                            "image_bytes": 102065,
+                            "callback_id": "B9ZDXALCQ:TA0VBN61L",
+                            "id": 4
+                        },
+                        {
+                            "callback_id": "B9ZDXALCQ:TA0VBN61L",
+                            "text": "Do you like Sons Of The East?",
+                            "pretext": "Sons Of The East",
+                            "id": 5,
+                            "fallback": "Do you like Sons Of The East?"
+                        },
+                        {
+                            "callback_id": "B9ZDXALCQ:TA0VBN61L",
+                            "id": 6,
+                            "actions": [
+                                {
+                                    "id": "2",
+                                    "name": "imBack",
+                                    "text": "I like Sons Of The East",
+                                    "type": "button",
+                                    "value": "I like spotify:artist:6cSxzHrQgGc4I4Ck5Gewej",
+                                    "style": "default"
+                                }
+                            ],
+                            "fallback": "[no preview available]"
+                        },
+                        {
+                            "fallback": "640x640px image",
+                            "image_url": "https://i.scdn.co/image/9528ba9adc74188c600f9d006f56171f1a91febf",
+                            "image_width": 640,
+                            "image_height": 640,
+                            "image_bytes": 153652,
+                            "callback_id": "B9ZDXALCQ:TA0VBN61L",
+                            "id": 7
+                        },
+                        {
+                            "callback_id": "B9ZDXALCQ:TA0VBN61L",
+                            "text": "Do you like Sons Of Zion?",
+                            "pretext": "Sons Of Zion",
+                            "id": 8,
+                            "fallback": "Do you like Sons Of Zion?"
+                        },
+                        {
+                            "callback_id": "B9ZDXALCQ:TA0VBN61L",
+                            "id": 9,
+                            "actions": [
+                                {
+                                    "id": "3",
+                                    "name": "imBack",
+                                    "text": "I like Sons Of Zion",
+                                    "type": "button",
+                                    "value": "I like spotify:artist:0PK0Dx3s9et0Uf4XbdFpiW",
+                                    "style": "default"
+                                }
+                            ],
+                            "fallback": "[no preview available]"
+                        }
+                    ],
+                    "type": "message",
+                    "subtype": "bot_message",
+                    "ts": "1523102542.000062"
+                },
+                "response_url": "https://hooks.slack.com/actions/TA0VBN61L/343829172758/BsEazX9ITDkO7OgdQRhpfMfj",
+                "trigger_id": "342395352801.340997754054.b4ea925dd0f7309007991f0f2d3a4f20"
+            },
+            "ApiToken": "xoxb-340306140741-rsNvhoyfSmFmvXazBVMShMUA"
+        },
+        "attachments": [],
+        "address": {
+            "id": "66b8cc605b0440199f0b22e6f763a732",
+            "channelId": "slack",
+            "user": {
+                "id": "U9ZDS52G0:TA0VBN61L",
+                "name": "daniel"
+            },
+            "conversation": {
+                "isGroup": false,
+                "id": "B9ZDXALCQ:TA0VBN61L:DA102TY3G",
+                "name": "directmessage"
+            },
+            "bot": {
+                "id": "B9ZDXALCQ:TA0VBN61L",
+                "name": "ringo"
+            },
+            "serviceUrl": "https://slack.botframework.com"
+        },
+        "source": "slack",
+        "agent": "botbuilder",
+        "user": {
+            "id": "U9ZDS52G0:TA0VBN61L",
+            "name": "daniel"
+        }
+    },
+    "lastArgs": {
+        "score": 0.991244256,
+        "intent": "Like Artist",
+        "intents": [
+            {
+                "intent": "Like Artist",
+                "score": 0.991244256
+            },
+            {
+                "intent": "None",
+                "score": 0.004924536
+            }
+        ],
+        "entities": [
+            {
+                "entity": "spotify:artist:0pk0dx3s9et0uf4xbdfpiw",
+                "type": "spotifyUri",
+                "startIndex": 7,
+                "endIndex": 43
+            }
+        ],
+        "compositeEntities": []
+    }
+}
