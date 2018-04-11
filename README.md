@@ -6,6 +6,14 @@ Install latest nodejs and npm: <https://nodejs.org/en/download/package-manager/#
 
     curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash - sudo apt-get install -y nodejs
 
+## Test site
+
+<https://ringobot.azurewebsites.net/>
+
+## Auth
+
+<https://beta.developer.spotify.com/documentation/general/guides/authorization-guide/#authorization-code-flow>
+
 ## Links
 
 Spotify Developer: <https://developer.spotify.com/web-api/console/get-search-item/#complete>
@@ -15,6 +23,8 @@ Emojipedia: <https://emojipedia.org/people/>
 ### Bot Framework
 
 Connect a bot to Slack: <https://docs.microsoft.com/en-us/azure/bot-service/bot-service-channel-connect-slack>
+
+Channel inspector: <https://docs.botframework.com/en-us/channel-inspector/channels/Slack?f=Carousel&e=example1>
 
 ### Typescript
 
@@ -45,3 +55,4 @@ Dockerizing a Node.js web app: <https://nodejs.org/en/docs/guides/nodejs-docker-
 ### Application insights
 
 <https://github.com/Microsoft/ApplicationInsights-node.js/>
+

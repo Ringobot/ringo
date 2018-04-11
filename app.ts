@@ -76,16 +76,6 @@ bot.dialog('Welcome', [
         //builder.Prompts.text(session, "What's your name?");
         session.endDialog();
     }
-
-    /*
-    ,
-    function (session, results) {
-        session.userData.username = results.response;
-        session.send(`'Sup ${results.response}! I love to discover new music and share my discoveries ;) `);
-        //+ "I'm not really very smart so you may have to be patient with me :) If I start bugging out, just type 'help'.");
-        builder.Prompts.text(session, "Who are your favourite artists and bands?");
-        session.endDialog();
-},*/
 ]);
 
 intents.matches('Help', [
@@ -142,10 +132,11 @@ intents.matches('Like Artist',
                 session.sendTyping();
                 try {
                     let artist = await _artists.getArtistByUri(uri);
-                    let msg = _messages.artist(session, artist);
-                    msg.text(`I like ${artist.name} too!`);
-                    session.send(msg);
-                    
+                    //let msg = _messages.artist(session, artist);
+                    //msg.text(`I like ${artist.name} too!`);
+                    //session.send(msg);
+                    session.send(`I like ${artist.name} too!`);
+
                     session.sendTyping();
                     await userdata.userLikesArtist(session.message.user.id, artist.name);
                     
@@ -156,17 +147,6 @@ intents.matches('Like Artist',
                     _messages.whoops(session, e);
                     return;
                 }
-                
-                /*
-                // if slack just send a URL
-                if (session.message.source === 'slack' && result.match.artistSpotifyUrl){
-                    session.send(result.match.artistSpotifyUrl)
-                } else {
-                    let audioCard = await cards.getAudioCard(session, artist);
-                    session.send(audioCard);
-                }
-                */
-
 
             } else {
                 // I like Radiohead
