@@ -36,6 +36,8 @@ The 80/20 Guide to Async/Await in Node.js: <http://thecodebarbarian.com/80-20-gu
 
 How to get node.js HTTP request promise without a single dependency: <https://www.tomas-dvorak.cz/posts/nodejs-request-without-dependencies/>
 
+Regex tester: <https://regex101.com/>
+
 ### Testing and Mocha
 
 Unit testing node applications with TypeScript — using mocha and chai: <https://journal.artfuldev.com/unit-testing-node-applications-with-typescript-using-mocha-and-chai-384ef05f32b2>

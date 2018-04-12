@@ -13,6 +13,7 @@ import _messages = require('./services/messages');
 import userdata = require('./services/userdata');
 import statedata = require('./services/statedata');
 import helpers = require('./helpers');
+import _spotify = require('./services/spotify');
 
 // Setup Restify Server
 var server = restify.createServer();
@@ -21,14 +22,16 @@ server.listen(process.env.port || process.env.PORT || 3978, function (e) {
     console.log('%s listening to %s', server.name, server.url);
 });
 
+/*
 server.get(
-    /\/(.*)?.*/,
+    /\/(.*)?.*//*,
     restify.plugins.serveStatic({
         directory: './static',
         default: 'index.html'
     })
 );
 
+*/
 
 // Create chat connector for communicating with the Bot Framework Service
 var connector = new builder.ChatConnector({
@@ -39,6 +42,8 @@ var connector = new builder.ChatConnector({
 
 // Listen for messages from users 
 server.post('/api/messages', connector.listen());
+
+server.get('/authorize/spotify/:userHash', _spotify.authorize);
 
 //setup botstate and main dialog
 var bot = new builder.UniversalBot(connector);
@@ -119,81 +124,127 @@ intents.matches('Like Artist',
         };
 
         if (args.entities == null) {
-            session.send('LUIS unable to detect entity');
+            _messages.sorry(session);
+            return;
         }
-        else {
-            var spotifyUri = builder.EntityRecognizer.findEntity(args.entities, 'spotifyUri');
 
-            if (spotifyUri) {
-                // I like spotify:artist:25IG9fa7cbdmCIy3OnuH57
-                // extract the entity with case preserved
-                let uri = helpers.getEntityText(session.message, spotifyUri);
-                
+        var spotifyUri = builder.EntityRecognizer.findEntity(args.entities, 'spotifyUri');
+
+        if (spotifyUri) {
+            // I like spotify:artist:25IG9fa7cbdmCIy3OnuH57
+            // extract the entity with case preserved
+            let uri = helpers.getEntityText(session.message, spotifyUri);
+            
+            session.sendTyping();
+            try {
+                let artist = await _artists.getArtistByUri(uri);
+                //let msg = _messages.artist(session, artist);
+                //msg.text(`I like ${artist.name} too!`);
+                //session.send(msg);
+                session.send(`I like ${artist.name} too!`);
+
                 session.sendTyping();
-                try {
-                    let artist = await _artists.getArtistByUri(uri);
-                    //let msg = _messages.artist(session, artist);
-                    //msg.text(`I like ${artist.name} too!`);
-                    //session.send(msg);
-                    session.send(`I like ${artist.name} too!`);
+                await userdata.userLikesArtist(session.message.user.id, artist.name);
+                
+                let msg2 = await _messages.recommendArtist(session, artist.id);
+                session.endDialog(msg2);
 
-                    session.sendTyping();
-                    await userdata.userLikesArtist(session.message.user.id, artist.name);
+            } catch(e){
+                _messages.whoops(session, e);
+                return;
+            }
+
+        } else {
+            // I like Radiohead
+            var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'Music.ArtistName');
+
+            if (!artistsName) {
+                _messages.sorry(session);
+                session.endDialog();
+                return;
+            }
+
+            // 1. lookup the artist
+            try {
+                session.sendTyping();
+                let artists = await _artists.searchArtists(artistsName.entity, 3);
+                let match = helpers.findMatch(artists);
+                
+                if (match.matched){
+                    // exact match
+                    let msg = _messages.artist(session, match.artist);
+                    msg.text(`I like ${match.artist.name} too!`);
+                    session.send(msg);
                     
-                    let msg2 = await _messages.recommendArtist(session, artist.id);
+                    session.sendTyping();
+                    await userdata.userLikesArtist(session.message.user.id, match.artist.name);
+
+                    let msg2 = await _messages.recommendArtist(session, match.artist.id);
                     session.endDialog(msg2);
 
-                } catch(e){
-                    _messages.whoops(session, e);
-                    return;
-                }
-
-            } else {
-                // I like Radiohead
-                var artistsName = builder.EntityRecognizer.findEntity(args.entities, 'Music.ArtistName');
-
-                if (!artistsName) {
-                    _messages.sorry(session);
-                    session.endDialog();
-                    return;
-                }
-
-                // 1. lookup the artist
-                try {
-                    session.sendTyping();
-                    let artists = await _artists.searchArtists(artistsName.entity, 3);
-                    let match = helpers.findMatch(artists);
+                } else {
+                    // Which artist?
+                    let cards = _cards.artists(session, artists);
+                    let msg = new builder.Message(session);
+                    msg.attachmentLayout(builder.AttachmentLayout.carousel);
+                    msg.attachments(cards);
+                    msg.text(`Which ${artistsName.entity}?`);
                     
-                    if (match.matched){
-                        // exact match
-                        let msg = _messages.artist(session, match.artist);
-                        msg.text(`I like ${match.artist.name} too!`);
-                        session.send(msg);
-                        
-                        session.sendTyping();
-                        await userdata.userLikesArtist(session.message.user.id, match.artist.name);
-
-                        let msg2 = await _messages.recommendArtist(session, match.artist.id);
-                        session.endDialog(msg2);
-
-                    } else {
-                        // Which artist?
-                        let cards = _cards.artists(session, artists);
-                        let msg = new builder.Message(session);
-                        msg.attachmentLayout(builder.AttachmentLayout.carousel);
-                        msg.attachments(cards);
-                        msg.text(`Which ${artistsName.entity}?`);
-                        
-                        session.send(msg)
-                        session.endDialog();
-                        return;                    
-                    }
+                    session.send(msg)
+                    session.endDialog();
+                    return;                    
                 }
-                catch (e) {
-                    _messages.whoops(session, e);
-                    return;
-                } 
             }
+            catch (e) {
+                _messages.whoops(session, e);
+                return;
+            } 
+        }        
+    }
+);
+
+intents.matches('Play Artist',
+    async (session, args, next) => {
+        // Session logging
+        //TODO: #340 Switch off last session logging
+        session.userData.lastSessionMessage = session.message;
+        session.userData.lastArgs = args;
+
+        // if in a group and the bot is not mentioned, ignore this dialog
+        if (helpers.isGroup(session.message) && !helpers.isMentioned(session.message)) {
+            console.log('DEBUG: Ignoring Group conversation without bot mentioned');
+            return
+        };
+
+        if (args.entities == null) {
+            _messages.sorry(session);
+            return;
+        }
+
+        // 1. get spotify artist URI entity
+        let spotifyUri = builder.EntityRecognizer.findEntity(args.entities, 'spotifyUri');
+
+        if (!spotifyUri) {
+            session.endDialog("Sorry, I did not understand. I can only play Spotify URIs");
+            return;
+        }
+
+        // 2. Is user authorised by Spotify? 
+        try {
+            let userAuth = await _spotify.userAuth(session.message.user.id);
+            if (!userAuth.authorised){
+                // 3. If not post message and link
+                session.endDialog("I would love to play this song for you. But first I need you to tell Spotify that it's OK. Click this link "
+                + "to authorise Ringo to control Spotify: https://ringobot.azurewebsites.net/authorise/spotify/" + userAuth.userHash);
+                return;
+            }
+
+            // 3. Play artist
+            await _spotify.playArtist(userAuth, spotifyUri);
+
+        } catch (e) {
+            _messages.whoops(session, e);
+            return;
         }
     }
 );

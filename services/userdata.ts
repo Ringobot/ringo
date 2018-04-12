@@ -60,3 +60,4 @@ export async function userLikesArtist(user: string, artist: string) {
     await _graph.addEdgeLike(graphClient, likesEdge);
 
 };
+

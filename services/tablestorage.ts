@@ -1,14 +1,18 @@
 import _azure = require('azure-storage');
 import _common = require('azure-common');
 
-interface TableEntity {
+export interface TableEntity {
     PartitionKey: string,
     RowKey: string
 }
 
+export function createQuery() : _azure.TableQuery {
+    return new _azure.TableQuery();
+}
+
 // Inserts entity. Invokes callback(error) when done.
 // table = table name
-export function insert(table: string, entity: TableEntity, insertOrReplace: boolean = false) {
+export function insert(table: string, entity: TableEntity, insertOrReplace: boolean = false): Promise<_azure.TableService.EntityMetadata> {
     var tableService = getTableService();
 
     return new Promise<any>((resolve, reject) => {
@@ -19,13 +23,13 @@ export function insert(table: string, entity: TableEntity, insertOrReplace: bool
             }
 
             var entry = mapToEntry(entity);
-            let callback = function (error) {
+            let callback = function (error, data) {
                 if (error) {
                     reject(error);
                     return;
                 }
                 console.log(`tablestorage ${insertOrReplace?'insertOrReplace':'insert'} into ${table}`);
-                resolve();
+                resolve(data);
                 return;
             };
 
@@ -63,25 +67,21 @@ export function deleteEntity(table: string, entity: TableEntity, callback) {
 };
 
 // Returns entities from query. Invokes callback(error, entities) when done.
-export function get(table, query, callback) {
+export function get(table, query : _azure.TableQuery) {
     var tableService = getTableService();
-    createTableIfNotExists(tableService, table, function (error) {
-        if (error) {
-            callback(error);
-            return;
-        }
 
-        // get
+    return new Promise<any>((resolve, reject) => {
         tableService.queryEntities(table, query, null, function (error, result, response) {
             if (error) {
-                callback(error);
+                reject(error);
                 return;
             }
-
+    
             console.log("tablestorage got entries ", result.entries.length);
             // map storage entries to simple JS objects
             var entities = mapToEntities(result.entries);
-            callback(null, entities);
+            resolve(entities);
+            return;
         });
     });
 }

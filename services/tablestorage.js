@@ -2,6 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const _azure = require("azure-storage");
 const _common = require("azure-common");
+function createQuery() {
+    return new _azure.TableQuery();
+}
+exports.createQuery = createQuery;
 // Inserts entity. Invokes callback(error) when done.
 // table = table name
 function insert(table, entity, insertOrReplace = false) {
@@ -13,13 +17,13 @@ function insert(table, entity, insertOrReplace = false) {
                 return;
             }
             var entry = mapToEntry(entity);
-            let callback = function (error) {
+            let callback = function (error, data) {
                 if (error) {
                     reject(error);
                     return;
                 }
                 console.log(`tablestorage ${insertOrReplace ? 'insertOrReplace' : 'insert'} into ${table}`);
-                resolve();
+                resolve(data);
                 return;
             };
             insertOrReplace
@@ -57,23 +61,19 @@ function deleteEntity(table, entity, callback) {
 exports.deleteEntity = deleteEntity;
 ;
 // Returns entities from query. Invokes callback(error, entities) when done.
-function get(table, query, callback) {
+function get(table, query) {
     var tableService = getTableService();
-    createTableIfNotExists(tableService, table, function (error) {
-        if (error) {
-            callback(error);
-            return;
-        }
-        // get
+    return new Promise((resolve, reject) => {
         tableService.queryEntities(table, query, null, function (error, result, response) {
             if (error) {
-                callback(error);
+                reject(error);
                 return;
             }
             console.log("tablestorage got entries ", result.entries.length);
             // map storage entries to simple JS objects
             var entities = mapToEntities(result.entries);
-            callback(null, entities);
+            resolve(entities);
+            return;
         });
     });
 }
