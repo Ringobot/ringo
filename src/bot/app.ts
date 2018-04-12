@@ -12,6 +12,7 @@ import _cards = require('./services/cards');
 import _messages = require('./services/messages');
 import userdata = require('./services/userdata');
 import statedata = require('./services/statedata');
+import servicebus = require('./services/servicebus')
 import helpers = require('./helpers');
 
 // Setup Restify Server
@@ -19,6 +20,7 @@ var server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3978, function (e) {
     if (e) throw e;
     console.log('%s listening to %s', server.name, server.url);
+    servicebus.sendMessages();
 });
 
 server.get(
