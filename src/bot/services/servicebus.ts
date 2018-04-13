@@ -8,12 +8,21 @@ var sbService = _azure.createServiceBusService(connStr);
 
 var idx = 0;
 export function sendMessages() {
-  var msg = 'Message # ' + (++idx);
-  sbService.sendTopicMessage(topicName, msg, function (err) {
+  var body = {
+    FromVertex: 'matt',
+    Relationship: 'like',
+    ToVertex: 'metallica'
+};
+var message = {
+  body: (JSON.stringify(body))
+}
+//message.body = JSON.stringify(body);
+console.log(message.body)
+  sbService.sendTopicMessage(topicName, message, function (err) {
    if (err) {
      console.log('Failed Tx: ', err);
    } else {
-     console.log('Sent ' + msg);
+     console.log('Sent ' + message);
    }
   });
 }

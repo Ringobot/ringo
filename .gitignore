@@ -5,3 +5,9 @@ node_modules
 *.js.map
 package-lock.json
 *.pptx
+/src/functions/.vs
+/src/functions/Ringo.Common/obj
+/src/functions/Ringo.Common/bin
+/src/Ringo.Tests/bin/Debug/netcoreapp2.0
+/src/Ringo.Tests/obj
+/src/Ringo.Tests/appsettings.test.json
