@@ -24,6 +24,7 @@ const helpers = require("./helpers");
 const _spotify = require("./services/spotify");
 // Setup Restify Server
 var server = restify.createServer();
+server.use(restify.queryParser());
 server.listen(process.env.port || process.env.PORT || 3978, function (e) {
     if (e)
         throw e;

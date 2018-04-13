@@ -13,10 +13,11 @@ const crypto = require("crypto");
 const _table = require("./tablestorage");
 //import restify = require('restify');
 const errs = require("restify-errors");
+const UserAuthTable = "UserSpotifyAuth";
 const baseUrl = 'https://api.spotify.com/v1';
 const tokenUrl = 'https://accounts.spotify.com/api/token';
 const authUrl = 'https://accounts.spotify.com/authorize';
-const scopes = 'user-modify-playback-state user-read-playback-state user-read-recently-played playlist-read-collaborative playlist-modify-public playlist-modify-private playlist-read-private user-follow-modify user-top-read';
+const scopes = Buffer.from('user-modify-playback-state user-read-playback-state user-read-recently-played playlist-read-collaborative playlist-modify-public playlist-modify-private playlist-read-private user-follow-modify user-top-read').toString("ascii");
 let authToken = { token: null, expires: null };
 function validateEnvVars() {
     if (process.env.SpotifyApiClientId == undefined || process.env.SpotifyApiClientSecret == undefined) {
@@ -98,26 +99,76 @@ exports.getAuthToken = getAuthToken;
 function partitionKey(userHash) {
     return userHash.substr(0, 5);
 }
+function authorizeCallback(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // https://ringobot.azurewebsites.net/authorize/spotify?code=AQAYtuv4d6NsFQYBbYv-gmzI0K1_LDUjpBNe59yC1pID0Yl6LTLtcJ3kPtOu0jkRH4TxDCEXAAWbeoQ72DAmzug5LFnKyoP-cOT7NvzC4IMqlavrzgonrjSL_-B1uIA3uo8Lzgds1TWRaqPf304axiUc0ivvxWjQSjlRkj2rcHe2inCcoalRQEvAa4ZMvkVoZ7KFJcXERlGZkS17LkRIJnhuthVK55cfWGkTDgHWDWlamfz4Lb3uvQHElk-OVP6a1YTOn2IfxUGgFtAx7CC0Vqw5fS37L7ONdMmcTqDENpQ1wCGaRfHJ2b6t7JZx88DbrRiaH8KjYFShw4f2wDOI9wyEusOPhjnngCUGZu17kzcIeZcJFZRCO5hiSGcMTxb020m_mt7qK0PFJUOjHDT_gsHGsRz4dqwFjnOz12ThehFE8dvU7J9X9JOv4QeJ8Keg8kogz7keM76z1E8xi3svAUPd06m9-nsSCvZfNNS4G2QVGcOIFTsG3KyiIZkPfclNej7r&state=60BC0AC2A44EA6146D876AEC3133D230B9A9E41BACC7EA0343B16FED4CB6BE55%3A7dff3dc47b10121834e6715ae4deda2545cc8c59
+        if (!req.query.code || req.query.code.length == 0) {
+            console.error("Expecting code in querystring");
+            next(new errs.BadRequestError());
+            return;
+        }
+        if (!req.query.state || req.query.state.length == 0) {
+            console.error("Expecting state in querystring");
+            next(new errs.BadRequestError());
+            return;
+        }
+        // decode the state
+        let decoded = unBase64(req.query.state);
+        // split into userHash and state
+        let parts = decoded.split(":");
+        if (parts.length != 2) {
+            console.error("Invalid state format");
+            next(new errs.BadRequestError());
+            return;
+        }
+        // get the auth record by userHash
+        let query = _table.createQuery()
+            .where('PartitionKey eq ?', partitionKey(parts[0]))
+            .where('RowId eq ?', parts[0]);
+        try {
+            let userAuth = yield _table.get(UserAuthTable, query);
+            // if states don't match, invalid
+            if (parts[1] !== userAuth.state) {
+                console.error("states don't match");
+                next(new errs.BadRequestError());
+                return;
+            }
+            // update the userAuth record just in case we need to retry
+            userAuth.code = req.query.code;
+            yield _table.update(UserAuthTable, userAuth);
+            // POST the code to get the tokens
+            // Save the tokens in the auth table, delete the state and code
+            // let the user know???
+        }
+        catch (e) {
+            console.error(e);
+            next(new errs.InternalServerError());
+        }
+    });
+}
+exports.authorizeCallback = authorizeCallback;
 function authorize(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         validateEnvVars();
         // /authorize/spotify/60BC0AC2A44EA6146D876AEC3133D230B9A9E41BACC7EA0343B16FED4CB6BE54
         let reg = /[a-zA-Z0-9]{64}/;
-        if (!reg.test(req.params.userHash))
-            throw "Not a valid /authorize Path";
+        if (!reg.test(req.params.userHash)) {
+            next(new errs.BadRequestError());
+            return;
+        }
         let userAuth = {
             PartitionKey: partitionKey(req.params.userHash),
             RowKey: req.params.userHash,
+            state: randomString(),
             userHash: req.params.userHash
         };
         try {
-            let result = yield _table.insert("UserSpotifyAuth", userAuth);
+            let result = yield _table.insert(UserAuthTable, userAuth, true);
             // 60BC0AC2A44EA6146D876AEC3133D230B9A9E41BACC7EA0343B16FED4CB6BE54/f26d60305
-            let state = `${req.params.userHash}/${result[".metadata"].etag}`;
+            let state = base64(`${req.params.userHash}:${userAuth.state}`);
             // https://accounts.spotify.com/authorize/?client_id=4b4a9fcb021a4d02a4acd1d8adba0bfe&response_type=code&redirect_uri=https%3A%2F%2Fexample.com%2Fcallback&scope=user-read-private%20user-read-email&state=34fFs29kd09
             let url = `${authUrl}/?client_id=${process.env.SpotifyApiClientId}&response_type=code&redirect_uri=${process.env.SpotifyAuthRedirectUri}&scope=${scopes}&state=${state}`;
             res.redirect(302, url, next);
-            next();
         }
         catch (e) {
             console.error(e);
@@ -140,19 +191,24 @@ function randomString(length = 40) {
     // https://stackoverflow.com/a/14869745/610731
     return crypto.randomBytes(length / 2).toString('hex');
 }
+function base64(input) {
+    return Buffer.from(input).toString('base64');
+}
+function unBase64(input) {
+    return Buffer.from(input, 'base64').toString('ascii');
+}
 function userAuth(userId) {
     return __awaiter(this, void 0, void 0, function* () {
         let userHash = sha256(userId);
-        let partition = userHash.substr(0, 5);
         let result = {
             authorised: false,
             userHash: userHash,
             auth: null
         };
         let query = _table.createQuery()
-            .where('PartitionKey eq ?', partition)
+            .where('PartitionKey eq ?', partitionKey(userHash))
             .where('RowId eq ?', userHash);
-        let row = yield _table.get("UserSpotifyAuth", query);
+        let row = yield _table.get(UserAuthTable, query);
         if (row) {
             result.authorised = true;
             result.auth = row;

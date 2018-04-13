@@ -17,6 +17,8 @@ import _spotify = require('./services/spotify');
 
 // Setup Restify Server
 var server = restify.createServer();
+server.use(restify.queryParser()); 
+
 server.listen(process.env.port || process.env.PORT || 3978, function (e) {
     if (e) throw e;
     console.log('%s listening to %s', server.name, server.url);
