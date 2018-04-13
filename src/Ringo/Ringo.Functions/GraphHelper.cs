@@ -9,6 +9,7 @@ using Microsoft.Azure.Documents.Linq;
 using System.Linq;
 using Microsoft.Azure.Graphs.Elements;
 using System.Text;
+using System.Collections.Generic;
 
 namespace Ringo.Functions
 {
@@ -19,6 +20,17 @@ namespace Ringo.Functions
         private static readonly string databaseId = Environment.GetEnvironmentVariable("CosmosGraphDB");
         private static readonly string collectionId = Environment.GetEnvironmentVariable("CosmosGraphCollection");
         private static DocumentClient documentClient = new DocumentClient(new Uri(endpointUrl), authorizationKey);
+
+        public static async Task<dynamic> GetVertex(string vertexId)
+        {
+            var collectionLink = await GetOrCreateCollectionAsync(databaseId, collectionId);
+            var gremlinQuery = ($@"g.V('{vertexId}')");
+
+            IDocumentQuery<Vertex> query = documentClient.CreateGremlinQuery<Vertex>(collectionLink, gremlinQuery);
+            dynamic result = await query.ExecuteNextAsync();
+            return result;
+            
+        }
 
         public static async Task CreateVertex(Entity entity)
         {
@@ -42,6 +54,7 @@ namespace Ringo.Functions
         public static async Task<dynamic> CreateRelationship(GremlinRelationship input)
         {
             var collectionLink = await GetOrCreateCollectionAsync(databaseId, collectionId);
+
             var gremlinQuery = $@"g.V('{input.FromVertex}').addE('{input.Relationship}').to(g.V('{input.ToVertex}'))";
 
             IDocumentQuery<dynamic> query = documentClient.CreateGremlinQuery<dynamic>(collectionLink, gremlinQuery);
