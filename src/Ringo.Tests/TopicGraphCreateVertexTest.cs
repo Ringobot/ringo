@@ -10,26 +10,22 @@ using System.Threading.Tasks;
 namespace Ringo.Tests
 {
     [TestClass]
-    public class TopicGraphRelationCreateTest
+    public class TopicGraphCreateVertexTest
     {
         [TestCategory("Integration")]
         [TestMethod]
-        public async Task Run_CreateRelationship_DoesNotError()
+        public async Task Run_CreateVertex_DoesNotError()
         {
             // initialise
 
             // arrange
             Entity testUser = TestHelper.NewEntity("testUser");
-            Entity testArtist = TestHelper.NewEntity("testArtist");
 
             // act
             try
             {
-                await GraphHelper.CreateVertex(testUser);
-                await GraphHelper.CreateVertex(testArtist);
-                GremlinRelationship mockMsg = new GremlinRelationship() { FromVertex = testUser.id, Relationship = "testRelationship", ToVertex = testArtist.id };
-                var mockMsgString = JsonConvert.SerializeObject(mockMsg);
-                await TopicGraphCreateRelationship.Run(mockMsgString, null);
+                var mockMsgString = JsonConvert.SerializeObject(testUser);
+                await TopicGraphCreateEntity.Run(mockMsgString, null);
 
 
                 // assert
@@ -42,7 +38,6 @@ namespace Ringo.Tests
             {
                 // teardown
                 HttpStatusCode cleanupFrom = await GraphHelper.RemoveVertex(testUser.id);
-                HttpStatusCode cleanupTo = await GraphHelper.RemoveVertex(testArtist.id);
             }
 
         }
@@ -50,11 +45,17 @@ namespace Ringo.Tests
         [TestInitialize]
         public void Init()
         {
-            IConfiguration config = TestHelper.GetIConfigurationRoot();
+
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.test.json")
+                .AddEnvironmentVariables()
+                .Build();
+
             Environment.SetEnvironmentVariable("CosmosGraphEndpoint", config.GetValue<string>("CosmosGraphEndpoint"));
             Environment.SetEnvironmentVariable("CosmosGraphKey", config.GetValue<string>("CosmosGraphKey"));
             Environment.SetEnvironmentVariable("CosmosGraphDB", config.GetValue<string>("CosmosGraphDB"));
             Environment.SetEnvironmentVariable("CosmosGraphCollection", config.GetValue<string>("CosmosGraphCollection"));
+
 
         }
     }

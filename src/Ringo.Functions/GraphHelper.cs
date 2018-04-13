@@ -7,6 +7,7 @@ using Ringo.Common.Models;
 using Microsoft.Azure.Graphs;
 using Microsoft.Azure.Documents.Linq;
 using System.Linq;
+using Microsoft.Azure.Graphs.Elements;
 
 namespace Ringo.Functions
 {
@@ -18,12 +19,12 @@ namespace Ringo.Functions
         private static readonly string collectionId = Environment.GetEnvironmentVariable("CosmosGraphCollection");
         private static DocumentClient documentClient = new DocumentClient(new Uri(endpointUrl), authorizationKey);
 
-        public static async Task CreateVertex(string vertexId)
+        public static async Task CreateVertex(Entity entity)
         {
             var collectionLink = await GetOrCreateCollectionAsync(databaseId, collectionId);
-            var gremlinQuery = $@"g.addV('entity').property('id', '{vertexId}')";
+            var gremlinQuery = $@"g.addV(T.Id, '{entity.id}').property('type', '{entity.type}').property('name', '{entity.name}')";
 
-            IDocumentQuery<dynamic> query = documentClient.CreateGremlinQuery<dynamic>(collectionLink, gremlinQuery);
+            IDocumentQuery<Vertex> query = documentClient.CreateGremlinQuery<Vertex>(collectionLink, gremlinQuery);
             dynamic result = await query.ExecuteNextAsync();
         }
 
@@ -32,14 +33,14 @@ namespace Ringo.Functions
             return (await documentClient.DeleteDocumentAsync(UriFactory.CreateDocumentUri(databaseId, collectionId, vertexId))).StatusCode;
         }
 
-        public static async Task CreateRelationship(GremlinRelationship input)
+        public static async Task<dynamic> CreateRelationship(GremlinRelationship input)
         {
             var collectionLink = await GetOrCreateCollectionAsync(databaseId, collectionId);
             var gremlinQuery = $@"g.V('{input.FromVertex}').addE('{input.Relationship}').to(g.V('{input.ToVertex}'))";
 
             IDocumentQuery<dynamic> query = documentClient.CreateGremlinQuery<dynamic>(collectionLink, gremlinQuery);
             dynamic result = await query.ExecuteNextAsync();
-
+            return result;
         }
 
 
