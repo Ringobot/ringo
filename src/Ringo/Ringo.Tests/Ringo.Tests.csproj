@@ -13,7 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\functions\Ringo.Functions\Ringo.Functions.csproj" />
+    <ProjectReference Include="..\Ringo.Common\Ringo.Common.csproj" />
+    <ProjectReference Include="..\Ringo.Functions\Ringo.Functions.csproj" />
   </ItemGroup>
 
   <ItemGroup>

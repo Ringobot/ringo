@@ -8,6 +8,7 @@ using Microsoft.Azure.Graphs;
 using Microsoft.Azure.Documents.Linq;
 using System.Linq;
 using Microsoft.Azure.Graphs.Elements;
+using System.Text;
 
 namespace Ringo.Functions
 {
@@ -22,9 +23,14 @@ namespace Ringo.Functions
         public static async Task CreateVertex(Entity entity)
         {
             var collectionLink = await GetOrCreateCollectionAsync(databaseId, collectionId);
-            var gremlinQuery = $@"g.addV(T.Id, '{entity.id}').property('type', '{entity.type}').property('name', '{entity.name}')";
+            var gremlinBaseQuery = $@"g.addV(T.Id, '{entity.id}').property('name', '{entity.name}')";
+            StringBuilder gremlinQuery = new StringBuilder(gremlinBaseQuery);
+            foreach (var p in entity.properties)
+            {
+                gremlinQuery.Append($@".property('{p.Key}', '{p.Value}')");
+            }
 
-            IDocumentQuery<Vertex> query = documentClient.CreateGremlinQuery<Vertex>(collectionLink, gremlinQuery);
+            IDocumentQuery<Vertex> query = documentClient.CreateGremlinQuery<Vertex>(collectionLink, gremlinQuery.ToString());
             dynamic result = await query.ExecuteNextAsync();
         }
 

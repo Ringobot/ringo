@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Ringo.Common.Models;
 using Ringo.Functions;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
