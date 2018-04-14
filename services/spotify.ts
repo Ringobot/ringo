@@ -197,8 +197,8 @@ export async function authorizeCallback(req, res, next) {
 
         await _table.update(UserAuthTable, entity);
 
-        // let the user know???
-        res.send(200, "Ok");
+        // TODO: let the user know???
+        res.send(200, "Spotify Authorised Ok");
         return next();
 
     } catch (e) {
