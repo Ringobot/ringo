@@ -7,16 +7,16 @@ namespace Ringo.Common.Models
     {
         public Entity(string id, string name, Dictionary<string, string> properties)
         {
-            this.id = id;
-            this.createDate = DateTime.UtcNow;
-            this.name = name;
-            this.properties = properties;
+            this.Id = id;
+            this.CreateDate = DateTime.UtcNow;
+            this.Name = name;
+            this.Properties = properties;
         }
 
-        public string id { get; set; }
-        public DateTime createDate { get; set; }
-        public string name { get; set; }
-        public Dictionary<string, string> properties { get; set; }
+        public string Id { get; set; }
+        public DateTime CreateDate { get; set; }
+        public string Name { get; set; }
+        public Dictionary<string, string> Properties { get; set; }
 
 
     }

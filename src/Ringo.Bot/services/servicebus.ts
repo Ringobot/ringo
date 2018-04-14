@@ -6,23 +6,17 @@ var topicName = 'graph';
 console.log('Connecting to ' + connStr + ' queue ' + topicName);
 var sbService = _azure.createServiceBusService(connStr);
 
-var idx = 0;
-export function sendMessages() {
-  var body = {
-    FromVertex: 'matt',
-    Relationship: 'like',
-    ToVertex: 'metallica'
-};
-var message = {
-  body: (JSON.stringify(body))
-}
-//message.body = JSON.stringify(body);
-console.log(message.body)
-  sbService.sendTopicMessage(topicName, message, function (err) {
-   if (err) {
-     console.log('Failed Tx: ', err);
-   } else {
-     console.log('Sent ' + message);
-   }
-  });
+export function sendMessages(entityRelationship) {
+  var message = {
+    body: (JSON.stringify(entityRelationship))
+    }
+  //message.body = JSON.stringify(body);
+  console.log(message.body)
+    sbService.sendTopicMessage(topicName, message, function (err) {
+    if (err) {
+      console.log('Failed Tx: ', err);
+    } else {
+      console.log('Sent ' + message);
+    }
+    });
 }

@@ -20,7 +20,6 @@ const _cards = require("./services/cards");
 const _messages = require("./services/messages");
 const userdata = require("./services/userdata");
 const statedata = require("./services/statedata");
-const servicebus = require("./services/servicebus");
 const helpers = require("./helpers");
 // Setup Restify Server
 var server = restify.createServer();
@@ -28,7 +27,6 @@ server.listen(process.env.port || process.env.PORT || 3978, function (e) {
     if (e)
         throw e;
     console.log('%s listening to %s', server.name, server.url);
-    servicebus.sendMessages();
 });
 server.get(/\/(.*)?.*/, restify.plugins.serveStatic({
     directory: './static',

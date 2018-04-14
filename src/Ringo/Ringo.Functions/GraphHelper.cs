@@ -23,45 +23,91 @@ namespace Ringo.Functions
 
         public static async Task<dynamic> GetVertex(string vertexId)
         {
-            var collectionLink = await GetOrCreateCollectionAsync(databaseId, collectionId);
             var gremlinQuery = ($@"g.V('{vertexId}')");
-
-            IDocumentQuery<Vertex> query = documentClient.CreateGremlinQuery<Vertex>(collectionLink, gremlinQuery);
-            dynamic result = await query.ExecuteNextAsync();
-            return result;
-            
+            return await RunDocumentQuery(gremlinQuery);
         }
 
-        public static async Task CreateVertex(Entity entity)
+        public static async Task<dynamic> CreateVertex(Entity entity)
         {
-            var collectionLink = await GetOrCreateCollectionAsync(databaseId, collectionId);
-            var gremlinBaseQuery = $@"g.addV(T.Id, '{entity.id}').property('name', '{entity.name}')";
+            var gremlinBaseQuery = $@"g.addV(T.Id, '{entity.Id}').property('name', '{entity.Name}')";
             StringBuilder gremlinQuery = new StringBuilder(gremlinBaseQuery);
-            foreach (var p in entity.properties)
+            foreach (var p in entity.Properties)
             {
                 gremlinQuery.Append($@".property('{p.Key}', '{p.Value}')");
             }
 
-            IDocumentQuery<Vertex> query = documentClient.CreateGremlinQuery<Vertex>(collectionLink, gremlinQuery.ToString());
-            dynamic result = await query.ExecuteNextAsync();
+            return await RunDocumentQuery(gremlinQuery.ToString());
         }
 
-        public static async Task<HttpStatusCode> RemoveVertex(string vertexId)
+        public static async Task<dynamic> RemoveVertex(string vertexId)
         {
-            return (await documentClient.DeleteDocumentAsync(UriFactory.CreateDocumentUri(databaseId, collectionId, vertexId))).StatusCode;
+            var gremlinQuery = ($@"g.V('{vertexId}').drop()");
+            return await RunDocumentQuery(gremlinQuery);
         }
 
-        public static async Task<dynamic> CreateRelationship(GremlinRelationship input)
+        public static async Task CreateRelationship(EntityRelationship input)
         {
-            var collectionLink = await GetOrCreateCollectionAsync(databaseId, collectionId);
+            await CheckOrCreateDocument(input.FromVertex);
+            await CheckOrCreateDocument(input.ToVertex);
+            await CheckOrCreateRelationship(input);
 
-            var gremlinQuery = $@"g.V('{input.FromVertex}').addE('{input.Relationship}').to(g.V('{input.ToVertex}'))";
-
-            IDocumentQuery<dynamic> query = documentClient.CreateGremlinQuery<dynamic>(collectionLink, gremlinQuery);
-            dynamic result = await query.ExecuteNextAsync();
-            return result;
         }
 
+        private static async Task<dynamic> RunDocumentQuery(string gremlinQuery)
+        {
+            try
+            {
+                var collectionLink = await GetOrCreateCollectionAsync(databaseId, collectionId);
+                IDocumentQuery<dynamic> query = documentClient.CreateGremlinQuery<dynamic>(collectionLink, gremlinQuery);
+                dynamic result = await query.ExecuteNextAsync();
+                return result;
+            }
+            catch (DocumentClientException ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+
+        }
+
+        private static async Task CheckOrCreateDocument(Entity entity)
+        {
+            try
+            {
+                var response = await documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri(databaseId, collectionId, entity.Id));
+            }
+            catch (DocumentClientException ex)
+            {
+                if (ex.StatusCode == HttpStatusCode.NotFound)
+                {
+                    await CreateVertex(entity);
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+
+        private static async Task CheckOrCreateRelationship(EntityRelationship input)
+        {
+            try
+            {
+                //g.V('default-user').outE('likes').inV().has('id', 'metallica:c6b5b6413f293fce96539c41e704b5a2')
+                var gremlinQuery = $@"g.V('{input.FromVertex.Id}').outE('likes').inV().has('id', '{input.ToVertex.Id}')";
+                var likes = await RunDocumentQuery(gremlinQuery.ToString());
+                if (likes.Count == 0)
+                {
+                    var gremlinInsert = $@"g.V('{input.FromVertex.Id}').addE('{input.Relationship}').to(g.V('{input.ToVertex.Id}'))";
+                    await RunDocumentQuery(gremlinInsert.ToString());
+                }
+
+            }
+            catch (DocumentClientException ex)
+            {
+                throw;
+            }
+        }
 
         private static async Task<DocumentCollection> GetOrCreateCollectionAsync(string databaseId, string collectionId)
         {

@@ -1,6 +1,7 @@
 import _table = require('./tablestorage');
 import _graph = require('./graphstorage')
 import _canonical = require('./canonicalisation');
+import _servicebus = require('./servicebus');
 import { createClient } from '../gremlin/index';
 
 export async function userLikesArtist(user: string, artist: string) {
@@ -19,44 +20,25 @@ export async function userLikesArtist(user: string, artist: string) {
 
     await _table.insert('UserLikesArtist', entity, true);
 
-    var graphClient = _graph.createClient();
-
-    var userVertex = {
-        Id: userId,
-        Name: user,
-        Properties: []
+    var entityRelationship = {
+        FromVertex: {
+            Id: userId,
+            Name: user,
+            Properties: {
+                    type: "user"
+                } 
+        },
+        ToVertex: {
+            Id: artistId,
+            Name: artist,
+            Properties: {
+                    type: "artist"
+                }
+        },
+        Relationship: "likes",
+        RelationshipDate: new Date()
     }
 
-    var artistVertex = {
-        Id: artistId,
-        Name: artist,
-        Properties: []
-    }
-
-    // TODO: Get vertex by Id?
-    var queryUserVertx = await _graph.getVertexById(graphClient, userVertex.Id);
-    console.log(queryUserVertx);
-    if (queryUserVertx.length == 0){
-        var userVertexResult = await _graph.addVertex(graphClient, userVertex);
-    }
-    else var userVertexResult = queryUserVertx;
-    console.log(userVertexResult);
-    
-    var queryArtistVertx = await _graph.getVertexById(graphClient, artistVertex.Id);
-    console.log(queryArtistVertx);
-    if (queryArtistVertx.length == 0){
-        var artistVertexResult = await _graph.addVertex(graphClient, artistVertex);
-    }
-    else var artistVertexResult = queryArtistVertx;
-    console.log(artistVertexResult);
-
-        //ToDo make this accept vertex vs string
-    var likesEdge = {
-        FromVertex: userVertexResult[0].id,
-        Relationship: 'likes',
-        ToVertex: artistVertexResult[0].id
-    }
-
-    await _graph.addEdgeLike(graphClient, likesEdge);
+    await _servicebus.sendMessages(entityRelationship);
 
 };

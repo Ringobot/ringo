@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const _table = require("./tablestorage");
-const _graph = require("./graphstorage");
 const _canonical = require("./canonicalisation");
+const _servicebus = require("./servicebus");
 function userLikesArtist(user, artist) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!user)
@@ -25,41 +25,25 @@ function userLikesArtist(user, artist) {
             WhenLiked: new Date()
         };
         yield _table.insert('UserLikesArtist', entity, true);
-        var graphClient = _graph.createClient();
-        var userVertex = {
-            Id: userId,
-            Name: user,
-            Properties: []
+        var entityRelationship = {
+            FromVertex: {
+                Id: userId,
+                Name: user,
+                Properties: {
+                    type: "user"
+                }
+            },
+            ToVertex: {
+                Id: artistId,
+                Name: artist,
+                Properties: {
+                    type: "artist"
+                }
+            },
+            Relationship: "likes",
+            RelationshipDate: new Date()
         };
-        var artistVertex = {
-            Id: artistId,
-            Name: artist,
-            Properties: []
-        };
-        // TODO: Get vertex by Id?
-        var queryUserVertx = yield _graph.getVertexById(graphClient, userVertex.Id);
-        console.log(queryUserVertx);
-        if (queryUserVertx.length == 0) {
-            var userVertexResult = yield _graph.addVertex(graphClient, userVertex);
-        }
-        else
-            var userVertexResult = queryUserVertx;
-        console.log(userVertexResult);
-        var queryArtistVertx = yield _graph.getVertexById(graphClient, artistVertex.Id);
-        console.log(queryArtistVertx);
-        if (queryArtistVertx.length == 0) {
-            var artistVertexResult = yield _graph.addVertex(graphClient, artistVertex);
-        }
-        else
-            var artistVertexResult = queryArtistVertx;
-        console.log(artistVertexResult);
-        //ToDo make this accept vertex vs string
-        var likesEdge = {
-            FromVertex: userVertexResult[0].id,
-            Relationship: 'likes',
-            ToVertex: artistVertexResult[0].id
-        };
-        yield _graph.addEdgeLike(graphClient, likesEdge);
+        yield _servicebus.sendMessages(entityRelationship);
     });
 }
 exports.userLikesArtist = userLikesArtist;

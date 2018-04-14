@@ -2,11 +2,11 @@
 
 namespace Ringo.Common.Models
 {
-    public class GremlinRelationship
+    public class EntityRelationship
     {
-        public string FromVertex { get; set; }
+        public Entity FromVertex { get; set; }
         public string Relationship { get; set; }
-        public string ToVertex { get; set; }
+        public Entity ToVertex { get; set; }
         public DateTime RelationshipDate { get; set; }
     }
 }

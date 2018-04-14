@@ -5,15 +5,9 @@ var connStr = process.env.SB_CONNECTION_STRING;
 var topicName = 'graph';
 console.log('Connecting to ' + connStr + ' queue ' + topicName);
 var sbService = _azure.createServiceBusService(connStr);
-var idx = 0;
-function sendMessages() {
-    var body = {
-        FromVertex: 'matt',
-        Relationship: 'like',
-        ToVertex: 'metallica'
-    };
+function sendMessages(entityRelationship) {
     var message = {
-        body: (JSON.stringify(body))
+        body: (JSON.stringify(entityRelationship))
     };
     //message.body = JSON.stringify(body);
     console.log(message.body);

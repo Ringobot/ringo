@@ -18,11 +18,12 @@ namespace Ringo.Tests
 
         public static Entity NewEntity(string type)
         {
+            var guid = Guid.NewGuid().ToString("N");
             var properties = new Dictionary<string, string>();
             properties.Add("type", type);
             properties.Add("testProp1", "testProp1");
             properties.Add("testProp2", "testProp2");
-            return new Entity(Guid.NewGuid().ToString("N"), Guid.NewGuid().ToString("N"), properties);
+            return new Entity(guid, guid, properties);
         }
     }
 }
