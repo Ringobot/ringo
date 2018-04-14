@@ -6,13 +6,13 @@ export interface TableEntity {
     RowKey: string
 }
 
-export function createQuery() : _azure.TableQuery {
+export function createQuery(): _azure.TableQuery {
     return new _azure.TableQuery();
 }
 
 // Inserts entity. Invokes callback(error) when done.
 // table = table name
-export function insert(table: string, entity: TableEntity, insertOrReplace: boolean = false): Promise<_azure.TableService.EntityMetadata> {
+export function insert(table: string, entity: TableEntity, insertOrReplace: boolean = false): Promise<TableEntity> {
     var tableService = getTableService();
 
     return new Promise<any>((resolve, reject) => {
@@ -28,8 +28,8 @@ export function insert(table: string, entity: TableEntity, insertOrReplace: bool
                     reject(error);
                     return;
                 }
-                console.log(`tablestorage ${insertOrReplace?'insertOrReplace':'insert'} into ${table}`);
-                resolve(data);
+                console.log(`tablestorage ${insertOrReplace ? 'insertOrReplace' : 'insert'} into ${table}`);
+                resolve(mapToEntity(data));
                 return;
             };
 
@@ -40,18 +40,21 @@ export function insert(table: string, entity: TableEntity, insertOrReplace: bool
     });
 };
 
-export function update(table: string, entity: TableEntity, callback) {
+export function update(table: string, entity: TableEntity): Promise<TableEntity> {
     var tableService = getTableService();
 
-    tableService.replaceEntity(table, entity, function (error) {
-        if (error) {
-            callback(error);
-            return;
-        }
+    return new Promise<any>((resolve, reject) => {
+        tableService.replaceEntity(table, entity, function (error, data) {
+            if (error) {
+                reject(error);
+                return;
+            }
 
-        callback(null);
-    });
-};
+            resolve(mapToEntity(data));
+        });
+    }
+    )
+}
 
 // Deletes entity. Invokes callback(error) when done.
 export function deleteEntity(table: string, entity: TableEntity, callback) {
@@ -67,7 +70,7 @@ export function deleteEntity(table: string, entity: TableEntity, callback) {
 };
 
 // Returns entities from query. Invokes callback(error, entities) when done.
-export function get(table, query : _azure.TableQuery) {
+export function get(table, query: _azure.TableQuery) {
     var tableService = getTableService();
 
     return new Promise<any>((resolve, reject) => {
@@ -76,7 +79,7 @@ export function get(table, query : _azure.TableQuery) {
                 reject(error);
                 return;
             }
-    
+
             console.log("tablestorage got entries ", result.entries.length);
             // map storage entries to simple JS objects
             var entities = mapToEntities(result.entries);

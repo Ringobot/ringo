@@ -23,7 +23,7 @@ function insert(table, entity, insertOrReplace = false) {
                     return;
                 }
                 console.log(`tablestorage ${insertOrReplace ? 'insertOrReplace' : 'insert'} into ${table}`);
-                resolve(data);
+                resolve(mapToEntity(data));
                 return;
             };
             insertOrReplace
@@ -34,18 +34,19 @@ function insert(table, entity, insertOrReplace = false) {
 }
 exports.insert = insert;
 ;
-function update(table, entity, callback) {
+function update(table, entity) {
     var tableService = getTableService();
-    tableService.replaceEntity(table, entity, function (error) {
-        if (error) {
-            callback(error);
-            return;
-        }
-        callback(null);
+    return new Promise((resolve, reject) => {
+        tableService.replaceEntity(table, entity, function (error, data) {
+            if (error) {
+                reject(error);
+                return;
+            }
+            resolve(mapToEntity(data));
+        });
     });
 }
 exports.update = update;
-;
 // Deletes entity. Invokes callback(error) when done.
 function deleteEntity(table, entity, callback) {
     var tableService = getTableService();

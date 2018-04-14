@@ -17,7 +17,7 @@ import _spotify = require('./services/spotify');
 
 // Setup Restify Server
 var server = restify.createServer();
-server.use(restify.queryParser()); 
+server.use(restify.plugins.queryParser());
 
 server.listen(process.env.port || process.env.PORT || 3978, function (e) {
     if (e) throw e;
@@ -45,6 +45,7 @@ var connector = new builder.ChatConnector({
 // Listen for messages from users 
 server.post('/api/messages', connector.listen());
 
+server.get('/authorize/spotify', _spotify.authorizeCallback);
 server.get('/authorize/spotify/:userHash', _spotify.authorize);
 
 //setup botstate and main dialog
@@ -205,7 +206,7 @@ intents.matches('Like Artist',
     }
 );
 
-intents.matches('Play Artist',
+intents.matches('Play',
     async (session, args, next) => {
         // Session logging
         //TODO: #340 Switch off last session logging
@@ -233,11 +234,11 @@ intents.matches('Play Artist',
 
         // 2. Is user authorised by Spotify? 
         try {
-            let userAuth = await _spotify.userAuth(session.message.user.id);
+            let userAuth = await _spotify.getUserAuthorization(session.message.user.id);
             if (!userAuth.authorised){
                 // 3. If not post message and link
                 session.endDialog("I would love to play this song for you. But first I need you to tell Spotify that it's OK. Click this link "
-                + "to authorise Ringo to control Spotify: https://ringobot.azurewebsites.net/authorise/spotify/" + userAuth.userHash);
+                + `to authorise Ringo to control Spotify: ${process.env.SpotifyAuthRedirectUri}/${userAuth.userHash}`);
                 return;
             }
 

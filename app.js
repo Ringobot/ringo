@@ -24,7 +24,7 @@ const helpers = require("./helpers");
 const _spotify = require("./services/spotify");
 // Setup Restify Server
 var server = restify.createServer();
-server.use(restify.queryParser());
+server.use(restify.plugins.queryParser());
 server.listen(process.env.port || process.env.PORT || 3978, function (e) {
     if (e)
         throw e;
@@ -48,6 +48,7 @@ var connector = new builder.ChatConnector({
 });
 // Listen for messages from users 
 server.post('/api/messages', connector.listen());
+server.get('/authorize/spotify', _spotify.authorizeCallback);
 server.get('/authorize/spotify/:userHash', _spotify.authorize);
 //setup botstate and main dialog
 var bot = new builder.UniversalBot(connector);
@@ -177,7 +178,7 @@ intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, 
         }
     }
 }));
-intents.matches('Play Artist', (session, args, next) => __awaiter(this, void 0, void 0, function* () {
+intents.matches('Play', (session, args, next) => __awaiter(this, void 0, void 0, function* () {
     // Session logging
     //TODO: #340 Switch off last session logging
     session.userData.lastSessionMessage = session.message;
@@ -200,11 +201,11 @@ intents.matches('Play Artist', (session, args, next) => __awaiter(this, void 0, 
     }
     // 2. Is user authorised by Spotify? 
     try {
-        let userAuth = yield _spotify.userAuth(session.message.user.id);
+        let userAuth = yield _spotify.getUserAuthorization(session.message.user.id);
         if (!userAuth.authorised) {
             // 3. If not post message and link
             session.endDialog("I would love to play this song for you. But first I need you to tell Spotify that it's OK. Click this link "
-                + "to authorise Ringo to control Spotify: https://ringobot.azurewebsites.net/authorise/spotify/" + userAuth.userHash);
+                + `to authorise Ringo to control Spotify: ${process.env.SpotifyAuthRedirectUri}/${userAuth.userHash}`);
             return;
         }
         // 3. Play artist
