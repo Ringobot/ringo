@@ -139,7 +139,7 @@ function getUserAuthToken(userId) {
             if (userAuth.expiry == null || userAuth.expiry.getTime() < new Date().getTime()) {
                 // if expired, refresh the token
                 let now = new Date();
-                let response = yield _httpj.post(tokenUrl, `grant_type=refresh_token&code=${userAuth.refreshToken}&redirect_uri=${process.env.SpotifyAuthRedirectUri}`, addClientAuthHeader());
+                let response = yield _httpj.post(tokenUrl, `grant_type=refresh_token&refresh_token=${userAuth.refreshToken}&redirect_uri=${process.env.SpotifyAuthRedirectUri}`, addClientAuthHeader());
                 console.log('refreshed token');
                 let expires = new Date(now.getTime() + response.expires_in * 1000);
                 userAuth.accessToken = response.access_token;

@@ -5,6 +5,10 @@ function ascii(input) {
     return Buffer.from(input).toString("ascii");
 }
 exports.ascii = ascii;
+function utf8(input) {
+    return Buffer.from(input).toString("utf8");
+}
+exports.utf8 = utf8;
 function sha1(input) {
     let sha = crypto.createHash('sha1');
     sha.update(input);

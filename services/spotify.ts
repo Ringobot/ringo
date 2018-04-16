@@ -3,6 +3,7 @@ import _table = require('./tablestorage');
 import errs = require('restify-errors');
 import _helper = require('./spotifyHelper');
 import _auth = require('./spotifyAuth');
+import _crypto = require('../helpers/crypto')
 
 const baseUrl = 'https://api.spotify.com/v1';
 
@@ -36,7 +37,7 @@ export async function getPlaylists(username: string, offset: number) {
     } catch (e) {
         throw e;
     }
-        
+
 }
 
 export async function getRecommendation(artistSeed: string, limit?: number) {
@@ -84,15 +85,18 @@ export async function getArtist(artistId: string) {
 };
 
 
-export async function playArtist(userId:string, spotifyUri:string) {
+export async function playArtist(userId: string, spotifyUri: string) {
     // PUT https://api.spotify.com/v1/me/player/play
 
     try {
         let token = await _auth.getUserAuthToken(userId);
+        let json = `{\r\n  \"context_uri\": \"${spotifyUri}\"\r\n}`;
+        //let data = { context_uri: spotifyUri };
+
+        console.log(json);
 
         await _httpj.put(`${baseUrl}/me/player/play`,
-            `context_uri=${spotifyUri}`,
-            { 'Authorization': 'Bearer ' + token });
+            json, { 'Authorization': 'Bearer ' + token });
 
     } catch (e) {
         throw e;

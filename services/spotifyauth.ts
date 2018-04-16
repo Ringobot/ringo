@@ -165,7 +165,7 @@ export async function getUserAuthToken(userId: string) {
             // if expired, refresh the token
             let now = new Date();
             let response = await _httpj.post(tokenUrl,
-                `grant_type=refresh_token&code=${userAuth.refreshToken}&redirect_uri=${process.env.SpotifyAuthRedirectUri}`,
+                `grant_type=refresh_token&refresh_token=${userAuth.refreshToken}&redirect_uri=${process.env.SpotifyAuthRedirectUri}`,
                 addClientAuthHeader());
 
             console.log('refreshed token');

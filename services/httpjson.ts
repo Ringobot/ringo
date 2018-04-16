@@ -21,14 +21,12 @@ export async function post(url: string, data, headers?:any) {
     return await request("POST", url, data, headers);
 };
 
-export async function put(url: string, data, headers?:any) {
-    // default content type is form-urlencoded
-    if (headers == undefined) headers = {"Content-Type": "application/x-www-form-urlencoded"};
+export async function put(url: string, data, headers = {}) {
+    // default content type is application/json
     
-    if (headers["Content-Type"] == undefined) {
-        headers["Content-Type"] = 'application/x-www-form-urlencoded';
-    }
-
+    if (!headers["Content-Type"]) headers["Content-Type"] = 'application/json';
+    if (!headers["Accept"]) headers["Accept"] = 'application/json';
+    
     return await request("PUT", url, data, headers);
 };
 
@@ -61,8 +59,13 @@ export function request(method: string, url: string, data?, headers?: any) {
                     return;
                 }
 
-                var obj = JSON.parse(output);
-                resolve(obj);
+                if(output && output.length > 0) {
+                    var obj = JSON.parse(output);
+                    resolve(obj);
+                } else {
+                    resolve(null);
+                }
+                
                 return;
             });
         });
@@ -72,7 +75,10 @@ export function request(method: string, url: string, data?, headers?: any) {
             return;
         });
 
-        if (data) req.write(data.toString());
+        if (data) {
+            console.log(data.toString());
+            req.write(data.toString());
+        }
         req.end();
     });
 };

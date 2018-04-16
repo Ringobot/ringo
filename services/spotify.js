@@ -90,7 +90,10 @@ function playArtist(userId, spotifyUri) {
         // PUT https://api.spotify.com/v1/me/player/play
         try {
             let token = yield _auth.getUserAuthToken(userId);
-            yield _httpj.put(`${baseUrl}/me/player/play`, `context_uri=${spotifyUri}`, { 'Authorization': 'Bearer ' + token });
+            let json = `{\r\n  \"context_uri\": \"${spotifyUri}\"\r\n}`;
+            //let data = { context_uri: spotifyUri };
+            console.log(json);
+            yield _httpj.put(`${baseUrl}/me/player/play`, json, { 'Authorization': 'Bearer ' + token });
         }
         catch (e) {
             throw e;

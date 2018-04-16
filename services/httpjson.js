@@ -33,14 +33,13 @@ function post(url, data, headers) {
 }
 exports.post = post;
 ;
-function put(url, data, headers) {
+function put(url, data, headers = {}) {
     return __awaiter(this, void 0, void 0, function* () {
-        // default content type is form-urlencoded
-        if (headers == undefined)
-            headers = { "Content-Type": "application/x-www-form-urlencoded" };
-        if (headers["Content-Type"] == undefined) {
-            headers["Content-Type"] = 'application/x-www-form-urlencoded';
-        }
+        // default content type is application/json
+        if (!headers["Content-Type"])
+            headers["Content-Type"] = 'application/json';
+        if (!headers["Accept"])
+            headers["Accept"] = 'application/json';
         return yield request("PUT", url, data, headers);
     });
 }
@@ -69,8 +68,13 @@ function request(method, url, data, headers) {
                     reject(output);
                     return;
                 }
-                var obj = JSON.parse(output);
-                resolve(obj);
+                if (output && output.length > 0) {
+                    var obj = JSON.parse(output);
+                    resolve(obj);
+                }
+                else {
+                    resolve(null);
+                }
                 return;
             });
         });
@@ -78,8 +82,10 @@ function request(method, url, data, headers) {
             reject(err);
             return;
         });
-        if (data)
+        if (data) {
+            console.log(data.toString());
             req.write(data.toString());
+        }
         req.end();
     });
 }
