@@ -242,7 +242,7 @@ intents.matches('Play',
             await _spotify.playArtist(session.message.user.id, helpers.getEntityText(session.message, spotifyUri));
 
         } catch (e) {
-            if (e.message == 'Not Authorised') {
+            if (e == 'Not Authorised') {
                 // 3. If not post message and link
                 session.endDialog("I would love to play this song for you. But first I need you to tell Spotify that it's OK. Click this link "
                     + `to authorise Ringo to control Spotify: ${process.env.SpotifyAuthRedirectUri}/${user.userHash(session.message.user.id)}`);
