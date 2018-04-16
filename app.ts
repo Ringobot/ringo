@@ -14,6 +14,8 @@ import userdata = require('./services/userdata');
 import statedata = require('./services/statedata');
 import helpers = require('./helpers');
 import _spotify = require('./services/spotify');
+import _spotifyAuth = require('./services/spotifyauth');
+import user = require('./models/user')
 
 // Setup Restify Server
 var server = restify.createServer();
@@ -27,10 +29,10 @@ server.listen(process.env.port || process.env.PORT || 3978, function (e) {
 /*
 server.get(
     /\/(.*)?.*//*,
-    restify.plugins.serveStatic({
-        directory: './static',
-        default: 'index.html'
-    })
+restify.plugins.serveStatic({
+    directory: './static',
+    default: 'index.html'
+})
 );
 
 */
@@ -45,8 +47,8 @@ var connector = new builder.ChatConnector({
 // Listen for messages from users 
 server.post('/api/messages', connector.listen());
 
-server.get('/authorize/spotify', _spotify.authorizeCallback);
-server.get('/authorize/spotify/:userHash', _spotify.authorize);
+server.get('/authorize/spotify', _spotifyAuth.authorizeCallback);
+server.get('/authorize/spotify/:userHash', _spotifyAuth.authorize);
 
 //setup botstate and main dialog
 var bot = new builder.UniversalBot(connector);
@@ -137,7 +139,7 @@ intents.matches('Like Artist',
             // I like spotify:artist:25IG9fa7cbdmCIy3OnuH57
             // extract the entity with case preserved
             let uri = helpers.getEntityText(session.message, spotifyUri);
-            
+
             session.sendTyping();
             try {
                 let artist = await _artists.getArtistByUri(uri);
@@ -148,11 +150,11 @@ intents.matches('Like Artist',
 
                 session.sendTyping();
                 await userdata.userLikesArtist(session.message.user.id, artist.name);
-                
+
                 let msg2 = await _messages.recommendArtist(session, artist.id);
                 session.endDialog(msg2);
 
-            } catch(e){
+            } catch (e) {
                 _messages.whoops(session, e);
                 return;
             }
@@ -172,13 +174,13 @@ intents.matches('Like Artist',
                 session.sendTyping();
                 let artists = await _artists.searchArtists(artistsName.entity, 3);
                 let match = helpers.findMatch(artists);
-                
-                if (match.matched){
+
+                if (match.matched) {
                     // exact match
                     let msg = _messages.artist(session, match.artist);
                     msg.text(`I like ${match.artist.name} too!`);
                     session.send(msg);
-                    
+
                     session.sendTyping();
                     await userdata.userLikesArtist(session.message.user.id, match.artist.name);
 
@@ -192,17 +194,17 @@ intents.matches('Like Artist',
                     msg.attachmentLayout(builder.AttachmentLayout.carousel);
                     msg.attachments(cards);
                     msg.text(`Which ${artistsName.entity}?`);
-                    
+
                     session.send(msg)
                     session.endDialog();
-                    return;                    
+                    return;
                 }
             }
             catch (e) {
                 _messages.whoops(session, e);
                 return;
-            } 
-        }        
+            }
+        }
     }
 );
 
@@ -233,21 +235,19 @@ intents.matches('Play',
         }
 
         // 2. Is user authorised by Spotify? 
-        try {
-            let userAuth = await _spotify.getUserAuthorization(session.message.user.id);
-            if (!userAuth.authorised){
-                // 3. If not post message and link
-                session.endDialog("I would love to play this song for you. But first I need you to tell Spotify that it's OK. Click this link "
-                + `to authorise Ringo to control Spotify: ${process.env.SpotifyAuthRedirectUri}/${userAuth.userHash}`);
-                return;
-            }
 
-            // 3. Play artist
-            await _spotify.playArtist(userAuth, spotifyUri);
+        // 3. Play artist
+        try {
+            await _spotify.playArtist(session.message.user.id, spotifyUri.entity);
 
         } catch (e) {
-            _messages.whoops(session, e);
+            if (e.message == 'Not Authorised')
+            // 3. If not post message and link
+            session.endDialog("I would love to play this song for you. But first I need you to tell Spotify that it's OK. Click this link "
+                + `to authorise Ringo to control Spotify: ${process.env.SpotifyAuthRedirectUri}/${user.userHash(session.message.user.id)}`);
             return;
+
         }
+
     }
 );

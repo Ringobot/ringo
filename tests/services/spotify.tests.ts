@@ -1,4 +1,5 @@
 import * as spotify from "../../services/spotify";
+import * as spotifyAuth from "../../services/spotifyauth";
 import { expect } from 'chai';
 import 'mocha';
 import './helper';
@@ -6,7 +7,7 @@ import './helper';
 describe('spotify.getAuthToken', () => {
   
   it('should return a token', async () => {
-    let token = await spotify.getAuthToken();
+    let token = await spotifyAuth.getClientAuthToken();
     console.log(token);
     expect(token).to.not.be.null;
   }).timeout(5000);

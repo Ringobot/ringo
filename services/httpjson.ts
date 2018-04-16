@@ -21,6 +21,17 @@ export async function post(url: string, data, headers?:any) {
     return await request("POST", url, data, headers);
 };
 
+export async function put(url: string, data, headers?:any) {
+    // default content type is form-urlencoded
+    if (headers == undefined) headers = {"Content-Type": "application/x-www-form-urlencoded"};
+    
+    if (headers["Content-Type"] == undefined) {
+        headers["Content-Type"] = 'application/x-www-form-urlencoded';
+    }
+
+    return await request("PUT", url, data, headers);
+};
+
 // request
 export function request(method: string, url: string, data?, headers?: any) {
     let parsedUrl = _url.parse(url, true);

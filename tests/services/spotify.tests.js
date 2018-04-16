@@ -9,12 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const spotify = require("../../services/spotify");
+const spotifyAuth = require("../../services/spotifyauth");
 const chai_1 = require("chai");
 require("mocha");
 require("./helper");
 describe('spotify.getAuthToken', () => {
     it('should return a token', () => __awaiter(this, void 0, void 0, function* () {
-        let token = yield spotify.getAuthToken();
+        let token = yield spotifyAuth.getClientAuthToken();
         console.log(token);
         chai_1.expect(token).to.not.be.null;
     })).timeout(5000);

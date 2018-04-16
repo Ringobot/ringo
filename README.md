@@ -50,6 +50,12 @@ Using mocha programmatically <https://github.com/mochajs/mocha/wiki/Using-mocha-
 
 Mocha async: <https://mochajs.org/#asynchronous-code>
 
+### Restify
+
+Restify cheatsheet: <https://gist.github.com/LeCoupa/0664e885fd74152d1f90>
+
+Restify errors: <https://github.com/restify/errors>
+
 ### Nodejs on Docker
 
 Dockerizing a Node.js web app: <https://nodejs.org/en/docs/guides/nodejs-docker-webapp/>

@@ -22,6 +22,8 @@ const userdata = require("./services/userdata");
 const statedata = require("./services/statedata");
 const helpers = require("./helpers");
 const _spotify = require("./services/spotify");
+const _spotifyAuth = require("./services/spotifyauth");
+const user = require("./models/user");
 // Setup Restify Server
 var server = restify.createServer();
 server.use(restify.plugins.queryParser());
@@ -34,8 +36,8 @@ server.listen(process.env.port || process.env.PORT || 3978, function (e) {
 server.get(
     /\/(.*)?.*/ /*,
 restify.plugins.serveStatic({
-    directory: './static',
-    default: 'index.html'
+directory: './static',
+default: 'index.html'
 })
 );
 
@@ -48,8 +50,8 @@ var connector = new builder.ChatConnector({
 });
 // Listen for messages from users 
 server.post('/api/messages', connector.listen());
-server.get('/authorize/spotify', _spotify.authorizeCallback);
-server.get('/authorize/spotify/:userHash', _spotify.authorize);
+server.get('/authorize/spotify', _spotifyAuth.authorizeCallback);
+server.get('/authorize/spotify/:userHash', _spotifyAuth.authorize);
 //setup botstate and main dialog
 var bot = new builder.UniversalBot(connector);
 bot.set('storage', statedata.getAzureBotStorage());
@@ -200,19 +202,15 @@ intents.matches('Play', (session, args, next) => __awaiter(this, void 0, void 0,
         return;
     }
     // 2. Is user authorised by Spotify? 
+    // 3. Play artist
     try {
-        let userAuth = yield _spotify.getUserAuthorization(session.message.user.id);
-        if (!userAuth.authorised) {
-            // 3. If not post message and link
-            session.endDialog("I would love to play this song for you. But first I need you to tell Spotify that it's OK. Click this link "
-                + `to authorise Ringo to control Spotify: ${process.env.SpotifyAuthRedirectUri}/${userAuth.userHash}`);
-            return;
-        }
-        // 3. Play artist
-        yield _spotify.playArtist(userAuth, spotifyUri);
+        yield _spotify.playArtist(session.message.user.id, spotifyUri.entity);
     }
     catch (e) {
-        _messages.whoops(session, e);
+        if (e.message == 'Not Authorised')
+            // 3. If not post message and link
+            session.endDialog("I would love to play this song for you. But first I need you to tell Spotify that it's OK. Click this link "
+                + `to authorise Ringo to control Spotify: ${process.env.SpotifyAuthRedirectUri}/${user.userHash(session.message.user.id)}`);
         return;
     }
 }));

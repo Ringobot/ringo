@@ -33,6 +33,19 @@ function post(url, data, headers) {
 }
 exports.post = post;
 ;
+function put(url, data, headers) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // default content type is form-urlencoded
+        if (headers == undefined)
+            headers = { "Content-Type": "application/x-www-form-urlencoded" };
+        if (headers["Content-Type"] == undefined) {
+            headers["Content-Type"] = 'application/x-www-form-urlencoded';
+        }
+        return yield request("PUT", url, data, headers);
+    });
+}
+exports.put = put;
+;
 // request
 function request(method, url, data, headers) {
     let parsedUrl = _url.parse(url, true);
