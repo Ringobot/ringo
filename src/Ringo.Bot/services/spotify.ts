@@ -89,7 +89,6 @@ export async function playArtist(userId: string, spotifyUri: string) {
     // PUT https://api.spotify.com/v1/me/player/play
 
     try {
-        throw "Not Authorised";
         let token = await _auth.getUserAuthToken(userId);
         let json = `{\r\n  \"context_uri\": \"${spotifyUri}\"\r\n}`;
         //let data = { context_uri: spotifyUri };
