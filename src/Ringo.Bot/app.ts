@@ -12,6 +12,7 @@ import _cards = require('./services/cards');
 import _messages = require('./services/messages');
 import userdata = require('./services/userdata');
 import statedata = require('./services/statedata');
+import servicebus = require('./services/servicebus')
 import helpers = require('./helpers');
 
 // Setup Restify Server
