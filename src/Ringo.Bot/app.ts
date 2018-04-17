@@ -122,6 +122,12 @@ intents.matches('Like Artist',
         session.userData.lastSessionMessage = session.message;
         session.userData.lastArgs = args;
 
+        // track user
+        //appInsights.defaultClient.context.keys.userAuthUserId
+        appInsights.defaultClient.context.keys.userAuthUserId = user.userHash(session.message.user.id);
+        appInsights.defaultClient.trackEvent({name: "Artist/Like", properties: {userAuthUserId: user.userHash(session.message.user.id)}});
+        
+
         // if in a group and the bot is not mentioned, ignore this dialog
         if (helpers.isGroup(session.message) && !helpers.isMentioned(session.message)) {
             console.log('DEBUG: Ignoring Group conversation without bot mentioned');
@@ -214,6 +220,11 @@ intents.matches('Play',
         //TODO: #340 Switch off last session logging
         session.userData.lastSessionMessage = session.message;
         session.userData.lastArgs = args;
+
+        // track user
+        //appInsights.defaultClient.context.keys.userId = user.userHash(session.message.user.id);
+        appInsights.defaultClient.context.keys.userAuthUserId = user.userHash(session.message.user.id);
+        appInsights.defaultClient.trackEvent({name: "Artist/Play", properties: {userAuthUserId: user.userHash(session.message.user.id)}});
 
         // if in a group and the bot is not mentioned, ignore this dialog
         if (helpers.isGroup(session.message) && !helpers.isMentioned(session.message)) {
