@@ -32,16 +32,6 @@ server.listen(process.env.port || process.env.PORT || 3978, function (e) {
         throw e;
     console.log('%s listening to %s', server.name, server.url);
 });
-/*
-server.get(
-    /\/(.*)?.*/ /*,
-restify.plugins.serveStatic({
-directory: './static',
-default: 'index.html'
-})
-);
-
-*/
 // Create chat connector for communicating with the Bot Framework Service
 var connector = new builder.ChatConnector({
     appId: process.env.MicrosoftAppId,
@@ -72,21 +62,23 @@ bot.on('conversationUpdate', function (session) {
 });
 bot.dialog('Welcome', [
     function (session) {
+        trackEvent(session.message, 'Bot/Welcome');
         session.send("Hey! I'm Ringo, the music bot 😎🎧🎵\r\nI love to discover new music and share my discoveries. "
             + "Tell me about Artists and Bands that you like, for example:\r\n"
             + "`I like Metallica`.\r\n"
             + "And you can type `help` or `quit` at any time.");
-        //builder.Prompts.text(session, "What's your name?");
         session.endDialog();
     }
 ]);
 intents.matches('Help', [
     function (session, args, next) {
+        trackEvent(session.message, 'Bot/Help');
         session.endDialog("Ringo is a bot that aims to discover music by asking you a series of questions about your music tastes."
             + "You can type 'quit' at any time to quit and resume the conversation later.");
     }
 ]);
 intents.matches('Quit', function (session, args, next) {
+    trackEvent(session.message, 'Bot/Quit');
     session.endDialog("OK - see ya!");
 });
 intents.onDefault([
@@ -101,15 +93,23 @@ intents.onDefault([
         session.endDialog();
     }
 ]);
+//** APPLICATION INSIGHTS
+function setAuthenticatedUserContext(message) {
+    let client = appInsights.defaultClient;
+    let key = client.context.keys.userAuthUserId;
+    client.context.tags[key] = user.userHash(message.address.user.id);
+}
+function trackEvent(message, name) {
+    // track user
+    setAuthenticatedUserContext(message);
+    appInsights.defaultClient.trackEvent({ name: name });
+}
+//**
 intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, void 0, function* () {
     // Session logging
     //TODO: #340 Switch off last session logging
     session.userData.lastSessionMessage = session.message;
     session.userData.lastArgs = args;
-    // track user
-    //appInsights.defaultClient.context.keys.userAuthUserId
-    appInsights.defaultClient.context.keys.userAuthUserId = user.userHash(session.message.user.id);
-    appInsights.defaultClient.trackEvent({ name: "Artist/Like", properties: { userAuthUserId: user.userHash(session.message.user.id) } });
     // if in a group and the bot is not mentioned, ignore this dialog
     if (helpers.isGroup(session.message) && !helpers.isMentioned(session.message)) {
         console.log('DEBUG: Ignoring Group conversation without bot mentioned');
@@ -132,6 +132,7 @@ intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, 
             //msg.text(`I like ${artist.name} too!`);
             //session.send(msg);
             session.send(`I like ${artist.name} too!`);
+            trackEvent(session.message, 'Artist/Like');
             session.sendTyping();
             yield userdata.userLikesArtist(session.message.user.id, artist.name);
             let msg2 = yield _messages.recommendArtist(session, artist.id);
@@ -160,6 +161,7 @@ intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, 
                 let msg = _messages.artist(session, match.artist);
                 msg.text(`I like ${match.artist.name} too!`);
                 session.send(msg);
+                trackEvent(session.message, 'Artist/Like');
                 session.sendTyping();
                 yield userdata.userLikesArtist(session.message.user.id, match.artist.name);
                 let msg2 = yield _messages.recommendArtist(session, match.artist.id);
@@ -221,12 +223,6 @@ intents.matches('Play', (session, args, next) => __awaiter(this, void 0, void 0,
                     // exact match
                     let msg = _messages.artist(session, match.artist);
                     spotifyUri = match.artist.uri;
-                    //msg.text(`I like ${match.artist.name} too!`);
-                    //session.send(msg);
-                    //session.sendTyping();
-                    //await userdata.userLikesArtist(session.message.user.id, match.artist.name);
-                    //let msg2 = await _messages.recommendArtist(session, match.artist.id);
-                    //session.endDialog(msg2);
                 }
                 else {
                     // Which artist?
@@ -248,10 +244,12 @@ intents.matches('Play', (session, args, next) => __awaiter(this, void 0, void 0,
     }
     // Play artist
     try {
+        trackEvent(session.message, 'Artist/Play');
         yield _spotify.playArtist(session.message.user.id, spotifyUri);
     }
     catch (e) {
         if (e == 'Not Authorised') {
+            trackEvent(session.message, 'User/NotAuthorized');
             // If not authorised post message and link
             session.endDialog("I would love to play this song for you. But first I need you to tell Spotify that it's OK. Click this link "
                 + `to authorise Ringo to control Spotify: ${process.env.SpotifyAuthRedirectUri}/${user.userHash(session.message.user.id)}`);
