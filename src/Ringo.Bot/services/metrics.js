@@ -12,6 +12,7 @@ function setAuthenticatedUserContext(sessionId, userHash) {
         let client = appInsights.defaultClient;
         client.context.tags[client.context.keys.sessionId] = sessionId;
         client.context.tags[client.context.keys.userId] = userHash;
+        client.context.tags[client.context.keys.userAccountId] = 'ringo';
         client.context.tags[client.context.keys.userAuthUserId] = userHash;
     }
     catch (e) {
