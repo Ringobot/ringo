@@ -64,3 +64,4 @@ Dockerizing a Node.js web app: <https://nodejs.org/en/docs/guides/nodejs-docker-
 
 <https://github.com/Microsoft/ApplicationInsights-node.js/>
 
+How to track auth users: <https://github.com/Microsoft/ApplicationInsights-node.js/issues/356>

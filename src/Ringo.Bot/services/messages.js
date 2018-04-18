@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const builder = require("botbuilder");
 const _cards = require("./cards");
 const _artists = require("./artists");
+const _metrics = require("./metrics");
 function artist(session, artist) {
     let card = _cards.artist(session, artist);
     let msg = new builder.Message(session);
@@ -58,10 +59,13 @@ function recommendArtist(session, artistId) {
 }
 exports.recommendArtist = recommendArtist;
 function sorry(session) {
+    _metrics.trackEvent('Bot/Sorry');
     session.send('Sorry!! I didn\'t understand, try something like \'I like metallica \'');
 }
 exports.sorry = sorry;
 function whoops(session, e) {
+    _metrics.trackError(e);
+    _metrics.trackEvent('Bot/Whoops');
     console.error(e);
     session.endDialog(`Whoops! Something is wrong 😞 Please try again`);
 }

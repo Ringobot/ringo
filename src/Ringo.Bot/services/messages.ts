@@ -1,6 +1,7 @@
 import builder = require('botbuilder');
 import _cards = require('./cards');
 import _artists = require('./artists');
+import _metrics = require('./metrics');
 
 export function artist(session: builder.Session, artist: any): builder.Message {
     let card = _cards.artist(session, artist);
@@ -49,10 +50,13 @@ export async function recommendArtist(session: builder.Session, artistId: string
 }
 
 export function sorry(session) {
+    _metrics.trackEvent('Bot/Sorry');
     session.send('Sorry!! I didn\'t understand, try something like \'I like metallica \'');
 }
 
 export function whoops(session, e) {
+    _metrics.trackError(e);
+    _metrics.trackEvent('Bot/Whoops');
     console.error(e);
     session.endDialog(`Whoops! Something is wrong 😞 Please try again`);
 }
