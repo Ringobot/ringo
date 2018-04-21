@@ -63,17 +63,17 @@ let custom = {
         var intent = { score: 0.0, intent: null };
         if (context.message.text) {
             switch (context.message.text.toLowerCase()) {
-                case '/help':
+                case 'help':
                     intent = { score: 1.0, intent: 'Help' };
                     break;
-                case '/quit':
-                case '/goodbye':
-                case '/exit':
+                case 'quit':
+                case 'goodbye':
+                case 'exit':
                     intent = { score: 1.0, intent: 'Quit' };
                     break;
             }
             // Feedback
-            if ((/^\/feedback.*/i).test(context.message.text)) {
+            if ((/^feedback.*/i).test(context.message.text)) {
                 intent = { score: 1.0, intent: 'Feedback' };
             }
         }
@@ -127,7 +127,7 @@ bot.dialog('Welcome', [
         session.send("Hey! I'm Ringo, the music bot 😎🎧🎵\r\nI love to discover new music and share my discoveries. "
             + "Tell me about Artists and Bands that you like, for example:\r\n"
             + "`I like Metallica`.\r\n"
-            + "And you can type `/help`, `/quit` or `/feedback` at any time.");
+            + "And you can type `help`, `quit` or `feedback` at any time.");
         session.endDialog();
     }
 ]);
@@ -154,7 +154,7 @@ intents.matches('Help', function (session) {
     _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
     _metrics.trackEvent('Bot/Help');
     session.endDialog("Ringo is a bot that aims to discover music by asking you a series of questions about your music tastes."
-        + "You can type 'quit' at any time to quit and resume the conversation later.");
+        + "You can type `quit` at any time to quit and resume the conversation later. Or type `feedback` to send feedback");
 });
 intents.matches('Quit', function (session) {
     if (notListening(session.message))
@@ -181,7 +181,7 @@ intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, 
     if (notListening(session.message))
         return;
     _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
-    console.log(`Like: intent = ${args.intent}, score = ${args.score}, entities = ${args.entities.length}`);
+    console.log(`Like: intent = ${args.intent}, score = ${args.score}, entities = ${args.entities.length}, message = "${session.message.text}"`);
     // Session logging
     //TODO: #340 Switch off last session logging
     session.userData.lastSessionMessage = session.message;
@@ -260,7 +260,7 @@ intents.matches('Play', (session, args) => __awaiter(this, void 0, void 0, funct
     if (notListening(session.message))
         return;
     _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
-    console.log(`Play: intent = ${args.intent}, score = ${args.score}, entities = ${args.entities.length}`);
+    console.log(`Play: intent = ${args.intent}, score = ${args.score}, entities = ${args.entities.length}, message = "${session.message.text}"`);
     // Session logging
     //TODO: #340 Switch off last session logging
     session.userData.lastSessionMessage = session.message;
