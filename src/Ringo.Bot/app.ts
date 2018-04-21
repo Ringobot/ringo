@@ -33,20 +33,70 @@ var connector = new builder.ChatConnector({
     openIdMetadata: process.env.BotOpenIdMetadata
 });
 
-// Listen for messages from users 
 server.post('/api/messages', connector.listen());
 server.get('/authorize/spotify', _spotifyAuth.authorizeCallback);
 server.get('/authorize/spotify/:userHash', _spotifyAuth.authorize);
+
+// last route for static files
+server.get(
+    /\/(.*)?.*/,
+    restify.plugins.serveStatic({
+    directory: './static',
+    default: 'index.html'
+    })
+);
 
 //setup botstate and main dialog
 var bot = new builder.UniversalBot(connector);
 bot.set('storage', statedata.getAzureBotStorage());
 
-// Setup LUIS Model and Intent Dialogs
-var model = process.env.LUIS_MODEL_URL;
-var recognizer = new builder.LuisRecognizer(model);
+/*
+const intentDialog = new builder.IntentDialog({ 
+    recognizers: [expressionRecognizer, defaultRecognizer, recognizer], 
+    recognizeOrder: 'series' 
+});
+*/
 
-var intents = new builder.IntentDialog({ recognizers: [recognizer] });
+// Install a custom recognizer to look for user saying 'help' or 'goodbye'.
+let custom = {
+    recognize: function (context, done) {
+        if (context.message && notListening(context.message)) {
+            done(null, { score: 1.0, intent: 'Ignore' })
+        }
+        
+        var intent = { score: 0.0, intent: null };
+
+        if (context.message.text) {
+            switch (context.message.text.toLowerCase()) {
+                case '/help':
+                    intent = { score: 1.0, intent: 'Help' };
+                    break;
+
+                case '/quit':
+                case '/goodbye':
+                case '/exit':
+                    intent = { score: 1.0, intent: 'Quit' };
+                    break;
+            }
+
+            // Feedback
+            if ((/^\/feedback.*/i).test(context.message.text)){
+                intent = { score: 1.0, intent: 'Feedback' };
+            }
+        }
+
+        done(null, intent);
+    }
+};
+
+// switch recognizer
+let recognizers = [
+    custom,
+    //new builder.RegExpRecognizer( "FeedbackIntent", { en_us: /^\/(feedback)/i}),
+    new builder.LuisRecognizer(process.env.LUIS_MODEL_URL)
+];
+
+var intents = new builder.IntentDialog({ recognizers: recognizers, recognizeOrder: builder.RecognizeOrder.series });
 bot.dialog('/', intents);
 
 let userHash = (session:any) :string | null => {
@@ -60,8 +110,6 @@ let userHash = (session:any) :string | null => {
 }
 
 function sessionId (session) {
-    //session.address.conversation.id
-    //session.message.address.conversation.id
     let sessionId = ((session && session.message && session.message.address 
         && session.message.address.conversation && session.message.address.conversation.id))
         || (session && session.address && session.address.conversation && session.address.conversation.id);
@@ -89,6 +137,7 @@ bot.on('conversationUpdate', function (session) {
 
 bot.dialog('Welcome', [
     function (session) {
+        if (notListening(session.message)) return;
         _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
         _metrics.trackEvent('Bot/Welcome');
 
@@ -96,25 +145,49 @@ bot.dialog('Welcome', [
             "Hey! I'm Ringo, the music bot 😎🎧🎵\r\nI love to discover new music and share my discoveries. "
             + "Tell me about Artists and Bands that you like, for example:\r\n"
             + "`I like Metallica`.\r\n"
-            + "And you can type `help` or `quit` at any time."
+            + "And you can type `/help`, `/quit` or `/feedback` at any time."
         );
 
         session.endDialog();
     }
 ]);
 
-intents.matches('Help', [
-    function (session, args, next) {
+intents.matches('Feedback', [
+    function (session) {
+        if (notListening(session.message)) return;
+        _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+        _metrics.trackEvent('Bot/Feedback');
+        
+        let message = session.message.text;
+
+        builder.Prompts.text(session, 'How can I improve? If you would like to be contacted, include your email address in your feedback');
+
+    },
+    function (session, results) {
+        session.endDialog('Thanks! I have sent your feedback.');
+        let message = results.response;
+
+    }
+]);
+
+intents.matches('Ignore', function (){
+    console.log('Not listening');
+});
+
+intents.matches('Help',
+    function (session) {
+        if (notListening(session.message)) return;
         _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
         _metrics.trackEvent('Bot/Help');
 
         session.endDialog("Ringo is a bot that aims to discover music by asking you a series of questions about your music tastes."
             + "You can type 'quit' at any time to quit and resume the conversation later.");
     }
-]);
+);
 
 intents.matches('Quit',
-    function (session, args, next) {
+    function (session) {
+        if (notListening(session.message)) return;
         _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
         _metrics.trackEvent('Bot/Quit');
 
@@ -122,36 +195,32 @@ intents.matches('Quit',
     }
 );
 
+function notListening(message){
+    // if in a group and the bot is not mentioned, ignore this dialog
+    if (helpers.isGroup(message) && !helpers.isMentioned(message)) return;
+}
+
 intents.onDefault([
     function (session, args) {
+        if (notListening(session.message)) return;
         _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
-
-        // if in a group and the bot is not mentioned, ignore this dialog
-        if (helpers.isGroup(session.message) && !helpers.isMentioned(session.message)) {
-            console.log('DEBUG: Ignoring Group conversation without bot mentioned');
-            return
-        };
 
         _messages.sorry(session);
         session.endDialog();
     }
 ]);
 
-
 intents.matches('Like Artist',
     async (session, args, next) => {
+        if (notListening(session.message)) return;
         _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+
+        console.log(`Like: intent = ${args.intent}, score = ${args.score}, entities = ${args.entities.length}`);
 
         // Session logging
         //TODO: #340 Switch off last session logging
         session.userData.lastSessionMessage = session.message;
         session.userData.lastArgs = args;
-
-        // if in a group and the bot is not mentioned, ignore this dialog
-        if (helpers.isGroup(session.message) && !helpers.isMentioned(session.message)) {
-            console.log('DEBUG: Ignoring Group conversation without bot mentioned');
-            return
-        };
 
         if (args.entities == null) {
             _messages.sorry(session);
@@ -238,19 +307,16 @@ intents.matches('Like Artist',
 );
 
 intents.matches('Play',
-    async (session, args, next) => {
+    async (session, args) => {
+        if (notListening(session.message)) return;
         _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+
+        console.log(`Play: intent = ${args.intent}, score = ${args.score}, entities = ${args.entities.length}`);
 
         // Session logging
         //TODO: #340 Switch off last session logging
         session.userData.lastSessionMessage = session.message;
         session.userData.lastArgs = args;
-
-        // if in a group and the bot is not mentioned, ignore this dialog
-        if (helpers.isGroup(session.message) && !helpers.isMentioned(session.message)) {
-            console.log('DEBUG: Ignoring Group conversation without bot mentioned');
-            return
-        };
 
         if (args.entities == null) {
             _messages.sorry(session);
