@@ -64,7 +64,12 @@ let custom = {
         }
         var intent = { score: 0.0, intent: null };
         if (context.message && context.message.text) {
-            switch (context.message.text.toLowerCase()) {
+            let mention = (context.message.entities
+                && context.message.entities.filter(e => e.type == 'mention')
+                    .find(e => e.mentioned.id == context.message.address.bot.id));
+            // filter out mention handle
+            let message = mention ? context.message.text.replace(mention.text).trim() : context.message.text;
+            switch (message.toLowerCase()) {
                 case 'help':
                     intent = { score: 1.0, intent: 'Help' };
                     break;
@@ -75,7 +80,7 @@ let custom = {
                     break;
             }
             // Feedback
-            if ((/^feedback.*/i).test(context.message.text)) {
+            if ((/^feedback.*/i).test(message)) {
                 intent = { score: 1.0, intent: 'Feedback' };
             }
         }
@@ -184,6 +189,11 @@ intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, 
         return;
     _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
     console.log(`Like: intent = ${args.intent}, score = ${args.score}, entities = ${args.entities.length}, message = "${session.message.text}"`);
+    // 90% certainty to like
+    if (args.score < 0.9) {
+        _messages.sorry(session);
+        return;
+    }
     // Session logging
     //TODO: #340 Switch off last session logging
     session.userData.lastSessionMessage = session.message;
@@ -263,6 +273,11 @@ intents.matches('Play', (session, args) => __awaiter(this, void 0, void 0, funct
         return;
     _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
     console.log(`Play: intent = ${args.intent}, score = ${args.score}, entities = ${args.entities.length}, message = "${session.message.text}"`);
+    // 90% certainty to play
+    if (args.score < 0.9) {
+        _messages.sorry(session);
+        return;
+    }
     // Session logging
     //TODO: #340 Switch off last session logging
     session.userData.lastSessionMessage = session.message;
