@@ -60,6 +60,7 @@ let custom = {
         if (context.message && notListening(context.message)) {
             // ignore non group/DM messages so that they don't go to LUIS
             done(null, { score: 1.0, intent: 'Ignore' });
+            return;
         }
         var intent = { score: 0.0, intent: null };
         if (context.message && context.message.text) {
