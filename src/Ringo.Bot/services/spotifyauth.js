@@ -13,7 +13,6 @@ const errs = require("restify-errors");
 const _helper = require("./spotifyHelper");
 const _crypto = require("../helpers/crypto");
 const _data = require("../data/spotifyUserAuthData");
-const user = require("../models/user");
 const tokenUrl = 'https://accounts.spotify.com/api/token';
 const authUrl = 'https://accounts.spotify.com/authorize';
 const scopes = _crypto.ascii('user-modify-playback-state user-read-playback-state user-read-recently-played playlist-read-collaborative playlist-modify-public playlist-modify-private playlist-read-private user-follow-modify user-top-read');
@@ -128,14 +127,13 @@ function getUserAuthTokens(code) {
     });
 }
 exports.getUserAuthTokens = getUserAuthTokens;
-function getUserAuthToken(userId) {
+function getUserAuthToken(userHash) {
     return __awaiter(this, void 0, void 0, function* () {
-        let userHash = user.userHash(userId);
         try {
             // get userAuth record
             let userAuth = yield _data.get(userHash);
             if (!userAuth)
-                throw 'Not Authorised'; // warning: catching on this exact message in app.js
+                throw new Error('Not Authorised'); // warning: catching on this exact message in app.js
             if (userAuth.expiry == null || userAuth.expiry.getTime() < new Date().getTime()) {
                 // if expired, refresh the token
                 let now = new Date();

@@ -85,12 +85,12 @@ export async function getArtist(artistId: string) {
 };
 
 
-export async function playArtist(userId: string, spotifyUri: string) {
+export async function playArtist(userHash: string, spotifyUri: string) {
     // PUT https://api.spotify.com/v1/me/player/play
 
     try {
         // TODO: -> getUserAuthHeader
-        let token = await _auth.getUserAuthToken(userId);
+        let token = await _auth.getUserAuthToken(userHash);
         let json = spotifyUri ? `{\r\n  \"context_uri\": \"${spotifyUri}\"\r\n}` : null;
         //let data = { context_uri: spotifyUri };
 

@@ -85,12 +85,12 @@ function getArtist(artistId) {
 }
 exports.getArtist = getArtist;
 ;
-function playArtist(userId, spotifyUri) {
+function playArtist(userHash, spotifyUri) {
     return __awaiter(this, void 0, void 0, function* () {
         // PUT https://api.spotify.com/v1/me/player/play
         try {
             // TODO: -> getUserAuthHeader
-            let token = yield _auth.getUserAuthToken(userId);
+            let token = yield _auth.getUserAuthToken(userHash);
             let json = spotifyUri ? `{\r\n  \"context_uri\": \"${spotifyUri}\"\r\n}` : null;
             //let data = { context_uri: spotifyUri };
             console.log(json);

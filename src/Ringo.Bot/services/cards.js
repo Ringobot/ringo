@@ -35,8 +35,8 @@ function artists(session, artists) {
             .images([builder.CardImage.create(session, item.images[0].url)])
             .text(`Do you like ${item.name}?`)
             .buttons([
-            builder.CardAction.imBack(session, `I like ${item.uri}`, `I like ${item.name} ❤️`),
-            builder.CardAction.imBack(session, `Play ${item.uri}`, `Play ${item.name} now 🎵`)
+            builder.CardAction.imBack(session, `I like ${item.uri}`, `❤️ I like ${item.name}`),
+            builder.CardAction.imBack(session, `Play ${item.uri}`, `🎵 Play ${item.name}`)
         ]);
         cards.push(card);
     }

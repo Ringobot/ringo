@@ -229,8 +229,8 @@ intents.matches('Like Artist',
         _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
         console.log(`Like: intent = ${args.intent}, score = ${args.score}, entities = ${args.entities.length}, message = "${session.message.text}"`);
 
-        // 90% certainty to like
-        if (args.score < 0.9) {
+        // 80% certainty to like
+        if (args.score < 0.8) {
             _messages.sorry(session);
             return;
         }
@@ -261,7 +261,7 @@ intents.matches('Like Artist',
                 session.send(`I like ${artist.name} too!`);
                 _metrics.trackEvent('Artist/Like');
                 session.sendTyping();
-                await userdata.userLikesArtist(session.message.user.id, artist.name);
+                await userdata.userLikesArtist(user.userId(session), artist.name);
 
                 let msg2 = await _messages.recommendArtist(session, artist.id);
                 session.endDialog(msg2);
@@ -295,7 +295,7 @@ intents.matches('Like Artist',
                     _metrics.trackEvent('Artist/Like');
 
                     session.sendTyping();
-                    await userdata.userLikesArtist(session.message.user.id, match.artist.name);
+                    await userdata.userLikesArtist(user.userId(session), match.artist.name);
 
                     let msg2 = await _messages.recommendArtist(session, match.artist.id);
                     session.endDialog(msg2);
@@ -330,8 +330,8 @@ intents.matches('Play',
         _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
         console.log(`Play: intent = ${args.intent}, score = ${args.score}, entities = ${args.entities.length}, message = "${session.message.text}"`);
 
-        // 90% certainty to play
-        if (args.score < 0.9) {
+        // 80% certainty to play
+        if (args.score < 0.8) {
             _messages.sorry(session);
             return;
         }
@@ -394,18 +394,18 @@ intents.matches('Play',
         // Play artist
         try {
             _metrics.trackEvent('Artist/Play');
-            await _spotify.playArtist(session.message.user.id, spotifyUri);
+            await _spotify.playArtist(user.userHash(session), spotifyUri);
 
         } catch (e) {
-            if (e == 'Not Authorised') {
+            if (e.message == 'Not Authorised') {
                 _metrics.trackEvent('User/NotAuthorized');
                 // If not authorised post message and link
                 session.endDialog("I would love to play this song for you. But first I need you to tell Spotify that it's OK. Click this link "
-                    + `to authorise Ringo to control Spotify: ${process.env.SpotifyAuthRedirectUri}/${user.userHash(session.message.user.id)}`);
+                    + `to authorise Ringo to control Spotify: ${process.env.SpotifyAuthRedirectUri}/${user.userHash(session)}`);
                 return;
             }
 
-            if (e.search('Command failed: Not paused') > 0) {
+            if (e.message.search('Command failed: Not paused') > 0) {
                 _metrics.trackEvent('Artist/PlayAlreadyPlaying');
                 session.endDialog("Already playing ;) try something like `Play Madonna`");
                 return;
