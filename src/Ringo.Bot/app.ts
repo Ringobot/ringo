@@ -74,7 +74,7 @@ let custom = {
                 .find(e => e.mentioned.id == context.message.address.bot.id));
             
             // filter out mention handle
-            let message = mention ? context.message.text.replace(mention.text).trim() : context.message.text;
+            let message = mention ? context.message.text.replace(mention.text, '').trim() : context.message.text;
             
             switch (message.toLowerCase()) {
                 case 'help':
