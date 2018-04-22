@@ -14,8 +14,9 @@ import servicebus = require('./services/servicebus')
 import helpers = require('./helpers');
 import _spotify = require('./services/spotify');
 import _spotifyAuth = require('./services/spotifyauth');
-import user = require('./models/user')
-import _crypto = require('./helpers/crypto')
+import user = require('./models/user');
+import _crypto = require('./helpers/crypto');
+import _feedback = require('./services/feedback');
 
 // Setup Restify Server
 var server = restify.createServer();
@@ -109,16 +110,6 @@ let recognizers = [
 var intents = new builder.IntentDialog({ recognizers: recognizers, recognizeOrder: builder.RecognizeOrder.series });
 bot.dialog('/', intents);
 
-let userHash = (session: any): string | null => {
-    let userId = ((session && session.user && session.user.id)
-        || (session && session.message && session.message.user && session.message.user.id));
-    if (!userId) {
-        console.warn('Could not find user Id in Session');
-        return null;
-    }
-    return user.userHash(userId);
-}
-
 function sessionId(session) {
     let sessionId = ((session && session.message && session.message.address
         && session.message.address.conversation && session.message.address.conversation.id))
@@ -138,7 +129,7 @@ function sessionHash(session:any): string {
 
 // Welcome message
 bot.on('conversationUpdate', function (session) {
-    _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+    _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
 
     if (session.membersAdded) {
         session.membersAdded.forEach((identity) => {
@@ -153,7 +144,7 @@ bot.on('conversationUpdate', function (session) {
 bot.dialog('Welcome', [
     function (session) {
         if (notListening(session.message)) return;
-        _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+        _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
         _metrics.trackEvent('Bot/Welcome');
 
         session.send(
@@ -168,19 +159,26 @@ bot.dialog('Welcome', [
 ]);
 
 intents.matches('Feedback', [
-    function (session) {
+    async function (session) {
         if (notListening(session.message)) return;
-        _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+        _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
         _metrics.trackEvent('Bot/Feedback');
 
-        let message = session.message.text;
-
-        builder.Prompts.text(session, 'How can I improve? If you would like to be contacted, include your email address in your feedback');
+        try {
+            await _feedback.sendFeedback(user.userId(session), sessionId(session), session.message.text);
+            builder.Prompts.text(session, 'How can I improve? If you would like to be contacted, include your email address in your feedback');
+        } catch (e) {
+            _messages.whoops(session, e);
+        }
 
     },
-    function (session, results) {
-        session.endDialog('Thanks! I have sent your feedback.');
-        let message = results.response;
+    async function (session, results) {
+        try {
+            await _feedback.sendFeedback(user.userId(session), sessionId(session), results.response);
+            session.endDialog('Thanks! I have sent your feedback.');
+        } catch (e) {
+            _messages.whoops(session, e);
+        }
 
     }
 ]);
@@ -192,7 +190,7 @@ intents.matches('Ignore', function () {
 intents.matches('Help',
     function (session) {
         if (notListening(session.message)) return;
-        _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+        _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
         _metrics.trackEvent('Bot/Help');
 
         session.endDialog("Ringo is a bot that aims to discover music by asking you a series of questions about your music tastes."
@@ -203,7 +201,7 @@ intents.matches('Help',
 intents.matches('Quit',
     function (session) {
         if (notListening(session.message)) return;
-        _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+        _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
         _metrics.trackEvent('Bot/Quit');
 
         session.endDialog("OK - see ya!");
@@ -218,7 +216,7 @@ function notListening(message): boolean {
 intents.onDefault([
     function (session, args) {
         if (notListening(session.message)) return;
-        _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+        _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
 
         _messages.sorry(session);
         session.endDialog();
@@ -228,7 +226,7 @@ intents.onDefault([
 intents.matches('Like Artist',
     async (session, args, next) => {
         if (notListening(session.message)) return;
-        _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+        _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
         console.log(`Like: intent = ${args.intent}, score = ${args.score}, entities = ${args.entities.length}, message = "${session.message.text}"`);
 
         // 90% certainty to like
@@ -329,7 +327,7 @@ intents.matches('Like Artist',
 intents.matches('Play',
     async (session, args) => {
         if (notListening(session.message)) return;
-        _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+        _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
         console.log(`Play: intent = ${args.intent}, score = ${args.score}, entities = ${args.entities.length}, message = "${session.message.text}"`);
 
         // 90% certainty to play

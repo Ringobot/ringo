@@ -8,13 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const _table = require("./tablestorage");
+//import _table = require('./tablestorage');
 const _canonical = require("./canonicalisation");
 const _servicebus = require("./servicebus");
 function userLikesArtist(user, artist) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!user)
-            throw 'user cannot be null';
+            throw new Error('user cannot be null');
         let userId = user;
         let artistId = `${artist.toLowerCase()}:${_canonical.getArtistId(artist).Id}`;
         let entity = {
@@ -24,7 +24,7 @@ function userLikesArtist(user, artist) {
             Artist: artist,
             WhenLiked: new Date()
         };
-        yield _table.insert('UserLikesArtist', entity, true);
+        //await _table.insert('UserLikesArtist', entity, true);
         var entityRelationship = {
             FromVertex: {
                 Id: userId,
@@ -43,7 +43,12 @@ function userLikesArtist(user, artist) {
             Relationship: "likes",
             RelationshipDate: new Date()
         };
-        yield _servicebus.sendMessages(entityRelationship);
+        try {
+            yield _servicebus.sendMessage('graph', entityRelationship);
+        }
+        catch (e) {
+            throw e;
+        }
     });
 }
 exports.userLikesArtist = userLikesArtist;

@@ -1,22 +1,27 @@
 import _azure = require('azure-sb');
 
 var connStr = process.env.SB_CONNECTION_STRING;
-var topicName = 'graph';
- 
-console.log('Connecting to ' + connStr + ' queue ' + topicName);
 var sbService = _azure.createServiceBusService(connStr);
 
-export function sendMessages(entityRelationship) {
+if (!connStr) throw new Error('Env var SB_CONNECTION_STRING not set');
+
+export async function sendMessage(topicName, messageBody) {
   var message = {
-    body: (JSON.stringify(entityRelationship))
-    }
-  //message.body = JSON.stringify(body);
-  console.log(message.body)
+    body: (JSON.stringify(messageBody))
+  };
+
+  console.log("serviceBus:sendMessage", message.body)
+
+  return new Promise<any>((resolve, reject) => {
     sbService.sendTopicMessage(topicName, message, function (err) {
-    if (err) {
-      console.log('Failed Tx: ', err);
-    } else {
-      console.log('Sent ' + message);
-    }
+      if (err) {
+        console.error(err);
+        reject(err);
+        return;
+      } else {
+        resolve();
+        return;
+      }
     });
+  });
 }

@@ -24,6 +24,7 @@ const _spotify = require("./services/spotify");
 const _spotifyAuth = require("./services/spotifyauth");
 const user = require("./models/user");
 const _crypto = require("./helpers/crypto");
+const _feedback = require("./services/feedback");
 // Setup Restify Server
 var server = restify.createServer();
 server.use(restify.plugins.queryParser());
@@ -97,15 +98,6 @@ let recognizers = [
 // serialise the recognizers so that the custom recognizer is called before LUIS (saving on LUIS calls)
 var intents = new builder.IntentDialog({ recognizers: recognizers, recognizeOrder: builder.RecognizeOrder.series });
 bot.dialog('/', intents);
-let userHash = (session) => {
-    let userId = ((session && session.user && session.user.id)
-        || (session && session.message && session.message.user && session.message.user.id));
-    if (!userId) {
-        console.warn('Could not find user Id in Session');
-        return null;
-    }
-    return user.userHash(userId);
-};
 function sessionId(session) {
     let sessionId = ((session && session.message && session.message.address
         && session.message.address.conversation && session.message.address.conversation.id))
@@ -122,7 +114,7 @@ function sessionHash(session) {
 }
 // Welcome message
 bot.on('conversationUpdate', function (session) {
-    _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+    _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
     if (session.membersAdded) {
         session.membersAdded.forEach((identity) => {
             if (identity.id === session.address.bot.id) {
@@ -135,7 +127,7 @@ bot.dialog('Welcome', [
     function (session) {
         if (notListening(session.message))
             return;
-        _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+        _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
         _metrics.trackEvent('Bot/Welcome');
         session.send("Hey! I'm Ringo, the music bot 😎🎧🎵\r\nI love to discover new music and share my discoveries. "
             + "Tell me about Artists and Bands that you like, for example:\r\n"
@@ -146,16 +138,30 @@ bot.dialog('Welcome', [
 ]);
 intents.matches('Feedback', [
     function (session) {
-        if (notListening(session.message))
-            return;
-        _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
-        _metrics.trackEvent('Bot/Feedback');
-        let message = session.message.text;
-        builder.Prompts.text(session, 'How can I improve? If you would like to be contacted, include your email address in your feedback');
+        return __awaiter(this, void 0, void 0, function* () {
+            if (notListening(session.message))
+                return;
+            _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
+            _metrics.trackEvent('Bot/Feedback');
+            try {
+                yield _feedback.sendFeedback(user.userId(session), sessionId(session), session.message.text);
+                builder.Prompts.text(session, 'How can I improve? If you would like to be contacted, include your email address in your feedback');
+            }
+            catch (e) {
+                _messages.whoops(session, e);
+            }
+        });
     },
     function (session, results) {
-        session.endDialog('Thanks! I have sent your feedback.');
-        let message = results.response;
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield _feedback.sendFeedback(user.userId(session), sessionId(session), results.response);
+                session.endDialog('Thanks! I have sent your feedback.');
+            }
+            catch (e) {
+                _messages.whoops(session, e);
+            }
+        });
     }
 ]);
 intents.matches('Ignore', function () {
@@ -164,7 +170,7 @@ intents.matches('Ignore', function () {
 intents.matches('Help', function (session) {
     if (notListening(session.message))
         return;
-    _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+    _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
     _metrics.trackEvent('Bot/Help');
     session.endDialog("Ringo is a bot that aims to discover music by asking you a series of questions about your music tastes."
         + "You can type `quit` at any time to quit and resume the conversation later. Or type `feedback` to send feedback");
@@ -172,7 +178,7 @@ intents.matches('Help', function (session) {
 intents.matches('Quit', function (session) {
     if (notListening(session.message))
         return;
-    _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+    _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
     _metrics.trackEvent('Bot/Quit');
     session.endDialog("OK - see ya!");
 });
@@ -184,7 +190,7 @@ intents.onDefault([
     function (session, args) {
         if (notListening(session.message))
             return;
-        _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+        _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
         _messages.sorry(session);
         session.endDialog();
     }
@@ -192,7 +198,7 @@ intents.onDefault([
 intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, void 0, function* () {
     if (notListening(session.message))
         return;
-    _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+    _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
     console.log(`Like: intent = ${args.intent}, score = ${args.score}, entities = ${args.entities.length}, message = "${session.message.text}"`);
     // 90% certainty to like
     if (args.score < 0.9) {
@@ -276,7 +282,7 @@ intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, 
 intents.matches('Play', (session, args) => __awaiter(this, void 0, void 0, function* () {
     if (notListening(session.message))
         return;
-    _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
+    _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
     console.log(`Play: intent = ${args.intent}, score = ${args.score}, entities = ${args.entities.length}, message = "${session.message.text}"`);
     // 90% certainty to play
     if (args.score < 0.9) {

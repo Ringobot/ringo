@@ -16,10 +16,10 @@ export function artist(session, artist: any, likeButton: boolean = false): build
 
     let buttons = [];
     if (likeButton){
-        buttons.push(builder.CardAction.imBack(session, `I like ${artist.uri}`, `I like ${artist.name} ❤️`));
+        buttons.push(builder.CardAction.imBack(session, `I like ${artist.uri}`, `❤️ I like ${artist.name}`));
     }
 
-    buttons.push(builder.CardAction.imBack(session, `Play ${artist.uri}`, `Play ${artist.name} now 🎵`));
+    buttons.push(builder.CardAction.imBack(session, `Play ${artist.uri}`, `🎵 Play ${artist.name}`));
     card.buttons(buttons);
 
     return card;

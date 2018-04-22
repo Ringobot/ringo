@@ -1,11 +1,9 @@
-import _table = require('./tablestorage');
-import _graph = require('./graphstorage')
+//import _table = require('./tablestorage');
 import _canonical = require('./canonicalisation');
 import _servicebus = require('./servicebus');
-import { createClient } from '../gremlin/index';
 
 export async function userLikesArtist(user: string, artist: string) {
-    if (!user) throw 'user cannot be null';
+    if (!user) throw new Error('user cannot be null');
     
     let userId = user;
     let artistId = `${artist.toLowerCase()}:${_canonical.getArtistId(artist).Id}`;
@@ -18,7 +16,7 @@ export async function userLikesArtist(user: string, artist: string) {
         WhenLiked: new Date()
     };
 
-    await _table.insert('UserLikesArtist', entity, true);
+    //await _table.insert('UserLikesArtist', entity, true);
 
     var entityRelationship = {
         FromVertex: {
@@ -39,6 +37,9 @@ export async function userLikesArtist(user: string, artist: string) {
         RelationshipDate: new Date()
     }
 
-    await _servicebus.sendMessages(entityRelationship);
-
+    try{
+        await _servicebus.sendMessage('graph', entityRelationship);
+    } catch(e) {
+        throw e;
+    }
 };
