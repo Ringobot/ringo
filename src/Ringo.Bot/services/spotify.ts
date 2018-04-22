@@ -92,9 +92,6 @@ export async function playArtist(userHash: string, spotifyUri: string) {
         // TODO: -> getUserAuthHeader
         let token = await _auth.getUserAuthToken(userHash);
         let json = spotifyUri ? `{\r\n  \"context_uri\": \"${spotifyUri}\"\r\n}` : null;
-        //let data = { context_uri: spotifyUri };
-
-        console.log(json);
 
         await _httpj.put(`${baseUrl}/me/player/play`,
             json, { 'Authorization': 'Bearer ' + token });

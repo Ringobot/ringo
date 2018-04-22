@@ -92,8 +92,6 @@ function playArtist(userHash, spotifyUri) {
             // TODO: -> getUserAuthHeader
             let token = yield _auth.getUserAuthToken(userHash);
             let json = spotifyUri ? `{\r\n  \"context_uri\": \"${spotifyUri}\"\r\n}` : null;
-            //let data = { context_uri: spotifyUri };
-            console.log(json);
             yield _httpj.put(`${baseUrl}/me/player/play`, json, { 'Authorization': 'Bearer ' + token });
         }
         catch (e) {

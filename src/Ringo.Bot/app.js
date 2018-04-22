@@ -345,8 +345,8 @@ intents.matches('Play', (session, args) => __awaiter(this, void 0, void 0, funct
         if (e.message == 'Not Authorised') {
             _metrics.trackEvent('User/NotAuthorized');
             // If not authorised post message and link
-            session.endDialog("I would love to play this song for you. But first I need you to tell Spotify that it's OK. Click this link "
-                + `to authorise Ringo to control Spotify: ${process.env.SpotifyAuthRedirectUri}/${user.userHash(session)}`);
+            session.endDialog("Ok! Let's play some music. You will need a Spotify Premium account. Click this link "
+                + `to authorise me to control Spotify for you: ${process.env.SpotifyAuthRedirectUri}/${user.userHash(session)}`);
             return;
         }
         if (e.message.search('Command failed: Not paused') > 0) {
