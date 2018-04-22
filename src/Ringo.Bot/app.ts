@@ -193,9 +193,10 @@ intents.matches('Help',
         _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
         _metrics.trackEvent('Bot/Help');
 
+        // \r\n not reconised by bot dialogs
         session.endDialog("Ringo is a bot that discovers music for you by learning what sort of music you like. "
-            + "You can type \"`quit`\" at any time to quit and resume the conversation later. Or type \"`feedback`\" to send feedback.\r\n"
-            + "Ringo understands:\r\n\"`I like (artist)`\" and\r\n\"`Play (artist)`\"\r\nRingo is just a baby. He will understand more soon!"
+            + "You can type \"`quit`\" at any time to quit and resume the conversation later. Or type \"`feedback`\" to send feedback. "
+            + "Ringo understands: \"`I like (artist)`\" and \"`Play (artist)`\". Ringo is just a baby - he will understand more soon! 👶"
         );
     }
 );
