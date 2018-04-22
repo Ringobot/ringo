@@ -26,6 +26,8 @@ Connect a bot to Slack: <https://docs.microsoft.com/en-us/azure/bot-service/bot-
 
 Channel inspector: <https://docs.botframework.com/en-us/channel-inspector/channels/Slack?f=Carousel&e=example1>
 
+Custom recognizer: <https://docs.microsoft.com/en-us/azure/bot-service/nodejs/bot-builder-nodejs-recognize-intent-messages#register-a-custom-intent-recognizer>
+
 ### Typescript
 
 Downlevel Async Functions: <https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-1.html>

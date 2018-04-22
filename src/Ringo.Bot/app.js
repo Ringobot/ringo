@@ -58,10 +58,11 @@ const intentDialog = new builder.IntentDialog({
 let custom = {
     recognize: function (context, done) {
         if (context.message && notListening(context.message)) {
+            // ignore non group/DM messages so that they don't go to LUIS
             done(null, { score: 1.0, intent: 'Ignore' });
         }
         var intent = { score: 0.0, intent: null };
-        if (context.message.text) {
+        if (context.message && context.message.text) {
             switch (context.message.text.toLowerCase()) {
                 case 'help':
                     intent = { score: 1.0, intent: 'Help' };
@@ -86,6 +87,7 @@ let recognizers = [
     //new builder.RegExpRecognizer( "FeedbackIntent", { en_us: /^\/(feedback)/i}),
     new builder.LuisRecognizer(process.env.LUIS_MODEL_URL)
 ];
+// serialise the recognizers so that the custom recognizer is called before LUIS (saving on LUIS calls)
 var intents = new builder.IntentDialog({ recognizers: recognizers, recognizeOrder: builder.RecognizeOrder.series });
 bot.dialog('/', intents);
 let userHash = (session) => {
@@ -165,8 +167,7 @@ intents.matches('Quit', function (session) {
 });
 function notListening(message) {
     // if in a group and the bot is not mentioned, ignore this dialog
-    if (helpers.isGroup(message) && !helpers.isMentioned(message))
-        return;
+    return (helpers.isGroup(message) && !helpers.isMentioned(message));
 }
 intents.onDefault([
     function (session, args) {

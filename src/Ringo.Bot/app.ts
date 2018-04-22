@@ -41,8 +41,8 @@ server.get('/authorize/spotify/:userHash', _spotifyAuth.authorize);
 server.get(
     /\/(.*)?.*/,
     restify.plugins.serveStatic({
-    directory: './static',
-    default: 'index.html'
+        directory: './static',
+        default: 'index.html'
     })
 );
 
@@ -61,12 +61,13 @@ const intentDialog = new builder.IntentDialog({
 let custom = {
     recognize: function (context, done) {
         if (context.message && notListening(context.message)) {
+            // ignore non group/DM messages so that they don't go to LUIS
             done(null, { score: 1.0, intent: 'Ignore' })
         }
-        
+
         var intent = { score: 0.0, intent: null };
 
-        if (context.message.text) {
+        if (context.message && context.message.text) {
             switch (context.message.text.toLowerCase()) {
                 case 'help':
                     intent = { score: 1.0, intent: 'Help' };
@@ -80,7 +81,7 @@ let custom = {
             }
 
             // Feedback
-            if ((/^feedback.*/i).test(context.message.text)){
+            if ((/^feedback.*/i).test(context.message.text)) {
                 intent = { score: 1.0, intent: 'Feedback' };
             }
         }
@@ -96,11 +97,12 @@ let recognizers = [
     new builder.LuisRecognizer(process.env.LUIS_MODEL_URL)
 ];
 
+// serialise the recognizers so that the custom recognizer is called before LUIS (saving on LUIS calls)
 var intents = new builder.IntentDialog({ recognizers: recognizers, recognizeOrder: builder.RecognizeOrder.series });
 bot.dialog('/', intents);
 
-let userHash = (session:any) :string | null => {
-    let userId = ((session && session.user && session.user.id) 
+let userHash = (session: any): string | null => {
+    let userId = ((session && session.user && session.user.id)
         || (session && session.message && session.message.user && session.message.user.id));
     if (!userId) {
         console.warn('Could not find user Id in Session');
@@ -109,11 +111,11 @@ let userHash = (session:any) :string | null => {
     return user.userHash(userId);
 }
 
-function sessionId (session) {
-    let sessionId = ((session && session.message && session.message.address 
+function sessionId(session) {
+    let sessionId = ((session && session.message && session.message.address
         && session.message.address.conversation && session.message.address.conversation.id))
         || (session && session.address && session.address.conversation && session.address.conversation.id);
-        
+
     if (!sessionId) {
         console.warn('Could not find session Id in Session');
         return null;
@@ -157,7 +159,7 @@ intents.matches('Feedback', [
         if (notListening(session.message)) return;
         _metrics.setAuthenticatedUserContext(sessionId(session), userHash(session));
         _metrics.trackEvent('Bot/Feedback');
-        
+
         let message = session.message.text;
 
         builder.Prompts.text(session, 'How can I improve? If you would like to be contacted, include your email address in your feedback');
@@ -170,7 +172,7 @@ intents.matches('Feedback', [
     }
 ]);
 
-intents.matches('Ignore', function (){
+intents.matches('Ignore', function () {
     console.log('Not listening');
 });
 
@@ -195,9 +197,9 @@ intents.matches('Quit',
     }
 );
 
-function notListening(message){
+function notListening(message): boolean {
     // if in a group and the bot is not mentioned, ignore this dialog
-    if (helpers.isGroup(message) && !helpers.isMentioned(message)) return;
+    return (helpers.isGroup(message) && !helpers.isMentioned(message));
 }
 
 intents.onDefault([
@@ -327,7 +329,7 @@ intents.matches('Play',
         let spotifyUriEntity = builder.EntityRecognizer.findEntity(args.entities, 'spotifyUri');
         var spotifyUri = null;
 
-        if (spotifyUriEntity){
+        if (spotifyUriEntity) {
             spotifyUri = helpers.getEntityText(session.message, spotifyUriEntity);
         } else {
             // Play Radiohead
@@ -387,7 +389,7 @@ intents.matches('Play',
                 session.endDialog("Already playing ;) try something like `Play Madonna`");
                 return;
             }
-            
+
             _messages.whoops(session, e);
         }
     }
