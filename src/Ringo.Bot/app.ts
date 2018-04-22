@@ -1,5 +1,4 @@
 /// <reference types="node" />
-
 require('dotenv').config();
 import _metrics = require('./services/metrics');
 _metrics.start();
@@ -16,6 +15,7 @@ import helpers = require('./helpers');
 import _spotify = require('./services/spotify');
 import _spotifyAuth = require('./services/spotifyauth');
 import user = require('./models/user')
+import _crypto = require('./helpers/crypto')
 
 // Setup Restify Server
 var server = restify.createServer();
@@ -71,11 +71,11 @@ let custom = {
         if (context.message && context.message.text) {
             let mention = (context.message.entities
                 && context.message.entities.filter(e => e.type == 'mention')
-                .find(e => e.mentioned.id == context.message.address.bot.id));
-            
+                    .find(e => e.mentioned.id == context.message.address.bot.id));
+
             // filter out mention handle
             let message = mention ? context.message.text.replace(mention.text, '').trim() : context.message.text;
-            
+
             switch (message.toLowerCase()) {
                 case 'help':
                     intent = { score: 1.0, intent: 'Help' };
@@ -129,6 +129,11 @@ function sessionId(session) {
         return null;
     }
     return sessionId;
+}
+
+function sessionHash(session:any): string {
+    let id = sessionId(session);
+    return id ? _crypto.sha256(id) : null;
 }
 
 // Welcome message
@@ -227,11 +232,11 @@ intents.matches('Like Artist',
         console.log(`Like: intent = ${args.intent}, score = ${args.score}, entities = ${args.entities.length}, message = "${session.message.text}"`);
 
         // 90% certainty to like
-        if (args.score < 0.9){
+        if (args.score < 0.9) {
             _messages.sorry(session);
-            return;            
+            return;
         }
-        
+
         // Session logging
         //TODO: #340 Switch off last session logging
         session.userData.lastSessionMessage = session.message;
@@ -328,9 +333,9 @@ intents.matches('Play',
         console.log(`Play: intent = ${args.intent}, score = ${args.score}, entities = ${args.entities.length}, message = "${session.message.text}"`);
 
         // 90% certainty to play
-        if (args.score < 0.9){
+        if (args.score < 0.9) {
             _messages.sorry(session);
-            return;            
+            return;
         }
 
         // Session logging

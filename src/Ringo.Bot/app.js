@@ -1,5 +1,4 @@
 "use strict";
-/// <reference types="node" />
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -9,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/// <reference types="node" />
 require('dotenv').config();
 const _metrics = require("./services/metrics");
 _metrics.start();
@@ -23,6 +23,7 @@ const helpers = require("./helpers");
 const _spotify = require("./services/spotify");
 const _spotifyAuth = require("./services/spotifyauth");
 const user = require("./models/user");
+const _crypto = require("./helpers/crypto");
 // Setup Restify Server
 var server = restify.createServer();
 server.use(restify.plugins.queryParser());
@@ -114,6 +115,10 @@ function sessionId(session) {
         return null;
     }
     return sessionId;
+}
+function sessionHash(session) {
+    let id = sessionId(session);
+    return id ? _crypto.sha256(id) : null;
 }
 // Welcome message
 bot.on('conversationUpdate', function (session) {
