@@ -11,33 +11,37 @@ Object.defineProperty(exports, "__esModule", { value: true });
 //import _table = require('./tablestorage');
 const _canonical = require("./canonicalisation");
 const _servicebus = require("./servicebus");
-function userLikesArtist(user, artist) {
+function userLikesArtist(userId, artist) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!user)
+        if (!userId)
             throw new Error('user cannot be null');
-        let userId = user;
-        let artistId = `${artist.toLowerCase()}:${_canonical.getArtistId(artist).Id}`;
+        // graph artist Id
+        let artistId = `${artist.name.toLowerCase()}:${_canonical.getArtistId(artist.name).Id}`;
+        /*
         let entity = {
             PartitionKey: userId,
             RowKey: artistId,
-            User: user,
+            User: userId,
             Artist: artist,
             WhenLiked: new Date()
         };
+    
         //await _table.insert('UserLikesArtist', entity, true);
+        */
         var entityRelationship = {
             FromVertex: {
                 Id: userId,
-                Name: user,
+                Name: userId,
                 Properties: {
                     type: "user"
                 }
             },
             ToVertex: {
                 Id: artistId,
-                Name: artist,
+                Name: artist.name,
                 Properties: {
-                    type: "artist"
+                    type: "artist",
+                    spotifyId: artist.spotifyId
                 }
             },
             Relationship: "likes",

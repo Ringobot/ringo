@@ -217,20 +217,17 @@ intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, 
     }
     var spotifyUri = builder.EntityRecognizer.findEntity(args.entities, 'spotifyUri');
     if (spotifyUri) {
-        // I like spotify:artist:25IG9fa7cbdmCIy3OnuH57
+        // I like spotifyUri
         // extract the entity with case preserved
         let uri = helpers.getEntityText(session.message, spotifyUri);
         session.sendTyping();
         try {
             let artist = yield _artists.getArtistByUri(uri);
-            //let msg = _messages.artist(session, artist);
-            //msg.text(`I like ${artist.name} too!`);
-            //session.send(msg);
             session.send(`I like ${artist.name} too!`);
             _metrics.trackEvent('Artist/Like');
             session.sendTyping();
-            yield userdata.userLikesArtist(user.userId(session), artist.name);
-            let msg2 = yield _messages.recommendArtist(session, artist.id);
+            yield userdata.userLikesArtist(user.userId(session), artist);
+            let msg2 = yield _messages.recommendArtist(session, artist.spotifyId);
             session.endDialog(msg2);
         }
         catch (e) {

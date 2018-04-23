@@ -1,45 +1,49 @@
 //import _table = require('./tablestorage');
 import _canonical = require('./canonicalisation');
 import _servicebus = require('./servicebus');
+import artist = require('../models/artist');
 
-export async function userLikesArtist(user: string, artist: string) {
-    if (!user) throw new Error('user cannot be null');
-    
-    let userId = user;
-    let artistId = `${artist.toLowerCase()}:${_canonical.getArtistId(artist).Id}`;
+export async function userLikesArtist(userId: string, artist: artist.Artist) {
+    if (!userId) throw new Error('user cannot be null');
 
+    // graph artist Id
+    let artistId = `${artist.name.toLowerCase()}:${_canonical.getArtistId(artist.name).Id}`;
+
+    /*
     let entity = {
         PartitionKey: userId,
         RowKey: artistId,
-        User: user,
+        User: userId,
         Artist: artist,
         WhenLiked: new Date()
     };
 
     //await _table.insert('UserLikesArtist', entity, true);
+    */
 
     var entityRelationship = {
         FromVertex: {
             Id: userId,
-            Name: user,
+            Name: userId,
             Properties: {
-                    type: "user"
-                } 
+                type: "user"
+            }
         },
         ToVertex: {
             Id: artistId,
-            Name: artist,
+            Name: artist.name,
             Properties: {
-                    type: "artist"
-                }
+                type: "artist",
+                spotifyId: artist.spotifyId
+            }
         },
         Relationship: "likes",
         RelationshipDate: new Date()
     }
 
-    try{
+    try {
         await _servicebus.sendMessage('graph', entityRelationship);
-    } catch(e) {
+    } catch (e) {
         throw e;
     }
 };
