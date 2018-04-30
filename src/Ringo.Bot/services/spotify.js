@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const _httpj = require("./httpjson");
-const _auth = require("./spotifyAuth");
+const _auth = require("./spotifyauth");
 const baseUrl = 'https://api.spotify.com/v1';
 function searchArtists(artist, limit) {
     return __awaiter(this, void 0, void 0, function* () {
