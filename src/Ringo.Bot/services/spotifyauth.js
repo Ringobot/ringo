@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const _httpj = require("./httpjson");
 const errs = require("restify-errors");
-const _helper = require("./spotifyHelper");
+const _helper = require("./spotifyhelper");
 const _crypto = require("../helpers/crypto");
 const _data = require("../data/spotifyUserAuthData");
 const tokenUrl = 'https://accounts.spotify.com/api/token';

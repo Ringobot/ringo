@@ -1,7 +1,7 @@
 import * as _httpj from "./httpjson";
 import _table = require('./tablestorage');
 import errs = require('restify-errors');
-import _helper = require('./spotifyHelper');
+import _helper = require('./spotifyhelper');
 import _auth = require('./spotifyauth');
 import _crypto = require('../helpers/crypto')
 

@@ -1,6 +1,6 @@
 import * as _httpj from "./httpjson";
 import errs = require('restify-errors');
-import _helper = require('./spotifyHelper');
+import _helper = require('./spotifyhelper');
 import _crypto = require('../helpers/crypto');
 import _data = require('../data/spotifyUserAuthData');
 
