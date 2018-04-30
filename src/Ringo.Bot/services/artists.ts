@@ -1,19 +1,19 @@
 import _spotify = require('./spotify');
 import artist = require('../models/artist');
 
-export function searchArtists(artist:string, limit?:number) {
-    return _spotify.searchArtists(artist, limit);
+export async function searchArtists(artistName: string, limit?: number): Promise<artist.Artist[]> {
+    return artist.MapToArtists(await _spotify.searchArtists(artistName, limit));
 }
 
-export function getRelatedArtists(artistId:string) {
-    return _spotify.getRelatedArtists(artistId);
+export async function getRelatedArtists(artistId: string): Promise<artist.Artist[]> {
+    return artist.MapToArtists(await _spotify.getRelatedArtists(artistId));
 };
 
-export function getArtist(artistId:string) {
+export function getArtist(artistId: string) {
     return _spotify.getArtist(artistId);
 };
 
-export async function getArtistByUri(uri:string) : Promise<artist.Artist> {
+export async function getArtistByUri(uri: string): Promise<artist.Artist> {
     let spotifyArtistRegex = /spotify:artist:[A-Za-z0-9]{22}/
 
     if (!spotifyArtistRegex.test(uri)) {
@@ -23,8 +23,17 @@ export async function getArtistByUri(uri:string) : Promise<artist.Artist> {
     let artistId = uri.split(":")[2];
 
     try {
-        return await artist.MapToArtist(_spotify.getArtist(artistId));
+        return await artist.MapToArtist(await _spotify.getArtist(artistId));
     } catch (e) {
         throw e;
     }
+}
+
+/**
+ * Finds true and the artist if only one artist (with an image) is found in the array
+ * @param artists an array of Artists (returned by a search API)
+ */
+export function findMatch(artists: artist.Artist[]): [boolean, artist.Artist] {
+    let artistsWithImages = artists.filter(i => i.images.length > 0);
+    return artistsWithImages.length === 1 ? [true, artistsWithImages[0]] : [false, null];
 }

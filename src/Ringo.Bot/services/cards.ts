@@ -1,11 +1,12 @@
 import builder = require('botbuilder');
+import _artist = require('../models/artist');
 
 /**
  * Creates a simple Artist Hero Card
  * @param session 
  * @param artist 
  */
-export function artist(session, artist: any, likeButton: boolean = false): builder.AttachmentType {
+export function artist(session, artist: _artist.Artist, likeButton: boolean = false): builder.AttachmentType {
     let card = new builder.HeroCard(session)
         .title(artist.name);
 
@@ -16,22 +17,22 @@ export function artist(session, artist: any, likeButton: boolean = false): build
 
     let buttons = [];
     if (likeButton){
-        buttons.push(builder.CardAction.imBack(session, `I like ${artist.uri}`, `❤️ I like ${artist.name}`));
+        buttons.push(builder.CardAction.imBack(session, `I like ${artist.spotify.uri}`, `❤️ I like ${artist.name}`));
     }
 
-    buttons.push(builder.CardAction.imBack(session, `Play ${artist.uri}`, `🎵 Play ${artist.name}`));
+    buttons.push(builder.CardAction.imBack(session, `Play ${artist.spotify.uri}`, `🎵 Play ${artist.name}`));
     card.buttons(buttons);
 
     return card;
 };
 
 
-export function artists(session, artists: any): builder.AttachmentType[] {
+export function artists(session, artists: _artist.Artist[]): builder.AttachmentType[] {
     let cards = new Array<builder.AttachmentType>();
 
-    for (var j in artists.artists.items) {
+    for (var j in artists) {
 
-        let item = artists.artists.items[j];
+        let item = artists[j];
 
         // skip items with no images
         if (item.images.length === 0) continue;
@@ -42,8 +43,8 @@ export function artists(session, artists: any): builder.AttachmentType[] {
             .images([builder.CardImage.create(session, item.images[0].url)])
             .text(`Do you like ${item.name}?`)
             .buttons([
-                builder.CardAction.imBack(session, `I like ${item.uri}`, `❤️ I like ${item.name}`),
-                builder.CardAction.imBack(session, `Play ${item.uri}`, `🎵 Play ${item.name}`)
+                builder.CardAction.imBack(session, `I like ${item.spotify.uri}`, `❤️ I like ${item.name}`),
+                builder.CardAction.imBack(session, `Play ${item.spotify.uri}`, `🎵 Play ${item.name}`)
             ]);
 
         cards.push(card);

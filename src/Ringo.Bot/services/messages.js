@@ -42,7 +42,7 @@ function recommendArtist(session, artistId) {
             if (artists.length === 0)
                 return null;
             // filter out artists without images and sort by popularity desc
-            let sorted = artists.artists.filter(a => a.images.length > 0).sort(popularityDesc);
+            let sorted = artists.filter(a => a.images.length > 0).sort(popularityDesc);
             let artist = sorted[0];
             let card = _cards.artist(session, artist, true);
             let msg = new builder.Message(session);

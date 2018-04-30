@@ -227,7 +227,7 @@ intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, 
             _metrics.trackEvent('Artist/Like');
             session.sendTyping();
             yield userdata.userLikesArtist(user.userId(session), artist);
-            let msg2 = yield _messages.recommendArtist(session, artist.spotifyId);
+            let msg2 = yield _messages.recommendArtist(session, artist.spotify.id);
             session.endDialog(msg2);
         }
         catch (e) {
@@ -247,16 +247,16 @@ intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, 
         try {
             session.sendTyping();
             let artists = yield _artists.searchArtists(artistsName.entity, 3);
-            let match = helpers.findMatch(artists);
-            if (match.matched) {
+            let match = _artists.findMatch(artists);
+            if (match[0]) {
                 // exact match
-                let msg = _messages.artist(session, match.artist);
-                msg.text(`I like ${match.artist.name} too!`);
+                let msg = _messages.artist(session, match[1]);
+                msg.text(`I like ${match[1].name} too!`);
                 session.send(msg);
                 _metrics.trackEvent('Artist/Like');
                 session.sendTyping();
-                yield userdata.userLikesArtist(user.userId(session), match.artist.name);
-                let msg2 = yield _messages.recommendArtist(session, match.artist.id);
+                yield userdata.userLikesArtist(user.userId(session), match[1]);
+                let msg2 = yield _messages.recommendArtist(session, match[1].spotify.id);
                 session.endDialog(msg2);
             }
             else {
@@ -310,11 +310,11 @@ intents.matches('Play', (session, args) => __awaiter(this, void 0, void 0, funct
             try {
                 session.sendTyping();
                 let artists = yield _artists.searchArtists(artistsName.entity, 3);
-                let match = helpers.findMatch(artists);
-                if (match.matched) {
+                let match = _artists.findMatch(artists);
+                if (match[0]) {
                     // exact match
-                    let msg = _messages.artist(session, match.artist);
-                    spotifyUri = match.artist.uri;
+                    let msg = _messages.artist(session, match[1]);
+                    spotifyUri = match[1].spotify.uri;
                 }
                 else {
                     // Which artist?

@@ -15,9 +15,9 @@ function artist(session, artist, likeButton = false) {
     }
     let buttons = [];
     if (likeButton) {
-        buttons.push(builder.CardAction.imBack(session, `I like ${artist.uri}`, `❤️ I like ${artist.name}`));
+        buttons.push(builder.CardAction.imBack(session, `I like ${artist.spotify.uri}`, `❤️ I like ${artist.name}`));
     }
-    buttons.push(builder.CardAction.imBack(session, `Play ${artist.uri}`, `🎵 Play ${artist.name}`));
+    buttons.push(builder.CardAction.imBack(session, `Play ${artist.spotify.uri}`, `🎵 Play ${artist.name}`));
     card.buttons(buttons);
     return card;
 }
@@ -25,8 +25,8 @@ exports.artist = artist;
 ;
 function artists(session, artists) {
     let cards = new Array();
-    for (var j in artists.artists.items) {
-        let item = artists.artists.items[j];
+    for (var j in artists) {
+        let item = artists[j];
         // skip items with no images
         if (item.images.length === 0)
             continue;
@@ -35,8 +35,8 @@ function artists(session, artists) {
             .images([builder.CardImage.create(session, item.images[0].url)])
             .text(`Do you like ${item.name}?`)
             .buttons([
-            builder.CardAction.imBack(session, `I like ${item.uri}`, `❤️ I like ${item.name}`),
-            builder.CardAction.imBack(session, `Play ${item.uri}`, `🎵 Play ${item.name}`)
+            builder.CardAction.imBack(session, `I like ${item.spotify.uri}`, `❤️ I like ${item.name}`),
+            builder.CardAction.imBack(session, `Play ${item.spotify.uri}`, `🎵 Play ${item.name}`)
         ]);
         cards.push(card);
     }

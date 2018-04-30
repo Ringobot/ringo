@@ -10,12 +10,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const _spotify = require("./spotify");
 const artist = require("../models/artist");
-function searchArtists(artist, limit) {
-    return _spotify.searchArtists(artist, limit);
+function searchArtists(artistName, limit) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return artist.MapToArtists(yield _spotify.searchArtists(artistName, limit));
+    });
 }
 exports.searchArtists = searchArtists;
 function getRelatedArtists(artistId) {
-    return _spotify.getRelatedArtists(artistId);
+    return __awaiter(this, void 0, void 0, function* () {
+        return artist.MapToArtists(yield _spotify.getRelatedArtists(artistId));
+    });
 }
 exports.getRelatedArtists = getRelatedArtists;
 ;
@@ -32,7 +36,7 @@ function getArtistByUri(uri) {
         }
         let artistId = uri.split(":")[2];
         try {
-            return yield artist.MapToArtist(_spotify.getArtist(artistId));
+            return yield artist.MapToArtist(yield _spotify.getArtist(artistId));
         }
         catch (e) {
             throw e;
@@ -40,3 +44,12 @@ function getArtistByUri(uri) {
     });
 }
 exports.getArtistByUri = getArtistByUri;
+/**
+ * Finds true and the artist if only one artist (with an image) is found in the array
+ * @param artists an array of Artists (returned by a search API)
+ */
+function findMatch(artists) {
+    let artistsWithImages = artists.filter(i => i.images.length > 0);
+    return artistsWithImages.length === 1 ? [true, artistsWithImages[0]] : [false, null];
+}
+exports.findMatch = findMatch;

@@ -1,6 +1,7 @@
 import builder = require('botbuilder');
 import _cards = require('./cards');
 import _artists = require('./artists');
+import _artist = require('../models/artist');
 import _metrics = require('./metrics');
 
 export function artist(session: builder.Session, artist: any): builder.Message {
@@ -29,11 +30,11 @@ function popularityDesc(a, b){
 
 export async function recommendArtist(session: builder.Session, artistId: string) : Promise<builder.Message> {
     try {
-        let artists = await _artists.getRelatedArtists(artistId);
+        let artists:_artist.Artist[] = await _artists.getRelatedArtists(artistId);
         if (artists.length === 0) return null;
 
         // filter out artists without images and sort by popularity desc
-        let sorted = artists.artists.filter(a => a.images.length > 0).sort(popularityDesc);
+        let sorted = artists.filter(a => a.images.length > 0).sort(popularityDesc);
         let artist = sorted[0];
         let card = _cards.artist(session, artist, true);
 

@@ -8,18 +8,25 @@ describe('spotify.getAuthToken', () => {
   
   it('should return a token', async () => {
     let token = await spotifyAuth.getClientAuthToken();
-    console.log(token);
     expect(token).to.not.be.null;
-  }).timeout(5000);
+  }).timeout(3000);
 
 });
 
-describe('spotify.searchArtists', () => {
+describe('spotify.searchArtists', function () {
 
-  it('should return a response', async () => {
-    let artists = await spotify.searchArtists("Radiohead");
-    console.log(artists);
-    expect(artists).to.not.be.null;
-  }).timeout(5000);
+  var data;
+
+  before(async function() {
+    data = await spotify.searchArtists("Radiohead");
+  });
+  
+  it('should return a response', () => {
+    expect(data).to.not.be.null;
+  });
+
+  it('should return data.artists.items', () => {
+    expect(data.artists.items).to.not.be.null;
+  });
 
 });

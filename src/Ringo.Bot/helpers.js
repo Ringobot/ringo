@@ -14,12 +14,3 @@ function getEntityText(message, entity) {
     return message.text.substr(entity.startIndex, entity.endIndex - entity.startIndex + 1);
 }
 exports.getEntityText = getEntityText;
-function findMatch(artists) {
-    let result = { matched: false, artist: null };
-    let artistsWithImages = artists.artists.items.filter(i => i.images.length > 0);
-    result.matched = artistsWithImages.length === 1;
-    if (result.matched)
-        result.artist = artistsWithImages[0];
-    return result;
-}
-exports.findMatch = findMatch;
