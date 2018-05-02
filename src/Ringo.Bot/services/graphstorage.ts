@@ -2,17 +2,20 @@
 
 import _gremlin = require('gremlin');
 
-export function createClient(dbId?: string, collectionId?: string) {
-    return _gremlin.createClient(
-        443,
-        process.env.GRAPH_ENDPOINT,
-        {
-            "session": false,
-            "ssl": true,
-            "user": `/dbs/${dbId || process.env.GRAPH_DATABASE_ID}/colls/${collectionId || process.env.GRAPH_COLLECTION_ID}`,
-            "password": process.env.GRAPH_ACCESS_KEY
-        });
+if (!process.env.GRAPH_ENDPOINT || !process.env.GRAPH_DATABASE_ID || !process.env.GRAPH_COLLECTION_ID || !process.env.GRAPH_ACCESS_KEY){
+    throw new Error('Expecting Env vars GRAPH_ENDPOINT, GRAPH_DATABASE_ID, GRAPH_COLLECTION_ID, GRAPH_ACCESS_KEY')
 }
+
+let client = _gremlin.createClient(
+    443,
+    process.env.GRAPH_ENDPOINT,
+    {
+        "session": false,
+        "ssl": true,
+        "user": `/dbs/${process.env.GRAPH_DATABASE_ID}/colls/${process.env.GRAPH_COLLECTION_ID}`,
+        "password": process.env.GRAPH_ACCESS_KEY
+    }
+);
 
 /*
 export function dropGraph(client, callback) {
@@ -45,7 +48,7 @@ interface Edge {
     ToVertex: string
 }
 
-export function getVertexByName(client, name: string) {
+export function getVertexByName(name: string) {
     var query = `g.V().hasLabel('${name}')`;
 
     console.log('graphstorage.getVertexByName', 'vertex.Name', name);
@@ -64,7 +67,26 @@ export function getVertexByName(client, name: string) {
     });
 };
 
-export function getVertexById(client, id:string){
+export function vertexEdgeVertices(vertexId, edgeLabel, verticesType) {
+    // g.V().has('id', 'default-user').out('likes').has('type', 'artist')
+    var query = `g.V().has('id', vertexId).out(edgeLabel).has('type', verticesType)`;
+    var bindings = { vertexId, edgeLabel, verticesType};
+
+    return new Promise<any>((resolve, reject) => {
+        client.execute(query, bindings, function (err, results) {
+            if (err) {
+                reject(err);
+                return;
+            }
+
+            resolve(results);
+            return;
+        });
+    });
+    
+}
+
+export function getVertexById(id:string){
     // g.V().hasId('123')
     var query = `g.V().hasId('${id}')`;
 
@@ -84,7 +106,7 @@ export function getVertexById(client, id:string){
     });
 }
 
-export function addVertex(client, vertex: Vertex) {
+export function addVertex(vertex: Vertex) {
     var query = "g.addV(T.Id, _Id)";
     var bindings = { _Id: vertex.Id };
 
@@ -111,7 +133,7 @@ export function addVertex(client, vertex: Vertex) {
     });
 };
 
-export function addEdgeLike(client, edge: Edge) {
+export function addEdgeLike(edge: Edge) {
     var query = `g.V('${edge.FromVertex}').addE('${edge.Relationship}').to(g.V('${edge.ToVertex}'))`;
 
     console.log('graphstorage.addEdgeLike', 'FromVertex', edge.FromVertex);

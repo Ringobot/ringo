@@ -12,6 +12,8 @@ const builder = require("botbuilder");
 const _cards = require("./cards");
 const _artists = require("./artists");
 const _metrics = require("./metrics");
+const _userdata = require("./userdata");
+const user = require("../models/user");
 function artist(session, artist) {
     let card = _cards.artist(session, artist);
     let msg = new builder.Message(session);
@@ -43,10 +45,23 @@ function recommendArtist(session, artistId) {
                 return null;
             // filter out artists without images and sort by popularity desc
             let sorted = artists.filter(a => a.images.length > 0).sort(popularityDesc);
-            let artist = sorted[0];
+            // get the artists that are already liked
+            let likedArtists = yield _userdata.artistsUserLikes(user.userId(session));
+            // go through the list until one that has not been list is found, or return null
+            var artist = null;
+            for (var i = 0; i < sorted.length; i++) {
+                if (likedArtists.find((l) => l.spotify.id === sorted[i].spotify.id)) {
+                    console.log('messages.recommendArtist: skipped, already liked', sorted[i]);
+                    continue;
+                }
+                // found one
+                artist = sorted[i];
+                break;
+            }
+            if (artist === null)
+                return null;
             let card = _cards.artist(session, artist, true);
             let msg = new builder.Message(session);
-            //msg.attachmentLayout(builder.AttachmentLayout.carousel);
             msg.attachments([card]);
             msg.text(`Do you like ${artist.name}?`);
             return msg;

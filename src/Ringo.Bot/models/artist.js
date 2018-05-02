@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-function MapToArtist(spotifyArtist) {
+function mapToArtist(spotifyArtist) {
     if (!spotifyArtist)
         return null;
     if (!spotifyArtist.name && !spotifyArtist.id && !spotifyArtist.uri) {
@@ -16,8 +16,8 @@ function MapToArtist(spotifyArtist) {
         images: spotifyArtist.images
     };
 }
-exports.MapToArtist = MapToArtist;
-function MapToArtists(spotifyData) {
+exports.mapToArtist = mapToArtist;
+function mapToArtists(spotifyData) {
     if (!spotifyData)
         return null;
     // spotify artist responses come in two shapes (!)
@@ -25,6 +25,25 @@ function MapToArtists(spotifyData) {
     if (!data) {
         throw new Error(`${spotifyData} is not a valid Spotify artists response`);
     }
-    return data.map(MapToArtist);
+    return data.map(mapToArtist);
 }
-exports.MapToArtists = MapToArtists;
+exports.mapToArtists = mapToArtists;
+function mapGraphToArtists(data) {
+    let artists = [];
+    data.forEach(item => {
+        artists.push({
+            name: item.properties['name'][0].value,
+            spotify: {
+                id: item.properties['spotifyId'] && item.properties['spotifyId'][0].value,
+                uri: item.properties['spotifyUri'] && item.properties['spotifyUri'][0].value
+            },
+            images: [{
+                    height: undefined,
+                    url: item.properties['imageUrl'] && item.properties['imageUrl'][0].value,
+                    width: undefined
+                }]
+        });
+    });
+    return artists;
+}
+exports.mapGraphToArtists = mapGraphToArtists;

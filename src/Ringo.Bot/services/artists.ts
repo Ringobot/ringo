@@ -2,11 +2,11 @@ import _spotify = require('./spotify');
 import artist = require('../models/artist');
 
 export async function searchArtists(artistName: string, limit?: number): Promise<artist.Artist[]> {
-    return artist.MapToArtists(await _spotify.searchArtists(artistName, limit));
+    return artist.mapToArtists(await _spotify.searchArtists(artistName, limit));
 }
 
 export async function getRelatedArtists(artistId: string): Promise<artist.Artist[]> {
-    return artist.MapToArtists(await _spotify.getRelatedArtists(artistId));
+    return artist.mapToArtists(await _spotify.getRelatedArtists(artistId));
 };
 
 export function getArtist(artistId: string) {
@@ -23,7 +23,7 @@ export async function getArtistByUri(uri: string): Promise<artist.Artist> {
     let artistId = uri.split(":")[2];
 
     try {
-        return await artist.MapToArtist(await _spotify.getArtist(artistId));
+        return await artist.mapToArtist(await _spotify.getArtist(artistId));
     } catch (e) {
         throw e;
     }

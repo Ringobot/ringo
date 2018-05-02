@@ -11,6 +11,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 //import _table = require('./tablestorage');
 const _canonical = require("./canonicalisation");
 const _servicebus = require("./servicebus");
+const artist = require("../models/artist");
+const _graph = require("./graphstorage");
+/**
+ * Get all of the artists that a User likes
+ * @param userId
+ */
+function artistsUserLikes(userId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let data = yield _graph.vertexEdgeVertices(userId, 'likes', 'artist');
+        return artist.mapGraphToArtists(data);
+    });
+}
+exports.artistsUserLikes = artistsUserLikes;
 function userLikesArtist(userId, artist) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!userId)

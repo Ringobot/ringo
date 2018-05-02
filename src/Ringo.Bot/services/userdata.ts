@@ -2,6 +2,16 @@
 import _canonical = require('./canonicalisation');
 import _servicebus = require('./servicebus');
 import artist = require('../models/artist');
+import _graph = require('./graphstorage')
+
+/**
+ * Get all of the artists that a User likes
+ * @param userId 
+ */
+export async function artistsUserLikes(userId) :Promise<artist.Artist[]> {
+    let data = await _graph.vertexEdgeVertices(userId, 'likes', 'artist')
+    return artist.mapGraphToArtists(data);
+}
 
 export async function userLikesArtist(userId: string, artist: artist.Artist) {
     if (!userId) throw new Error('user cannot be null');

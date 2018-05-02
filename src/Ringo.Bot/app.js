@@ -228,7 +228,10 @@ intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, 
             session.sendTyping();
             yield userdata.userLikesArtist(user.userId(session), artist);
             let msg2 = yield _messages.recommendArtist(session, artist.spotify.id);
-            session.endDialog(msg2);
+            if (msg2)
+                session.endDialog(msg2);
+            else
+                session.endDialog();
         }
         catch (e) {
             _messages.whoops(session, e);
@@ -256,8 +259,12 @@ intents.matches('Like Artist', (session, args, next) => __awaiter(this, void 0, 
                 _metrics.trackEvent('Artist/Like');
                 session.sendTyping();
                 yield userdata.userLikesArtist(user.userId(session), match[1]);
+                // Recommend another artist
                 let msg2 = yield _messages.recommendArtist(session, match[1].spotify.id);
-                session.endDialog(msg2);
+                if (msg2)
+                    session.endDialog(msg2);
+                else
+                    session.endDialog();
             }
             else {
                 // Which artist?

@@ -13,7 +13,7 @@ export interface Artist {
     images: Image[]
 }
 
-export function MapToArtist(spotifyArtist: any): Artist {
+export function mapToArtist(spotifyArtist: any): Artist {
     if (!spotifyArtist) return null;
     if (!spotifyArtist.name && !spotifyArtist.id && !spotifyArtist.uri) {
         // it's not an artist
@@ -30,7 +30,7 @@ export function MapToArtist(spotifyArtist: any): Artist {
     };
 }
 
-export function MapToArtists(spotifyData: any): Artist[] {
+export function mapToArtists(spotifyData: any): Artist[] {
     if (!spotifyData) return null;
 
     // spotify artist responses come in two shapes (!)
@@ -41,5 +41,26 @@ export function MapToArtists(spotifyData: any): Artist[] {
         throw new Error(`${spotifyData} is not a valid Spotify artists response`);
     }
 
-    return data.map(MapToArtist);
+    return data.map(mapToArtist);
+}
+
+export function mapGraphToArtists(data:any[]): Artist[]{
+    let artists:Artist[] = []
+    
+    data.forEach(item => {
+        artists.push({
+            name: item.properties['name'][0].value,
+            spotify: {
+                id: item.properties['spotifyId'] && item.properties['spotifyId'][0].value,
+                uri: item.properties['spotifyUri'] && item.properties['spotifyUri'][0].value
+            },
+            images: [{
+                height: undefined,
+                url: item.properties['imageUrl'] && item.properties['imageUrl'][0].value,
+                width: undefined
+            }]
+        })
+    });
+
+    return artists;
 }
