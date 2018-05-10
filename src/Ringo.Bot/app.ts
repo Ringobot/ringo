@@ -264,7 +264,7 @@ intents.matches('Like Artist',
                 
                 session.sendTyping();
                 await userdata.userLikesArtist(user.userId(session), artist);
-                let msg2 = await _messages.recommendArtist(session, artist.spotify.id);
+                let msg2 = await _messages.recommendArtist(session, artist);
                 if (msg2) session.endDialog(msg2) 
                 else session.endDialog()
 
@@ -300,7 +300,7 @@ intents.matches('Like Artist',
                     await userdata.userLikesArtist(user.userId(session), match[1]);
 
                     // Recommend another artist
-                    let msg2 = await _messages.recommendArtist(session, match[1].spotify.id);
+                    let msg2 = await _messages.recommendArtist(session, match[1]);
                     if (msg2) session.endDialog(msg2) 
                     else session.endDialog()
 

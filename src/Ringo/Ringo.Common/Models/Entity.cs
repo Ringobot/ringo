@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace Ringo.Common.Models
 {
     public class Entity
     {
-        public Entity(string id, string name, Dictionary<string, string> properties)
+        public Entity(string id, string name, JObject properties)
         {
             this.Id = id;
             this.CreateDate = DateTime.UtcNow;
@@ -16,7 +16,7 @@ namespace Ringo.Common.Models
         public string Id { get; set; }
         public DateTime CreateDate { get; set; }
         public string Name { get; set; }
-        public Dictionary<string, string> Properties { get; set; }
+        public JObject Properties { get; set; }
 
 
     }

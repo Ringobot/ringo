@@ -1,0 +1,39 @@
+{
+    "FromVertex": {
+        "Id": "band of skulls:6f857f9be820ad4ea3d6d8fe52295cad",
+        "Name": "Band Of Skulls",
+        "Properties": {
+            "type": "artist"
+        }
+    },
+    "ToVertex": {
+        "Id": "black rebel motorcycle club:79447cd54dda40aec80c47b8495791ca",
+        "Name": "Black Rebel Motorcycle Club",
+        "Properties": {
+            "type": "artist",
+            "spotify": {
+                "id": "1tpXaFf2F55E7kVJON4j4G",
+                "uri": "spotify:artist:1tpXaFf2F55E7kVJON4j4G"
+            },
+            "images": [
+                {
+                    "height": 640,
+                    "url": "https://i.scdn.co/image/a894da31627e0491be4f1ae6303ed3738cb1a226",
+                    "width": 640
+                },
+                {
+                    "height": 320,
+                    "url": "https://i.scdn.co/image/bf6ce53a5908d07cae0bfedecef3fe0f493fed2f",
+                    "width": 320
+                },
+                {
+                    "height": 160,
+                    "url": "https://i.scdn.co/image/cd80c732f3be39fefda4f147f0a7bbee7b5e992c",
+                    "width": 160
+                }
+            ]
+        }
+    },
+    "Relationship": "related",
+    "RelationshipDate": "2018-05-10T01:54:30.506Z"
+}

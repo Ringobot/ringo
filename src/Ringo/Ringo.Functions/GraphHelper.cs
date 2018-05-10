@@ -94,7 +94,7 @@ namespace Ringo.Functions
             try
             {
                 //g.V('default-user').outE('likes').inV().has('id', 'metallica:c6b5b6413f293fce96539c41e704b5a2')
-                var gremlinQuery = $@"g.V('{input.FromVertex.Id}').outE('likes').inV().has('id', '{input.ToVertex.Id}')";
+                var gremlinQuery = $@"g.V('{input.FromVertex.Id}').outE('{input.Relationship}').inV().has('id', '{input.ToVertex.Id}')";
                 var likes = await RunDocumentQuery(gremlinQuery.ToString());
                 if (likes.Count == 0)
                 {

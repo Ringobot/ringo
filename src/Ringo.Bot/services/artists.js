@@ -10,6 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const _spotify = require("./spotify");
 const artist = require("../models/artist");
+const _servicebus = require("./servicebus");
+const _canonical = require("./canonicalisation");
 function searchArtists(artistName, limit) {
     return __awaiter(this, void 0, void 0, function* () {
         return artist.mapToArtists(yield _spotify.searchArtists(artistName, limit));
@@ -44,6 +46,43 @@ function getArtistByUri(uri) {
     });
 }
 exports.getArtistByUri = getArtistByUri;
+function pushRelatedArtist(baseArtist, relatedArtistList) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            relatedArtistList.forEach((Artist) => __awaiter(this, void 0, void 0, function* () {
+                let baseArtistId = `${baseArtist.name.toLowerCase()}:${_canonical.getArtistId(baseArtist.name).Id}`;
+                let relatedArtistId = `${Artist.name.toLowerCase()}:${_canonical.getArtistId(Artist.name).Id}`;
+                // let er:entityrelation.EntityRelationship = {
+                var er = {
+                    FromVertex: {
+                        Id: baseArtistId,
+                        Name: baseArtist.name,
+                        Properties: {
+                            type: 'artist'
+                        }
+                    },
+                    ToVertex: {
+                        Id: relatedArtistId,
+                        Name: Artist.name,
+                        Properties: {
+                            type: 'artist',
+                            spotifyid: Artist.spotify.id,
+                            spotifyuri: Artist.spotify.uri,
+                            images: Artist.images[0].url
+                        }
+                    },
+                    Relationship: 'related',
+                    RelationshipDate: new Date()
+                };
+                yield _servicebus.sendMessage('graph', er);
+            }));
+        }
+        catch (e) {
+            throw e;
+        }
+    });
+}
+exports.pushRelatedArtist = pushRelatedArtist;
 /**
  * Finds true and the artist if only one artist (with an image) is found in the array
  * @param artists an array of Artists (returned by a search API)
