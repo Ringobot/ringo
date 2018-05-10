@@ -2,7 +2,7 @@
 using Ringo.Common.Models;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using Newtonsoft.Json.Linq;
 
 namespace Ringo.Tests
 {
@@ -19,7 +19,7 @@ namespace Ringo.Tests
         public static Entity NewEntity(string type)
         {
             var guid = Guid.NewGuid().ToString("N");
-            var properties = new Dictionary<string, string>();
+            var properties = new JObject();
             properties.Add("type", type);
             properties.Add("testProp1", "testProp1");
             properties.Add("testProp2", "testProp2");

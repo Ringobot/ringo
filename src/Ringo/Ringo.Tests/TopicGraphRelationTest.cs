@@ -32,7 +32,9 @@ namespace Ringo.Tests
             try
             {
                 //string mockMsgString = $@"{ ""FromVertex"":{ ""Id"":""test-user{}"",""Name"":""default-user"",""Properties"":{""type"":""user""}},""ToVertex"":{""Id"":""test-artist"",""Name"":""Metallica"",""Properties"":{""type"":""artist""}},""Relationship"":""likes"",""RelationshipDate"":""2018-04-13T22:31:17.935Z""}";
-                var mockMsgString = JsonConvert.SerializeObject(entityRelationship);
+                string mockMsgString = "{\"FromVertex\":{\"Id\":\"royal blood:c55d0d9c90d3449db50b7be7e86c9dd3\",\"Name\":\"Royal Blood\",\"Properties\":{\"type\":\"artist\"}},\"ToVertex\":{\"Id\":\"the dead weather:5ae85e62666706234136615cf7f2013e\",\"Name\":\"The Dead Weather\",\"Properties\":{\"type\":\"artist\",\"spotify\":{\"id\":\"4AZab8zo2nTYd7ORDmQu0V\",\"uri\":\"spotify:artist:4AZab8zo2nTYd7ORDmQu0V\"}}},\"Relationship\":\"related\",\"RelationshipDate\":\"2018-05-10T01:35:34.587Z\"}";
+
+                //var mockMsgString = JsonConvert.SerializeObject(entityRelationship);
                 await TopicGraphCreateRelationship.Run(mockMsgString, null);
 
 

@@ -40,11 +40,12 @@ function popularityDesc(a, b) {
 function recommendArtist(session, artistId) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            let artists = yield _artists.getRelatedArtists(artistId);
+            let artists = yield _artists.getRelatedArtists(artistId.spotify.id);
             if (artists.length === 0)
                 return null;
             // filter out artists without images and sort by popularity desc
             let sorted = artists.filter(a => a.images.length > 0).sort(popularityDesc);
+            let related = yield _artists.pushRelatedArtist(artistId, sorted);
             // get the artists that are already liked
             let likedArtists = yield _userdata.artistsUserLikes(user.userId(session));
             // go through the list until one that has not been list is found, or return null

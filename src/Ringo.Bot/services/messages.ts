@@ -5,6 +5,7 @@ import _artist = require('../models/artist');
 import _metrics = require('./metrics');
 import _userdata = require('./userdata');
 import user = require('../models/user');
+import _servicebus = require('./servicebus')
 
 
 export function artist(session: builder.Session, artist: any): builder.Message {
@@ -31,13 +32,15 @@ function popularityDesc(a, b){
     return 0;
 }
 
-export async function recommendArtist(session: builder.Session, artistId: string) : Promise<builder.Message> {
+export async function recommendArtist(session: builder.Session, artistId: _artist.Artist) : Promise<builder.Message> {
     try {
-        let artists:_artist.Artist[] = await _artists.getRelatedArtists(artistId);
+        let artists:_artist.Artist[] = await _artists.getRelatedArtists(artistId.spotify.id);
         if (artists.length === 0) return null;
 
         // filter out artists without images and sort by popularity desc
         let sorted = artists.filter(a => a.images.length > 0).sort(popularityDesc);
+
+        let related = await _artists.pushRelatedArtist(artistId, sorted);
 
         // get the artists that are already liked
         let likedArtists = await _userdata.artistsUserLikes(user.userId(session));
