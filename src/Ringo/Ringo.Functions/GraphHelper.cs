@@ -29,7 +29,7 @@ namespace Ringo.Functions
 
         public static async Task<dynamic> CreateVertex(Entity entity)
         {
-            var gremlinBaseQuery = $@"g.addV(T.Id, '{entity.Id}').property('name', '{entity.Name}')";
+            var gremlinBaseQuery = $@"g.addV('{entity.Properties["type"]}').property(T.id, '{entity.Id}').property('name', '{entity.Name}')";
             StringBuilder gremlinQuery = new StringBuilder(gremlinBaseQuery);
             foreach (var p in entity.Properties)
             {
