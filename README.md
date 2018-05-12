@@ -1,26 +1,24 @@
 # Ringo
 
-## Getting started on Linux (Ubuntu)
-
-Install latest nodejs and npm: <https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions>
-
-    curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash - sudo apt-get install -y nodejs
-
-## Test site
-
 <https://ringobot.azurewebsites.net/>
 
-## Auth
+## Deployment
 
-<https://beta.developer.spotify.com/documentation/general/guides/authorization-guide/#authorization-code-flow>
+1. Commit / merge your changes to `master`
+1. Push to VSTS
+1. Create a new **Deploy Ringo** Release in VSTS
 
-## Links
+Deployment process will deploy to staging slot, run `npm test` and then swap.
 
-Spotify Developer: <https://developer.spotify.com/web-api/console/get-search-item/#complete>
+### Deployment links
 
-Emojipedia: <https://emojipedia.org/people/>
+Set up staging environments in Azure App Service: <https://docs.microsoft.com/en-us/azure/app-service/web-sites-staged-publishing>
 
-### Bot Framework
+Best practices for using App Service Local Cache: <https://docs.microsoft.com/en-us/azure/app-service/app-service-local-cache-overview#best-practices-for-using-app-service-local-cache>
+
+Speeding up Azure App Service Builds: <https://wildermuth.com/2017/01/14/Speeding-up-Azure-App-Service-Builds>
+
+## Bot Framework
 
 Connect a bot to Slack: <https://docs.microsoft.com/en-us/azure/bot-service/bot-service-channel-connect-slack>
 
@@ -28,7 +26,19 @@ Channel inspector: <https://docs.botframework.com/en-us/channel-inspector/channe
 
 Custom recognizer: <https://docs.microsoft.com/en-us/azure/bot-service/nodejs/bot-builder-nodejs-recognize-intent-messages#register-a-custom-intent-recognizer>
 
-### Typescript
+## Restify
+
+Restify cheatsheet: <https://gist.github.com/LeCoupa/0664e885fd74152d1f90>
+
+Restify errors: <https://github.com/restify/errors>
+
+## Spotify
+
+Spotify Developer: <https://developer.spotify.com/web-api/console/get-search-item/#complete>
+
+Authorisation guide: <https://beta.developer.spotify.com/documentation/general/guides/authorization-guide/#authorization-code-flow>
+
+## Typescript
 
 Downlevel Async Functions: <https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-1.html>
 
@@ -52,18 +62,20 @@ Using mocha programmatically <https://github.com/mochajs/mocha/wiki/Using-mocha-
 
 Mocha async: <https://mochajs.org/#asynchronous-code>
 
-### Restify
+## Linux, Docker, Nodejs
 
-Restify cheatsheet: <https://gist.github.com/LeCoupa/0664e885fd74152d1f90>
+Install latest nodejs and npm (on Ubuntu): <https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions>
 
-Restify errors: <https://github.com/restify/errors>
-
-### Nodejs on Docker
+    curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash - sudo apt-get install -y nodejs
 
 Dockerizing a Node.js web app: <https://nodejs.org/en/docs/guides/nodejs-docker-webapp/>
 
-### Application insights
+## Application insights
 
 <https://github.com/Microsoft/ApplicationInsights-node.js/>
 
 How to track auth users: <https://github.com/Microsoft/ApplicationInsights-node.js/issues/356>
+
+## More Links
+
+Emojipedia: <https://emojipedia.org/people/>
