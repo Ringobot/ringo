@@ -1,0 +1,234 @@
+{
+  "luis_schema_version": "3.0.0",
+  "versionId": "0.1",
+  "name": "ringo",
+  "desc": "Ringo Bot",
+  "culture": "en-us",
+  "intents": [
+    {
+      "name": "Like Artist"
+    },
+    {
+      "name": "None"
+    },
+    {
+      "name": "Play"
+    }
+  ],
+  "entities": [
+    {
+      "name": "Music.ArtistName",
+      "inherits": {
+        "domain_name": "Music",
+        "model_name": "ArtistName"
+      },
+      "roles": []
+    },
+    {
+      "name": "Music.Genre",
+      "inherits": {
+        "domain_name": "Music",
+        "model_name": "Genre"
+      },
+      "roles": []
+    }
+  ],
+  "composites": [],
+  "closedLists": [],
+  "patternAnyEntities": [],
+  "regex_entities": [
+    {
+      "name": "spotifyUri",
+      "regexPattern": "spotify:[a-z]+:[A-Za-z0-9]{22}",
+      "roles": []
+    }
+  ],
+  "prebuiltEntities": [],
+  "model_features": [
+    {
+      "name": "like",
+      "mode": true,
+      "words": "like,i like,love,i love,i really like,i really love",
+      "activated": true
+    }
+  ],
+  "regex_features": [],
+  "patterns": [],
+  "utterances": [
+    {
+      "text": "i like hall & oats",
+      "intent": "Like Artist",
+      "entities": [
+        {
+          "entity": "Music.ArtistName",
+          "startPos": 7,
+          "endPos": 17
+        }
+      ]
+    },
+    {
+      "text": "i like hootie and the blowfish",
+      "intent": "Like Artist",
+      "entities": [
+        {
+          "entity": "Music.ArtistName",
+          "startPos": 7,
+          "endPos": 29
+        }
+      ]
+    },
+    {
+      "text": "i like massive attack",
+      "intent": "Like Artist",
+      "entities": [
+        {
+          "entity": "Music.ArtistName",
+          "startPos": 7,
+          "endPos": 20
+        }
+      ]
+    },
+    {
+      "text": "i like prince",
+      "intent": "Like Artist",
+      "entities": [
+        {
+          "entity": "Music.ArtistName",
+          "startPos": 7,
+          "endPos": 12
+        }
+      ]
+    },
+    {
+      "text": "i like radiohead",
+      "intent": "Like Artist",
+      "entities": [
+        {
+          "entity": "Music.ArtistName",
+          "startPos": 7,
+          "endPos": 15
+        }
+      ]
+    },
+    {
+      "text": "i like spotify:artist:25ig9fa7cbdmciy3onuh57",
+      "intent": "Like Artist",
+      "entities": []
+    },
+    {
+      "text": "like massive attack",
+      "intent": "Like Artist",
+      "entities": [
+        {
+          "entity": "Music.ArtistName",
+          "startPos": 5,
+          "endPos": 18
+        }
+      ]
+    },
+    {
+      "text": "like radiohead",
+      "intent": "Like Artist",
+      "entities": [
+        {
+          "entity": "Music.ArtistName",
+          "startPos": 5,
+          "endPos": 13
+        }
+      ]
+    },
+    {
+      "text": "play collie buddz",
+      "intent": "Play",
+      "entities": [
+        {
+          "entity": "Music.ArtistName",
+          "startPos": 5,
+          "endPos": 16
+        }
+      ]
+    },
+    {
+      "text": "play easy dub all stars",
+      "intent": "Play",
+      "entities": [
+        {
+          "entity": "Music.ArtistName",
+          "startPos": 5,
+          "endPos": 22
+        }
+      ]
+    },
+    {
+      "text": "play harry belafonte",
+      "intent": "Play",
+      "entities": [
+        {
+          "entity": "Music.ArtistName",
+          "startPos": 5,
+          "endPos": 19
+        }
+      ]
+    },
+    {
+      "text": "play hootie and the blowfish",
+      "intent": "Play",
+      "entities": [
+        {
+          "entity": "Music.ArtistName",
+          "startPos": 5,
+          "endPos": 27
+        }
+      ]
+    },
+    {
+      "text": "play katchafire",
+      "intent": "Play",
+      "entities": [
+        {
+          "entity": "Music.ArtistName",
+          "startPos": 5,
+          "endPos": 14
+        }
+      ]
+    },
+    {
+      "text": "play massive attack",
+      "intent": "Play",
+      "entities": [
+        {
+          "entity": "Music.ArtistName",
+          "startPos": 5,
+          "endPos": 18
+        }
+      ]
+    },
+    {
+      "text": "play prince",
+      "intent": "Play",
+      "entities": [
+        {
+          "entity": "Music.ArtistName",
+          "startPos": 5,
+          "endPos": 10
+        }
+      ]
+    },
+    {
+      "text": "play radiohead",
+      "intent": "Play",
+      "entities": [
+        {
+          "entity": "Music.ArtistName",
+          "startPos": 5,
+          "endPos": 13
+        }
+      ]
+    },
+    {
+      "text": "play spotify:artist:25ig9fa7cbdmciy3onuh57",
+      "intent": "Play",
+      "entities": []
+    }
+  ]
+}
