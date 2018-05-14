@@ -1,12 +1,12 @@
 import _table = require('./tablestorage')
 
 export async function getHealth(req, res, next) {
-    // version
+    // version number from package.json
     var packageJson = require('../package.json')
 
+    // default result
     let result = {
         Status: 'Up',
-        Health: 1.0,
         Version: packageJson.version,
         DateTime: new Date(),
         Services:[]
@@ -14,33 +14,42 @@ export async function getHealth(req, res, next) {
 
     // table storage
     try {
+        // use a high-res timer
         let start = process.hrtime()
-        let tableHealth = await _table.get('UserSpotifyAuth', _table.createQuery().top(1))
+        // get top 1 from a table TODO: Health table
+        await _table.get('UserSpotifyAuth', _table.createQuery().top(1))
         let elapsed = process.hrtime(start);
+        // calculate elapsed milliseconds: TODO: helper function
         let elapsedMs = (elapsed[0] * 1000) + (elapsed[1] / 1000000)
 
-        let health = elapsedMs < 100 ? ['Up', 1.0] : elapsedMs < 500 ? ['Trouble', 0.5] : ['Down', 0.1]
+        // Business logic for deciding if Table Storage is Up, Trouble or Down
+        let health = 
+            // <100ms = Up
+            elapsedMs < 100 ? 'Up' : 
+            // < 5 seconds = Trouble
+            elapsedMs < 3000 ? 'Trouble' : 
+            // > 5 seconds = Down
+            'Down'
 
         result.Services.push({
             Name: "Table Storage",
-            Status: health[0],
-            Health: health[1],
+            Status: health,
             Elapsed: elapsedMs
         })
 
     } catch (e) {
+        // error means Down
         console.error(e)
         result.Services.push({
             Name: "Table Storage",
             Status: "Down",
             Message: "Error",
-            Health: 0.0
+            HealthScore: 0.0
         })
     }
 
-    // Status reflects table storage status (v1)
+    // Status reflects table storage status (v1). TODO: Combined health of services
     result.Status = result.Services[0].Status
-    result.Health = result.Services[0].Health
 
     res.send(result)
     return next()
