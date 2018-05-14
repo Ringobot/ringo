@@ -17,6 +17,7 @@ import _spotifyAuth = require('./services/spotifyauth');
 import user = require('./models/user');
 import _crypto = require('./helpers/crypto');
 import _feedback = require('./services/feedback');
+import _health = require('./services/healthService')
 
 // Setup Restify Server
 var server = restify.createServer();
@@ -34,6 +35,7 @@ var connector = new builder.ChatConnector({
     openIdMetadata: process.env.BotOpenIdMetadata
 });
 
+server.get('/api/health', _health.getHealth)
 server.post('/api/messages', connector.listen());
 server.get('/authorize/spotify', _spotifyAuth.authorizeCallback);
 server.get('/authorize/spotify/:userHash', _spotifyAuth.authorize);
