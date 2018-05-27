@@ -1,5 +1,6 @@
 import _table = require('./tablestorage')
 import errs = require('restify-errors');
+import _graph = require('./graphstorage')
 
 /**
  * Restify handler for Health API
@@ -20,7 +21,7 @@ export async function getHealth(req, res, next) {
     }
 
     try {
-        let results = await Promise.all([getTableStorageHealth(), getTableStorageHealth()])
+        let results = await Promise.all([getTableStorageHealth(), getGraphDbHealth()])
         result.Services = results;
 
         // business logic for determining system status. TODO: Test
@@ -89,6 +90,45 @@ async function getTableStorageHealth() : Promise<ServiceHealth> {
         console.error(e)
         return {
             Name: "Table Storage",
+            Status: "Down",
+            Message: "Error"
+        }
+    }
+    
+}
+
+/**
+ * Determines the health of Graph Db and returns a ServiceHealth result
+ */
+async function getGraphDbHealth() : Promise<ServiceHealth> {
+    try {
+        // use a high-res timer
+        let start = process.hrtime()
+
+        await _graph.execute('g.V().limit(1)', undefined)
+
+        let elapsed = elapsedMs(process.hrtime(start))
+
+        // Business logic for deciding if Up, Trouble or Down
+        let health = 
+            // <100ms = Up
+            elapsed < 100 ? 'Up' : 
+            // < 5 seconds = Trouble
+            elapsed < 3000 ? 'Trouble' : 
+            // > 5 seconds = Down
+            'Down'
+
+        return {
+            Name: "Graph Db",
+            Status: health,
+            Elapsed: elapsed
+        }
+
+    } catch (e) {
+        // error means Down
+        console.error(e)
+        return {
+            Name: "Graph Db",
             Status: "Down",
             Message: "Error"
         }

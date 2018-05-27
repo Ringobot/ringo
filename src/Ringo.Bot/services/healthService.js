@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const _table = require("./tablestorage");
 const errs = require("restify-errors");
+const _graph = require("./graphstorage");
 /**
  * Restify handler for Health API
  * @param req
@@ -28,7 +29,7 @@ function getHealth(req, res, next) {
             Services: []
         };
         try {
-            let results = yield Promise.all([getTableStorageHealth(), getTableStorageHealth()]);
+            let results = yield Promise.all([getTableStorageHealth(), getGraphDbHealth()]);
             result.Services = results;
             // business logic for determining system status. TODO: Test
             result.Status = (results.find(s => s.Status === "Down") ||
@@ -83,6 +84,41 @@ function getTableStorageHealth() {
             console.error(e);
             return {
                 Name: "Table Storage",
+                Status: "Down",
+                Message: "Error"
+            };
+        }
+    });
+}
+/**
+ * Determines the health of Graph Db and returns a ServiceHealth result
+ */
+function getGraphDbHealth() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            // use a high-res timer
+            let start = process.hrtime();
+            yield _graph.execute('g.V().limit(1)', undefined);
+            let elapsed = elapsedMs(process.hrtime(start));
+            // Business logic for deciding if Up, Trouble or Down
+            let health = 
+            // <100ms = Up
+            elapsed < 100 ? 'Up' :
+                // < 5 seconds = Trouble
+                elapsed < 3000 ? 'Trouble' :
+                    // > 5 seconds = Down
+                    'Down';
+            return {
+                Name: "Graph Db",
+                Status: health,
+                Elapsed: elapsed
+            };
+        }
+        catch (e) {
+            // error means Down
+            console.error(e);
+            return {
+                Name: "Graph Db",
                 Status: "Down",
                 Message: "Error"
             };
