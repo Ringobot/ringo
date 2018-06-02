@@ -2,6 +2,58 @@
 
 <https://ringobot.azurewebsites.net/>
 
+Ringo is a Chat Bot by @DanielLarsenNZ and @msimpsonnz that learns what music you
+like and helps you to discover more. It demonstrates several technologies including:
+
+* Microsoft Bot Framework
+* Nodejs + TypeScript
+* Microsoft CosmosDB, Graph DB
+* .NET Core in Azure Functions
+* Spotify Web API
+* Azure App Services, Table Storage, Service Bus
+
+## Getting started
+
+To get the bot working on your local machine:
+
+    git clone https://github.com/Ringobot/ringo.git
+    cd ./ringo/src/Ringo.Bot
+    npm install
+    touch .env
+
+Copy the following settings into a dotenv file, replacing the `<PLACEHOLDERS>` with
+your own values:
+
+```text
+SpotifyApiClientId=<SPOTIFY-API-CLIENTID>
+SpotifyApiClientSecret=<SPOTIFY-API-CLIENTSECRET>
+AZURE_STORAGE_ACCOUNT=<STORAGE-ACCOUNT-NAME>
+AZURE_STORAGE_ACCESS_KEY=<STORAGE-ACCOUNT-KEY>
+GRAPH_ENDPOINT=<GRAPH-ENDPOINT>
+GRAPH_ACCESS_KEY=<GRAPH-ACCESS-KEY>
+GRAPH_DATABASE_ID=<GRAPH-DATABASE-ID>
+GRAPH_COLLECTION_ID=<GRAPH-COLLECTION-ID>
+LUIS_MODEL_URL=<LUIS-MODEL-URL>
+APPINSIGHTS_INSTRUMENTATIONKEY=<APPINSIGHTS-INSTRUMENTATIONKEY>
+SpotifyAuthRedirectUri=http://localhost:3978/authorize/spotify
+SB_CONNECTION_STRING=Endpoint=sb://ringobotsb.servicebus.windows.net/;SharedAccessKeyName=BotSend;SharedAccessKey=<SHARED-ACCESS-KEY>
+```
+
+> Tip: `GRAPH_ENDPOINT` should be specified as a DNS name without a protocol, e.g.
+> `mygraphdb.gremlin.cosmosdb.azure.com`
+
+### List of links to prerequisites
+
+Register for a Spotify API Key: <https://developer.spotify.com/dashboard/>
+
+Get a free Azure Account: <https://azure.microsoft.com/en-us/free/startups/>
+
+Create a Storage Account: <https://azure.microsoft.com/en-us/services/storage/>
+
+
+
+
+
 ## Deployment
 
 1. Commit / merge your changes to `master`
