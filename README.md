@@ -5,14 +5,16 @@
 Ringo is a Chat Bot by @DanielLarsenNZ and @msimpsonnz that learns what music you
 like and helps you to discover more. It demonstrates several technologies including:
 
-* Microsoft Bot Framework
-* Nodejs + TypeScript
+* Microsoft Bot Framework with Nodejs + TypeScript
 * Microsoft CosmosDB, Graph DB
 * .NET Core in Azure Functions
 * Spotify Web API
-* Azure App Services, Table Storage, Service Bus
+* Azure Bot Service, App Services, Table Storage, Service Bus
 
 ## Getting started
+
+> We recommend that you install / upgrade to the latest "LTS" (long term support)
+> version of Nodejs + npm: <https://nodejs.org/en/download/>
 
 To get the bot working on your local machine:
 
@@ -21,7 +23,7 @@ To get the bot working on your local machine:
     npm install
     touch .env
 
-Copy the following settings into a dotenv file, replacing the `<PLACEHOLDERS>` with
+Copy the following settings into a dotenv `.env` file, replacing the `<PLACEHOLDERS>` with
 your own values:
 
 ```text
@@ -42,17 +44,27 @@ SB_CONNECTION_STRING=Endpoint=sb://ringobotsb.servicebus.windows.net/;SharedAcce
 > Tip: `GRAPH_ENDPOINT` should be specified as a DNS name without a protocol, e.g.
 > `mygraphdb.gremlin.cosmosdb.azure.com`
 
-### List of links to prerequisites
+### Prerequisites
+
+All of these services have free tiers or free to try:
 
 Register for a Spotify API Key: <https://developer.spotify.com/dashboard/>
 
 Get a free Azure Account: <https://azure.microsoft.com/en-us/free/startups/>
 
-Create a Storage Account: <https://azure.microsoft.com/en-us/services/storage/>
+Azure Bot Service: <https://dev.botframework.com/>
 
+Create an Azure Storage Account: <https://azure.microsoft.com/en-us/services/storage/>
 
+Create Cosmos DB Graph: <https://azure.microsoft.com/en-us/try/cosmosdb/>
 
+Azure Functions: <https://azure.microsoft.com/en-us/services/functions/>
 
+Sign up for LUIS: <https://www.luis.ai/home>
+
+Application Insights: <https://azure.microsoft.com/en-us/services/application-insights/>
+
+Azure Service Bus: <https://azure.microsoft.com/en-us/services/service-bus/>
 
 ## Deployment
 
