@@ -1,15 +1,21 @@
 # Ringo
 
-<https://ringobot.azurewebsites.net/>
+Ringo is a chatbot by [@DanielLarsenNZ] and [@msimpsonnz] that learns what music you
+like and helps you to discover more. It is a work in progress. You can read more
+about Ringo and the live demo on this website: <https://ringobot.azurewebsites.net/>
 
-Ringo is a Chat Bot by @DanielLarsenNZ and @msimpsonnz that learns what music you
-like and helps you to discover more. It demonstrates several technologies including:
+![Screenshots from Skype and Slack](docs/images/splash.png)
 
-* Microsoft Bot Framework with Nodejs + TypeScript
-* Microsoft CosmosDB, Graph DB
-* .NET Core in Azure Functions
+Ringo demonstrates how to build a bot using:
+
+* Nodejs + TypeScript with Microsoft Bot Framework
 * Spotify Web API
+* .NET Core in Azure Functions
+* Azure Cosmos DB Graph
 * Azure Bot Service, App Services, Table Storage, Service Bus
+
+[@DanielLarsenNZ]:https://github.com/DanielLarsenNZ
+[@msimpsonnz]:https://github.com/msimpsonnz
 
 ## Getting started
 
