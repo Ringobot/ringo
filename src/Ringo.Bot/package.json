@@ -4,7 +4,7 @@
   "description": "Ringo Music Bot",
   "main": "app.js",
   "scripts": {
-    "test": "mocha -r ts-node/register tests/**/*.tests.ts --exit",
+    "test": "mocha -r ts-node/register tests/**/*.tests.ts --reporter mocha-junit-reporter --reporter-options mochaFile=./test-results.xml --exit",
     "start": "node app.js"
   },
   "author": "@DanielLarsenNZ",
@@ -27,6 +27,7 @@
     "@types/mocha": "^2.2.44",
     "chai": "^4.1.2",
     "mocha": "^4.0.1",
+    "mocha-junit-reporter": "^1.17.0",
     "ts-node": "^3.3.0",
     "typescript": "^2.6.1"
   }

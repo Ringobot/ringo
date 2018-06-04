@@ -99,6 +99,13 @@ Application Insights: <https://azure.microsoft.com/en-us/services/application-in
 
 Azure Service Bus: <https://azure.microsoft.com/en-us/services/service-bus/>
 
+## CI/CD
+
+Ringo is built and released using Visual Studio Team Services (VSTS).
+Try VSTS for free: <https://www.visualstudio.com/team-services/>
+
+![build status](https://dalars.visualstudio.com/_apis/public/build/definitions/176b1958-0be0-498a-a881-71fcaf8b338c/26/badge)
+
 ## More information and Links
 
 ### Deployment
