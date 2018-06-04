@@ -23,8 +23,8 @@ To get the bot working on your local machine:
     npm install
     touch .env
 
-Copy the following settings into a dotenv `.env` file, replacing the `<PLACEHOLDERS>` with
-your own values:
+Copy the following settings into a dotenv `.env` file, replacing the `<PLACEHOLDERS>`
+with your own values:
 
 ```text
 SpotifyApiClientId=<SPOTIFY-API-CLIENTID>
@@ -44,15 +44,42 @@ SB_CONNECTION_STRING=Endpoint=sb://ringobotsb.servicebus.windows.net/;SharedAcce
 > Tip: `GRAPH_ENDPOINT` should be specified as a DNS name without a protocol, e.g.
 > `mygraphdb.gremlin.cosmosdb.azure.com`
 
+If you don't have Typescript installed:
+
+    npm install -g typescript
+
+Compile the TypeScript to JavaScript and run the tests:
+
+    tsc
+    npm test
+
+Run the app:
+
+    node app.js
+
+You should see something like:
+
+    restify listening to http://[::]:3978
+    Bot is listening on /api/messages
+
+Now create a new Bot configuration in the [Bot Framework Emulator] using the endpoint
+URL `http://localhost:3978/api/messages` (change port number if necessary):
+
+![New Bot Config](docs/images/new-bot-config.JPG) ![Hey I'm Ringo](docs/images/hey-im-ringo.JPG)
+
+[Bot Framework Emulator]:https://github.com/Microsoft/BotFramework-Emulator/releases
+
 ### Prerequisites
 
-All of these services have free tiers or free to try:
+All of these services are free or free to try:
 
 Register for a Spotify API Key: <https://developer.spotify.com/dashboard/>
 
 Get a free Azure Account: <https://azure.microsoft.com/en-us/free/startups/>
 
 Azure Bot Service: <https://dev.botframework.com/>
+
+Microsoft Bot Framework emulator: <https://github.com/Microsoft/BotFramework-Emulator/releases>
 
 Create an Azure Storage Account: <https://azure.microsoft.com/en-us/services/storage/>
 
@@ -66,15 +93,9 @@ Application Insights: <https://azure.microsoft.com/en-us/services/application-in
 
 Azure Service Bus: <https://azure.microsoft.com/en-us/services/service-bus/>
 
-## Deployment
+## More information and Links
 
-1. Commit / merge your changes to `master`
-1. Push to VSTS
-1. Create a new **Deploy Ringo** Release in VSTS
-
-Deployment process will deploy to staging slot, run `npm test` and then swap.
-
-### Deployment links
+### Deployment
 
 Set up staging environments in Azure App Service: <https://docs.microsoft.com/en-us/azure/app-service/web-sites-staged-publishing>
 
@@ -82,7 +103,7 @@ Best practices for using App Service Local Cache: <https://docs.microsoft.com/en
 
 Speeding up Azure App Service Builds: <https://wildermuth.com/2017/01/14/Speeding-up-Azure-App-Service-Builds>
 
-## Bot Framework
+### Bot Framework
 
 Connect a bot to Slack: <https://docs.microsoft.com/en-us/azure/bot-service/bot-service-channel-connect-slack>
 
@@ -90,19 +111,19 @@ Channel inspector: <https://docs.botframework.com/en-us/channel-inspector/channe
 
 Custom recognizer: <https://docs.microsoft.com/en-us/azure/bot-service/nodejs/bot-builder-nodejs-recognize-intent-messages#register-a-custom-intent-recognizer>
 
-## Restify
+### Restify
 
 Restify cheatsheet: <https://gist.github.com/LeCoupa/0664e885fd74152d1f90>
 
 Restify errors: <https://github.com/restify/errors>
 
-## Spotify
+### Spotify
 
 Spotify Developer: <https://developer.spotify.com/web-api/console/get-search-item/#complete>
 
 Authorisation guide: <https://beta.developer.spotify.com/documentation/general/guides/authorization-guide/#authorization-code-flow>
 
-## Typescript
+### Typescript
 
 Downlevel Async Functions: <https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-1.html>
 
@@ -126,7 +147,7 @@ Using mocha programmatically <https://github.com/mochajs/mocha/wiki/Using-mocha-
 
 Mocha async: <https://mochajs.org/#asynchronous-code>
 
-## Linux, Docker, Nodejs
+### Linux, Docker, Nodejs
 
 Install latest nodejs and npm (on Ubuntu): <https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions>
 
@@ -134,12 +155,12 @@ Install latest nodejs and npm (on Ubuntu): <https://nodejs.org/en/download/packa
 
 Dockerizing a Node.js web app: <https://nodejs.org/en/docs/guides/nodejs-docker-webapp/>
 
-## Application insights
+### Application insights
 
 <https://github.com/Microsoft/ApplicationInsights-node.js/>
 
 How to track auth users: <https://github.com/Microsoft/ApplicationInsights-node.js/issues/356>
 
-## More Links
+### More Links
 
 Emojipedia: <https://emojipedia.org/people/>

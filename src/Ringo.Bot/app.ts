@@ -26,6 +26,7 @@ server.use(restify.plugins.queryParser());
 server.listen(process.env.port || process.env.PORT || 3978, function (e) {
     if (e) throw e;
     console.log('%s listening to %s', server.name, server.url);
+    console.log('Bot is listening on /api/messages')
 });
 
 // Create chat connector for communicating with the Bot Framework Service
