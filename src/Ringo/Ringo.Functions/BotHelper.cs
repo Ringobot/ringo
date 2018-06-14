@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Bot.Connector.DirectLine;
-using Newtonsoft.Json.Linq;
 
 namespace Ringo.Functions
 {
@@ -13,9 +12,8 @@ namespace Ringo.Functions
     {
         private static string directLineSecret = Environment.GetEnvironmentVariable("RingoDirectLine");
         private static HttpClient client = new HttpClient();
-        private static string tokenUrl = "https://accounts.spotify.com/api/token";
-        private static string authUrl = "https://accounts.spotify.com/authorize";
-        private static string botId = Environment.GetEnvironmentVariable("RingoBotId");
+        private static string authUrl = "https://directline.botframework.com/v3/directline/conversations";
+        //private static string botId = Environment.GetEnvironmentVariable("RingoBotId");
         private static string fromUser = "DirectLineSampleClientUser";
 
         public static async Task BuildArtistGraph()
@@ -27,52 +25,37 @@ namespace Ringo.Functions
 
         public static async Task LikeArtist(dynamic artlistList)
         {
-            DirectLineClient client = new DirectLineClient(directLineSecret);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", directLineSecret);
 
-            var conversation = await client.Conversations.StartConversationAsync();
+            var convIdRequest = await client.PostAsync("https://directline.botframework.com/v3/directline/conversations", null);
 
-            new System.Threading.Thread(async () => await ReadBotMessagesAsync(client, conversation.ConversationId)).Start();
+            var convIdResult = await convIdRequest.Content.ReadAsStringAsync();
+            JObject convIdObj = JObject.Parse(convIdResult);
+            string convId = (string)convIdObj["conversationId"];
 
-        foreach (var spotifyId in artlistList)
+            foreach (var spotifyId in artlistList)
             {
-                Console.WriteLine(spotifyId);
-                Activity userMessage = new Activity
+                Message msg = new Message()
                 {
-                    From = new ChannelAccount(fromUser),
-                    Text = $"i like {spotifyId}",
-                    Type = ActivityTypes.Message
-                };
+                    type = "message",
+                    from = new MessageFrom() { id = fromUser },
+                    text = $"i like {spotifyId}"
 
-                var msg = await client.Conversations.PostActivityAsync(conversation.ConversationId, userMessage);
-                msg.Id.ToString();
+                };
+                var msgJson = JsonConvert.SerializeObject(msg);
+
+                var sendArtisit = await client.PostAsync($"https://directline.botframework.com/v3/directline/conversations/{convId}/activities", new StringContent(msgJson, Encoding.UTF8, "application/json"));
+
+                var sendArtisitResult = await sendArtisit.Content.ReadAsStringAsync();
             }
         }
-
-    private static async Task ReadBotMessagesAsync(DirectLineClient client, string conversationId)
-    {
-        string watermark = null;
-
-        while (true)
-        {
-            var activitySet = await client.Conversations.GetActivitiesAsync(conversationId, watermark);
-            watermark = activitySet?.Watermark;
-
-            var activities = from x in activitySet.Activities
-                             where x.From.Id == botId
-                             select x;
-
-            var str = "";
-
-            await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
-        }
+        
     }
-}
-
 
     public class Message
     {
         public string type { get; set; }
-        public Message from { get; set; }
+        public MessageFrom from { get; set; }
         public string text { get; set; }
     }
 
@@ -80,5 +63,6 @@ namespace Ringo.Functions
     {
         public string id { get; set; }
     }
+
 
 }
