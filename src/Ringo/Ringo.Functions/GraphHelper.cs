@@ -1,15 +1,15 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Net;
+﻿using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
-using Microsoft.Azure.Documents;
-using Ringo.Common.Models;
-using Microsoft.Azure.Graphs;
 using Microsoft.Azure.Documents.Linq;
-using System.Linq;
-using Microsoft.Azure.Graphs.Elements;
-using System.Text;
+using Microsoft.Azure.Graphs;
+using Newtonsoft.Json.Linq;
+using Ringo.Common.Models;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Ringo.Functions
 {
@@ -53,6 +53,30 @@ namespace Ringo.Functions
 
         }
 
+        public static async Task<List<string>> GetArtistRelatedLessThanTwo()
+        {
+            var gremlinQuery = ($@"g.V().out('related').where(__.out().count().is(lt(2))).project('spotifyid')");
+            try
+            {
+                List<string> result = new List<string>();
+                var collectionLink = await GetOrCreateCollectionAsync(databaseId, collectionId);
+                IDocumentQuery<dynamic> query = documentClient.CreateGremlinQuery<dynamic>(collectionLink, gremlinQuery);
+                foreach (JObject item in await query.ExecuteNextAsync<dynamic>())
+                {
+                    result.Add(item["spotifyid"]["id"].ToString());
+                }
+                return result;
+
+                }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+           
+
+        }
+
         private static async Task<dynamic> RunDocumentQuery(string gremlinQuery)
         {
             try
@@ -63,6 +87,11 @@ namespace Ringo.Functions
                 return result;
             }
             catch (DocumentClientException ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 throw;
