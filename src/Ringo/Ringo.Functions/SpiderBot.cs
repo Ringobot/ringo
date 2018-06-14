@@ -4,7 +4,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
-using Microsoft.Bot.Connector.DirectLine;
 
 namespace Ringo.Functions
 {
@@ -13,7 +12,7 @@ namespace Ringo.Functions
 
 
         [FunctionName("SpiderBot")]
-        public static async Task Run([TimerTrigger("10 * * * * *")]TimerInfo myTimer, TraceWriter log)
+        public static async Task Run([TimerTrigger("* * * 1 * *")]TimerInfo myTimer, TraceWriter log)
         {
             if (log != null) log.Info($"C# Timer trigger function executed at: {DateTime.Now}");
 
