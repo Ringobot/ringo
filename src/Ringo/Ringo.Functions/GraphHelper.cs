@@ -135,6 +135,7 @@ namespace Ringo.Functions
             }
             catch (DocumentClientException ex)
             {
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }

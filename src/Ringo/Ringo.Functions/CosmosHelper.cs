@@ -1,15 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Net;
+﻿using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
-using Microsoft.Azure.Documents;
 using Ringo.Common.Models;
+using System;
 using System.Linq;
-using System.Text;
-using Newtonsoft.Json.Linq;
-using System.Dynamic;
-using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Ringo.Functions
 {

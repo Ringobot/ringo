@@ -12,8 +12,6 @@ namespace Ringo.Functions
     {
         private static string directLineSecret = Environment.GetEnvironmentVariable("RingoDirectLine");
         private static HttpClient client = new HttpClient();
-        private static string authUrl = "https://directline.botframework.com/v3/directline/conversations";
-        //private static string botId = Environment.GetEnvironmentVariable("RingoBotId");
         private static string fromUser = "DirectLineSampleClientUser";
 
         public static async Task BuildArtistGraph()
