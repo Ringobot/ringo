@@ -50,6 +50,42 @@ namespace Ringo.Tests
 
         }
 
+        [TestMethod]
+        public async Task Run_CreateRelationshipwithSpecial_DoesNotError()
+        {
+            // initialise
+
+            // arrange
+            Entity testUser = TestHelper.NewEntity("testUser", "user");
+            Entity testArtist = TestHelper.NewEntity("incubus:373c591c05ed02146136d1ceb704191f", "Incubus 's test special", "artist");
+            EntityRelationship entityRelationship = new EntityRelationship();
+            entityRelationship.FromVertex = testUser;
+            entityRelationship.ToVertex = testArtist;
+            entityRelationship.Relationship = "likes";
+            entityRelationship.RelationshipDate = DateTime.UtcNow;
+
+            // act
+            try
+            {
+                var mockMsgString = JsonConvert.SerializeObject(entityRelationship);
+                await TopicGraphCreateRelationship.Run(mockMsgString, null);
+
+
+                // assert
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                // teardown
+                var cleanupFrom = await GraphHelper.RemoveVertex(testUser.Id);
+                var cleanupTo = await GraphHelper.RemoveVertex(testArtist.Id);
+            }
+
+        }
+
         [TestInitialize]
         public void Init()
         {
