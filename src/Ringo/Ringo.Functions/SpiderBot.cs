@@ -10,9 +10,8 @@ namespace Ringo.Functions
     public static class SpiderBot
     {
 
-
         [FunctionName("SpiderBot")]
-        public static async Task Run([TimerTrigger("0 0 13 * * *")]TimerInfo myTimer, TraceWriter log)
+        public static async Task Run([TimerTrigger("%Timer%")]TimerInfo myTimer, TraceWriter log)
         {
             if (log != null) log.Info($"C# Timer trigger function executed at: {DateTime.Now}");
 
