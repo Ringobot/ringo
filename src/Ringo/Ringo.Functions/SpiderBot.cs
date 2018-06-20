@@ -15,7 +15,7 @@ namespace Ringo.Functions
         {
             if (log != null) log.Info($"C# Timer trigger function executed at: {DateTime.Now}");
 
-            await BotHelper.BuildArtistGraph();
+            await SpotifyHelper.BuildArtistGraph();
 
         }
     }

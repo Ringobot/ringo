@@ -38,4 +38,17 @@ namespace Ringo.Common.Models
         public string id { get; set; }
     }
 
+    
+    public class Message
+    {
+        public string type { get; set; }
+        public MessageFrom from { get; set; }
+        public string text { get; set; }
+    }
+
+    public class MessageFrom
+    {
+        public string id { get; set; }
+    }
+
 }
