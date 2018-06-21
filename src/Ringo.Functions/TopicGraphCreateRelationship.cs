@@ -3,6 +3,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using Ringo.Common.Models;
+using Ringo.Common.Heplers;
 
 namespace Ringo.Functions
 {

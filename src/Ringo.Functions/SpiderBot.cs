@@ -1,9 +1,8 @@
-using System;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
+using System;
+using System.Threading.Tasks;
+using Ringo.Common.Heplers;
 
 namespace Ringo.Functions
 {
@@ -15,7 +14,7 @@ namespace Ringo.Functions
         {
             if (log != null) log.Info($"C# Timer trigger function executed at: {DateTime.Now}");
 
-            await SpotifyHelper.BuildArtistGraph();
+            //await SpotifyHelper.BuildArtistGraph();
 
         }
     }
