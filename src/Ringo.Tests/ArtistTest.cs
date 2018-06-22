@@ -69,6 +69,15 @@ namespace Ringo.Tests
 
         }
 
+        [TestCategory("Unit")]
+        [TestMethod]
+        public async Task GetArtist_DoesNotError()
+        {
+            ArtistService artistService = new ArtistService();
+
+            var result = await artistService.GetArtist("spotify:artist:4VnomLtKTm9Ahe1tZfmZju");
+        }
+
 
         [TestInitialize]
         public void Init()

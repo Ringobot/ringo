@@ -10,7 +10,7 @@ namespace Ringo.Common.Services
     {
         Artists MapToArtist(string data);
 
-        string GetArtist(string artistId);
+        Task<Artist> GetArtist(string artistId);
 
         Artist GetArtistByUri(string artistUri);
 

@@ -25,7 +25,7 @@ namespace Ringo.Common.Services
                 Urn = urn,
                 Id = checksum,
                 UrnId = $"urn:rdostr:v1:{checksum}"
-        };
+            };
             return rdostrId;
         }
     }

@@ -5,6 +5,7 @@ using Ringo.Common.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
+using Ringo.Common.Heplers;
 
 namespace Ringo.Common.Services
 {
@@ -15,9 +16,9 @@ namespace Ringo.Common.Services
             throw new NotImplementedException();
         }
 
-        public string GetArtist(string artistId)
+        public async Task<Artist> GetArtist(string artistId)
         {
-            throw new NotImplementedException();
+            return await SpotifyHelper.GetArtist(artistId);
         }
 
         public Artist GetArtistByUri(string artistUri)
@@ -25,9 +26,10 @@ namespace Ringo.Common.Services
             throw new NotImplementedException();
         }
 
-        public Artist[] GetRelatedArtists(string artist)
+        public Artists GetRelatedArtists(string artist)
         {
             throw new NotImplementedException();
+
         }
 
         public Artists MapToArtist(string data)
@@ -52,19 +54,38 @@ namespace Ringo.Common.Services
             {
                 RdostrId baseArtistRdo = CanonicalService.GetArtistId(baseArtist.name);
                 string baseArtistId = $"{baseArtist.name}:{baseArtistRdo.Id}";
-                JObject baseArtistProps = new JObject();
+                JObject baseArtistProps = JObject.FromObject(new {
+                    Properties = new
+                    {
+                        type = "artist",
+                        spotifyid = baseArtist.spotify.id,
+                        spotifyuri = baseArtist.spotify.uri,
+                        images = baseArtist.image[0].url
+                    }
+                });
                 Entity baseArtistEntity = new Entity(baseArtistId, baseArtist.name, baseArtistProps);
                 foreach (Artist relatedArtist in relatedArtists.artists)
                 {
                     RdostrId relatedArtistRdo = CanonicalService.GetArtistId(relatedArtist.name);
                     string relatedArtistId = $"{relatedArtist.name}:{relatedArtistRdo.Id}";
-                    JObject relatedArtistProps = new JObject();
+                    JObject relatedArtistProps = JObject.FromObject(new
+                    {
+                        Properties = new
+                        {
+                            type = "artist",
+                            spotifyid = relatedArtist.spotify.id,
+                            spotifyuri = relatedArtist.spotify.uri,
+                            images = relatedArtist.image[0].url
+                        }
+                    });
                     Entity relatedEntity = new Entity(relatedArtistId, relatedArtist.name, relatedArtistProps);
-                    EntityRelationship entityRelationship = new EntityRelationship();
-                    entityRelationship.FromVertex = baseArtistEntity;
-                    entityRelationship.Relationship = "related";
-                    entityRelationship.RelationshipDate = DateTime.UtcNow;
-                    entityRelationship.ToVertex = relatedEntity;
+                    EntityRelationship entityRelationship = new EntityRelationship
+                    {
+                        FromVertex = baseArtistEntity,
+                        Relationship = "related",
+                        RelationshipDate = DateTime.UtcNow,
+                        ToVertex = relatedEntity
+                    };
                     entityRelationshipList.Add(entityRelationship);
                 }
 
@@ -78,19 +99,11 @@ namespace Ringo.Common.Services
             return entityRelationshipList;
         }
 
-        public Artist[] SearchArtists(string artist, int limit = 3)
+        public Artists SearchArtists(string artist, int limit = 3)
         {
             throw new NotImplementedException();
         }
 
-        Artists IArtistService.GetRelatedArtists(string artist)
-        {
-            throw new NotImplementedException();
-        }
 
-        Artists IArtistService.SearchArtists(string artist, int limit)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
