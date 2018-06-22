@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Ringo.Common.Models;
+using Ringo.Common.Heplers;
 using Ringo.Functions;
 using System;
 using System.Threading.Tasks;

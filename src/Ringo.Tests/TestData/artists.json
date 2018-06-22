@@ -1,0 +1,46 @@
+{
+  "artists": [
+    {
+      "name": "Radiohead",
+      "spotify": {
+        "id": "somestring",
+        "uri": "someuri"
+      },
+      "image": [
+        {
+          "height": 640,
+          "width": 480,
+          "url": "some image url"
+        }
+      ]
+    },
+    {
+      "name": "Radiohead",
+      "spotify": {
+        "id": "somestring",
+        "uri": "someuri"
+      },
+      "image": [
+        {
+          "height": 640,
+          "width": 480,
+          "url": "some image url"
+        }
+      ]
+    },
+    {
+      "name": "Radiohead",
+      "spotify": {
+        "id": "somestring",
+        "uri": "someuri"
+      },
+      "image": [
+        {
+          "height": 640,
+          "width": 480,
+          "url": "some image url"
+        }
+      ]
+    }
+  ]
+}

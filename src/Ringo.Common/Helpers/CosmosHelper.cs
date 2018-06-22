@@ -6,7 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Ringo.Functions
+namespace Ringo.Common.Heplers
 {
     public static class CosmosHelper
     {

@@ -11,7 +11,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ringo.Functions
+namespace Ringo.Common.Heplers
 {
     public static class GraphHelper
     {
