@@ -50,12 +50,14 @@ namespace Ringo.Common.Services
             List<EntityRelationship> entityRelationshipList = new List<EntityRelationship>();
             try
             {
-                string baseArtistId = CanonicalService.GetArtistId(baseArtist.name);
+                RdostrId baseArtistRdo = CanonicalService.GetArtistId(baseArtist.name);
+                string baseArtistId = $"{baseArtist.name}:{baseArtistRdo.Id}";
                 JObject baseArtistProps = new JObject();
                 Entity baseArtistEntity = new Entity(baseArtistId, baseArtist.name, baseArtistProps);
                 foreach (Artist relatedArtist in relatedArtists.artists)
                 {
-                    string relatedArtistId = CanonicalService.GetArtistId(relatedArtist.name);
+                    RdostrId relatedArtistRdo = CanonicalService.GetArtistId(relatedArtist.name);
+                    string relatedArtistId = $"{relatedArtist.name}:{relatedArtistRdo.Id}";
                     JObject relatedArtistProps = new JObject();
                     Entity relatedEntity = new Entity(relatedArtistId, relatedArtist.name, relatedArtistProps);
                     EntityRelationship entityRelationship = new EntityRelationship();

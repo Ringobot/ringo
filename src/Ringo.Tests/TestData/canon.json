@@ -1,0 +1,14 @@
+﻿[
+  {
+    "Version": "1",
+    "Urn": "urn:rdostr:v1:artist/radiohead",
+    "Id": "bb96925edc18d7b7ef19e800904993a5",
+    "UrnId": "urn:rdostr:v1:bb96925edc18d7b7ef19e800904993a5"
+  },
+  {
+    "Version": "1",
+    "Urn": "urn:rdostr:v1:artist/jackie wilson",
+    "Id": "86deb2fe1cfb266088a8badd94efe30a",
+    "UrnId": "urn:rdostr:v1:86deb2fe1cfb266088a8badd94efe30a"
+  }
+]
