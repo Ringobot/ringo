@@ -12,13 +12,13 @@ namespace Ringo.Common.Services
 
         Task<Artist> GetArtist(string artistId);
 
-        Artist GetArtistByUri(string artistUri);
+        Task<Artist> GetArtistByUriAsync(string artistUri);
 
         bool FindArtistMatch(Artist artist);
 
-        Artists SearchArtists(string artist, int limit = 3);
+        Task<Artists> SearchArtists(string artist, int limit = 3);
 
-        Artists GetRelatedArtists(string artist);
+        Task<Artists> GetRelatedArtistsAsync(string artist);
 
         List<EntityRelationship> PushRelatedArtist(Artist baseArtist, Artists relatedArtists);
 

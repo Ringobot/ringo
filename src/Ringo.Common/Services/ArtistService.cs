@@ -11,6 +11,8 @@ namespace Ringo.Common.Services
 {
     public class ArtistService : IArtistService
     {
+        public static SpotifyService SpotifyService = new SpotifyService();
+        
         public bool FindArtistMatch(Artist artist)
         {
             throw new NotImplementedException();
@@ -18,17 +20,31 @@ namespace Ringo.Common.Services
 
         public async Task<Artist> GetArtist(string artistId)
         {
-            return await SpotifyHelper.GetArtist(artistId);
+            try
+            {
+                dynamic artistRequest = await SpotifyService.GetArtist(artistId);
+                Artist artist = new Artist()
+                {
+                    name = artistRequest.name,
+                };
+                return artist;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+
         }
 
-        public Artist GetArtistByUri(string artistUri)
+        public async Task<Artist> GetArtistByUriAsync(string artistUri)
         {
-            throw new NotImplementedException();
+            return await SpotifyService.GetArtist(artistUri);
         }
 
-        public Artists GetRelatedArtists(string artist)
+        public async Task<Artists> GetRelatedArtistsAsync(string artistId)
         {
-            throw new NotImplementedException();
+            return await SpotifyService.GetRelatedArtists(artistId);
 
         }
 
@@ -99,7 +115,7 @@ namespace Ringo.Common.Services
             return entityRelationshipList;
         }
 
-        public Artists SearchArtists(string artist, int limit = 3)
+        public async Task<Artists> SearchArtists(string artist, int limit = 3)
         {
             throw new NotImplementedException();
         }

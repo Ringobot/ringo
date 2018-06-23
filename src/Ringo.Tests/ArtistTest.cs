@@ -76,6 +76,30 @@ namespace Ringo.Tests
             ArtistService artistService = new ArtistService();
 
             var result = await artistService.GetArtist("spotify:artist:4VnomLtKTm9Ahe1tZfmZju");
+
+            Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", result.spotify.uri);
+        }
+
+        [TestCategory("Unit")]
+        [TestMethod]
+        public async Task GetArtistByUri_DoesNotError()
+        {
+            ArtistService artistService = new ArtistService();
+
+            var result = await artistService.GetArtistByUriAsync("spotify:artist:4VnomLtKTm9Ahe1tZfmZju");
+
+            Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", result.spotify.uri);
+        }
+
+        [TestCategory("Unit")]
+        [TestMethod]
+        public async Task GetRelatedArtistsAsync_DoesNotError()
+        {
+            ArtistService artistService = new ArtistService();
+
+            var result = await artistService.GetRelatedArtistsAsync("spotify:artist:4VnomLtKTm9Ahe1tZfmZju");
+
+            Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", result.artists[0].spotify.uri);
         }
 
 
