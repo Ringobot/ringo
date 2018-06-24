@@ -3,16 +3,34 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using SpotifyApiDotNetCore;
+using System.Collections.Generic;
 
-
-namespace Ringo.Common.Heplers
+namespace Ringo.Common.Services
 {
 
-    public class SpotifyService : ISpotifyWebApi
+    public class SpotifyService
     {
-        public Task<dynamic> GetArtist(string artistId)
+        public async Task<List<dynamic>> GetArtist(string artistId)
         {
-            return SpotifyHelperv1.FakeArtist();
+            List<dynamic> list = new List<dynamic>();
+            dynamic result = new
+            {
+                name = "Jackie Wilson",
+                spotify = new
+                {
+                    id = "4VnomLtKTm9Ahe1tZfmZju",
+                    uri = "spotify:artist:4VnomLtKTm9Ahe1tZfmZju"
+                },
+                image = new
+                {
+                    height = 640,
+                    width = 480,
+                    url = "https://i.scdn.co/image/66cadd255a5f01b6496c0854bed1267888b312d1"
+                }
+            };
+            list.Add(result);
+            return list;
+
         }
 
         public Task<dynamic> GetPlaylists(string username)

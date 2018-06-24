@@ -8,19 +8,19 @@ namespace Ringo.Common.Services
 {
     public interface IArtistService
     {
-        Artists MapToArtist(string data);
+        List<Artist> MapToArtist(List<dynamic> data);
 
-        Task<Artist> GetArtist(string artistId);
+        Task<List<Artist>> GetArtist(string artistId);
 
-        Task<Artist> GetArtistByUriAsync(string artistUri);
+        Task<List<Artist>> GetArtistByUriAsync(string artistUri);
 
         bool FindArtistMatch(Artist artist);
 
-        Task<Artists> SearchArtists(string artist, int limit = 3);
+        Task<List<Artist>> SearchArtists(string artist, int limit = 3);
 
-        Task<Artists> GetRelatedArtistsAsync(string artist);
+        Task<List<Artist>> GetRelatedArtistsAsync(string artist);
 
-        List<EntityRelationship> PushRelatedArtist(Artist baseArtist, Artists relatedArtists);
+        List<EntityRelationship> PushRelatedArtist(Artist baseArtist, List<Artist> relatedArtists);
 
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Ringo.Common.Models;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -19,11 +20,11 @@ namespace Ringo.Common.Heplers
             return FakeArtist();
         }
 
-        public async static Task<Artists> GetRelatedArtists(string artistId)
+        public async static Task<List<Artist>> GetRelatedArtists(string artistId)
         {
-            Artists artists = new Artists();
             Artist artist = FakeArtist();
-            artists.artists.Add(artist);
+            List<Artist> artists = new List<Artist>();
+            artists.Add(artist);
             return artists;
 
         }
@@ -38,19 +39,16 @@ namespace Ringo.Common.Heplers
             dynamic result = new
             {
                 name = "Jackie Wilson",
-                spotify = new Spotify()
+                spotify = new
                 {
                     id = "4VnomLtKTm9Ahe1tZfmZju",
                     uri = "spotify:artist:4VnomLtKTm9Ahe1tZfmZju"
                 },
-                image = new Image[]
+                image = new
                 {
-                    new Image()
-                    {
                     height = 640,
                     width = 480,
                     url = "https://i.scdn.co/image/66cadd255a5f01b6496c0854bed1267888b312d1"
-                    }
                 }
             };
             return result;
