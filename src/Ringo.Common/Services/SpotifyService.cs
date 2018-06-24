@@ -31,9 +31,9 @@ namespace Ringo.Common.Services
             return await FakeArtist();
         }
 
-        public Task<dynamic> GetRecommendation(string artistSeed, int limit)
+        public async Task<dynamic> GetRecommendation(string artistSeed, int limit)
         {
-            throw new NotImplementedException();
+            return await FakeArtist();
         }
 
         public async Task<dynamic> GetRelatedArtists(string artistId)
@@ -46,35 +46,39 @@ namespace Ringo.Common.Services
             throw new NotImplementedException();
         }
 
-        public Task<dynamic> SearchArtists(string artist)
+        public async Task<dynamic> SearchArtists(string artist)
         {
-            throw new NotImplementedException();
+            return await FakeArtist(true);
         }
 
-        public Task<dynamic> SearchArtists(string artist, int limit)
+        public async Task<dynamic> SearchArtists(string artist, int limit)
         {
-            throw new NotImplementedException();
+            return await FakeArtist(true);
         }
 
-        private async Task<List<dynamic>> FakeArtist()
+        private async Task<List<dynamic>> FakeArtist(bool empty = false)
         {
             List<dynamic> list = new List<dynamic>();
-            dynamic result = new
+            if (empty != true)
             {
-                name = "Jackie Wilson",
-                spotify = new
+                dynamic result = new
                 {
-                    id = "4VnomLtKTm9Ahe1tZfmZju",
-                    uri = "spotify:artist:4VnomLtKTm9Ahe1tZfmZju"
-                },
-                image = new
-                {
-                    height = 640,
-                    width = 480,
-                    url = "https://i.scdn.co/image/66cadd255a5f01b6496c0854bed1267888b312d1"
-                }
-            };
-            list.Add(result);
+                    name = "Jackie Wilson",
+                    spotify = new
+                    {
+                        id = "4VnomLtKTm9Ahe1tZfmZju",
+                        uri = "spotify:artist:4VnomLtKTm9Ahe1tZfmZju"
+                    },
+                    image = new
+                    {
+                        height = 640,
+                        width = 480,
+                        url = "https://i.scdn.co/image/66cadd255a5f01b6496c0854bed1267888b312d1"
+                    }
+                };
+                list.Add(result);
+            }
+
             return list;
         }
     }

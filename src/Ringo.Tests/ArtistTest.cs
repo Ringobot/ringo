@@ -14,6 +14,8 @@ namespace Ringo.Tests
     [TestClass]
     public class ArtistTest
     {
+        ArtistService artistService = new ArtistService();
+
         [TestCategory("Unit")]
         [TestMethod]
         public void MapDataToArtist_DoesNotError()
@@ -21,7 +23,6 @@ namespace Ringo.Tests
             // arrange
             string artistJson = File.ReadAllText(".\\TestData\\artists.json");
             string radiohead = "Radiohead";
-            ArtistService artistService = new ArtistService();
             // act
             try
             {
@@ -46,7 +47,6 @@ namespace Ringo.Tests
             // arrange
             string artistsJson = File.ReadAllText(".\\TestData\\artists.json");
             string radiohead = "Radiohead";
-            ArtistService artistService = new ArtistService();
 
             // act
             try
@@ -73,8 +73,6 @@ namespace Ringo.Tests
         [TestMethod]
         public async Task GetArtist_DoesNotError()
         {
-            ArtistService artistService = new ArtistService();
-
             var result = await artistService.GetArtist("4VnomLtKTm9Ahe1tZfmZju");
 
             Assert.AreEqual("Jackie Wilson", result[0].name);
@@ -85,8 +83,6 @@ namespace Ringo.Tests
         [TestMethod]
         public async Task GetArtistByUri_DoesNotError()
         {
-            ArtistService artistService = new ArtistService();
-
             var result = await artistService.GetArtistByUriAsync("spotify:artist:4VnomLtKTm9Ahe1tZfmZju");
 
             Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", result[0].spotify.uri);
@@ -96,11 +92,31 @@ namespace Ringo.Tests
         [TestMethod]
         public async Task GetRelatedArtistsAsync_DoesNotError()
         {
-            ArtistService artistService = new ArtistService();
-
             var result = await artistService.GetRelatedArtistsAsync("spotify:artist:4VnomLtKTm9Ahe1tZfmZju");
 
             Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", result[0].spotify.uri);
+        }
+
+        [TestCategory("Unit")]
+        [TestMethod]
+        public async Task SearchArtists_DoesNotError()
+        {
+            var result = await artistService.SearchArtists("spotify:artist:4VnomLtKTm9Ahe1tZfmZju");
+
+            Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", result[0].spotify.uri);
+        }
+
+        [TestCategory("Unit")]
+        [TestMethod]
+        public async Task FindArtistMatch_DoesNotError()
+        {
+            (bool result, List<Artist> artists) = await artistService.FindArtistMatch("spotify:artist:4VnomLtKTm9Ahe1tZfmZju");
+
+            if (result)
+            {
+                Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", artists[0].spotify.uri);
+            }
+
         }
 
 

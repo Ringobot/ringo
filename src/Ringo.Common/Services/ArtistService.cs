@@ -13,9 +13,36 @@ namespace Ringo.Common.Services
     {
         SpotifyService SpotifyService = new SpotifyService();
         
-        public bool FindArtistMatch(Artist artist)
+        public async Task<Tuple<bool, List<Artist>>> FindArtistMatch(string artist)
         {
-            throw new NotImplementedException();
+            bool result = false;
+            List<Artist> artistsList = new List<Artist>();
+            var artistRequest = await SpotifyService.SearchArtists(artist);
+            var artists = MapToArtist(artistRequest);
+            foreach (Artist a in artists)
+            {
+                if (a.image.url.Length > 0)
+                {
+                    result = true;
+                    artistsList.Add(a);
+
+                }
+            }
+            return Tuple.Create(result, artistsList);
+            /*
+             export function findMatch(artists: artist.Artist[]): [boolean, artist.Artist] {
+    let artistsWithImages = artists.filter(i => i.images.length > 0);
+    return artistsWithImages.length === 1 ? [true, artistsWithImages[0]] : [false, null];
+} 
+              
+             */
+        }
+
+        public async Task<List<Artist>> SearchArtists(string artist, int limit = 3)
+        {
+            var artistRequest = await SpotifyService.SearchArtists(artist, limit);
+            var artists = MapToArtist(artistRequest);
+            return artists;
         }
 
         public async Task<List<Artist>> GetArtist(string artistId)
@@ -154,12 +181,6 @@ namespace Ringo.Common.Services
 
             return entityRelationshipList;
         }
-
-        public async Task<List<Artist>> SearchArtists(string artist, int limit = 3)
-        {
-            throw new NotImplementedException();
-        }
-
 
     }
 }

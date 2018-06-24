@@ -14,7 +14,7 @@ namespace Ringo.Common.Services
 
         Task<List<Artist>> GetArtistByUriAsync(string artistUri);
 
-        bool FindArtistMatch(Artist artist);
+        Task<Tuple<bool, List<Artist>>> FindArtistMatch(string artist);
 
         Task<List<Artist>> SearchArtists(string artist, int limit = 3);
 
