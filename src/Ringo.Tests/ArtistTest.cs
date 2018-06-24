@@ -75,10 +75,10 @@ namespace Ringo.Tests
         {
             ArtistService artistService = new ArtistService();
 
-            var result = await artistService.GetArtist("spotify:artist:4VnomLtKTm9Ahe1tZfmZju");
+            var result = await artistService.GetArtist("4VnomLtKTm9Ahe1tZfmZju");
 
             Assert.AreEqual("Jackie Wilson", result[0].name);
-            //Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", result.spotify.uri);
+            Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", result[0].spotify.uri);
         }
 
         [TestCategory("Unit")]

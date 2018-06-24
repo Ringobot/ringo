@@ -36,12 +36,35 @@ namespace Ringo.Common.Services
 
         public async Task<List<Artist>> GetArtistByUriAsync(string artistUri)
         {
-            throw new NotImplementedException();
+            try
+            {
+                string[] artist = artistUri.Split(new[] { ':' });
+                var artistRequest = await SpotifyService.GetRelatedArtists(artist[2]);
+                var artists = MapToArtist(artistRequest);
+                return artists;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+
         }
 
         public async Task<List<Artist>> GetRelatedArtistsAsync(string artistId)
         {
-            return await SpotifyService.GetRelatedArtists(artistId);
+            try
+            {
+                var artistRequest = await SpotifyService.GetRelatedArtists(artistId);
+                var artists = MapToArtist(artistRequest);
+                return artists;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
 
         }
 

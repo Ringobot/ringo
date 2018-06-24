@@ -12,6 +12,52 @@ namespace Ringo.Common.Services
     {
         public async Task<List<dynamic>> GetArtist(string artistId)
         {
+            return await FakeArtist();
+
+        }
+
+        public Task<dynamic> GetPlaylists(string username)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<dynamic> GetPlaylists(string username, int offset)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<dynamic> GetRecommendation(string artistSeed)
+        {
+            return await FakeArtist();
+        }
+
+        public Task<dynamic> GetRecommendation(string artistSeed, int limit)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<dynamic> GetRelatedArtists(string artistId)
+        {
+            return await FakeArtist();
+        }
+
+        public Task PlayArtist(string userHash, string spotifyUri)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<dynamic> SearchArtists(string artist)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<dynamic> SearchArtists(string artist, int limit)
+        {
+            throw new NotImplementedException();
+        }
+
+        private async Task<List<dynamic>> FakeArtist()
+        {
             List<dynamic> list = new List<dynamic>();
             dynamic result = new
             {
@@ -30,47 +76,6 @@ namespace Ringo.Common.Services
             };
             list.Add(result);
             return list;
-
-        }
-
-        public Task<dynamic> GetPlaylists(string username)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<dynamic> GetPlaylists(string username, int offset)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<dynamic> GetRecommendation(string artistSeed)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<dynamic> GetRecommendation(string artistSeed, int limit)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<dynamic> GetRelatedArtists(string artistId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task PlayArtist(string userHash, string spotifyUri)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<dynamic> SearchArtists(string artist)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<dynamic> SearchArtists(string artist, int limit)
-        {
-            throw new NotImplementedException();
         }
     }
 
