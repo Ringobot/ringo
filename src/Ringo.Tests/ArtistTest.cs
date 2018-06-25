@@ -15,19 +15,20 @@ namespace Ringo.Tests
     public class ArtistTest
     {
         ArtistService artistService = new ArtistService();
+        static string artistsJson = File.ReadAllText(".\\TestData\\artists.json");
+        static string radiohead = "Radiohead";
+        List<dynamic> artistsList = JsonConvert.DeserializeObject<List<dynamic>>(artistsJson);
 
         [TestCategory("Unit")]
         [TestMethod]
         public void MapDataToArtist_DoesNotError()
         {
             // arrange
-            string artistJson = File.ReadAllText(".\\TestData\\artists.json");
-            string radiohead = "Radiohead";
+
             // act
             try
             {
-                List<dynamic> artists = JsonConvert.DeserializeObject<List<dynamic>>(artistJson);
-                List<Artist> artist = artistService.MapToArtist(artists);
+                List<Artist> artist = artistService.MapToArtist(artistsList);
 
                 // assert
                 Assert.AreEqual(radiohead, artist[0].name);
@@ -45,13 +46,12 @@ namespace Ringo.Tests
         public void PushRelatedArtist_DoesNotError()
         {
             // arrange
-            string artistsJson = File.ReadAllText(".\\TestData\\artists.json");
-            string radiohead = "Radiohead";
+          
 
             // act
             try
             {
-                List<dynamic> artistsList = JsonConvert.DeserializeObject<List<dynamic>>(artistsJson);
+                
                 List<Artist> artists = artistService.MapToArtist(artistsList);
                 List<EntityRelationship> entityRelationships = artistService.PushRelatedArtist(artists[0], artists);
 
@@ -115,6 +115,19 @@ namespace Ringo.Tests
             if (result)
             {
                 Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", artists[0].spotify.uri);
+            }
+
+        }
+
+        [TestCategory("Unit")]
+        [TestMethod]
+        public async Task FindArtistNoMatch_DoesNotError()
+        {
+            (bool result, List<Artist> artists) = await artistService.FindArtistMatch(string.Empty);
+
+            if (result)
+            {
+                Assert.AreEqual(0, artists.Count);
             }
 
         }

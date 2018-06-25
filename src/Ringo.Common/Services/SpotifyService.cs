@@ -12,7 +12,7 @@ namespace Ringo.Common.Services
     {
         public async Task<List<dynamic>> GetArtist(string artistId)
         {
-            return await FakeArtist();
+            return await FakeArtist(artistId);
 
         }
 
@@ -28,17 +28,17 @@ namespace Ringo.Common.Services
 
         public async Task<dynamic> GetRecommendation(string artistSeed)
         {
-            return await FakeArtist();
+            return await FakeArtist(artistSeed);
         }
 
         public async Task<dynamic> GetRecommendation(string artistSeed, int limit)
         {
-            return await FakeArtist();
+            return await FakeArtist(artistSeed, limit);
         }
 
         public async Task<dynamic> GetRelatedArtists(string artistId)
         {
-            return await FakeArtist();
+            return await FakeArtist(artistId);
         }
 
         public Task PlayArtist(string userHash, string spotifyUri)
@@ -48,18 +48,18 @@ namespace Ringo.Common.Services
 
         public async Task<dynamic> SearchArtists(string artist)
         {
-            return await FakeArtist(true);
+            return await FakeArtist(artist);
         }
 
         public async Task<dynamic> SearchArtists(string artist, int limit)
         {
-            return await FakeArtist(true);
+            return await FakeArtist(artist, limit);
         }
 
-        private async Task<List<dynamic>> FakeArtist(bool empty = false)
+        private async Task<List<dynamic>> FakeArtist(string artist, int limit = 3)
         {
             List<dynamic> list = new List<dynamic>();
-            if (empty != true)
+            if (artist.Length > 0)
             {
                 dynamic result = new
                 {
