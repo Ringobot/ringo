@@ -83,16 +83,16 @@ namespace Ringo.Tests
         [TestMethod]
         public async Task GetArtistByUri_DoesNotError()
         {
-            var result = await artistService.GetArtistByUriAsync("spotify:artist:4VnomLtKTm9Ahe1tZfmZju");
+            var result = await artistService.GetArtistByUri("spotify:artist:4VnomLtKTm9Ahe1tZfmZju");
 
             Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", result[0].spotify.uri);
         }
 
         [TestCategory("Unit")]
         [TestMethod]
-        public async Task GetRelatedArtistsAsync_DoesNotError()
+        public async Task GetRelatedArtists_DoesNotError()
         {
-            var result = await artistService.GetRelatedArtistsAsync("spotify:artist:4VnomLtKTm9Ahe1tZfmZju");
+            var result = await artistService.GetRelatedArtists("spotify:artist:4VnomLtKTm9Ahe1tZfmZju");
 
             Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", result[0].spotify.uri);
         }

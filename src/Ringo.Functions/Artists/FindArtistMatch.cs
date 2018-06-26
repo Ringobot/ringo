@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Ringo.Functions
 {
-    public static class GetArtistByUri
+    public static class FindArtistMatch
     {
-        [FunctionName("GetArtistByUri")]
+        [FunctionName("FindArtistMatch")]
         public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]HttpRequestMessage req, TraceWriter log)
         {
             log.Info("C# HTTP trigger function processed a request.");
@@ -18,7 +18,7 @@ namespace Ringo.Functions
             dynamic data = await req.Content.ReadAsAsync<object>();
 
             ArtistService artistService = new ArtistService();
-            var result = await artistService.GetArtistByUri(data.artistId.ToString());
+            var result = await artistService.FindArtistMatch(data.artistId.ToString());
 
             return result.Count != 0
                 ? (ActionResult)new OkObjectResult(result)

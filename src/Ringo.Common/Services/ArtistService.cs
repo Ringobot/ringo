@@ -55,7 +55,7 @@ namespace Ringo.Common.Services
 
         }
 
-        public async Task<List<Artist>> GetArtistByUriAsync(string artistUri)
+        public async Task<List<Artist>> GetArtistByUri(string artistUri)
         {
             try
             {
@@ -73,7 +73,7 @@ namespace Ringo.Common.Services
 
         }
 
-        public async Task<List<Artist>> GetRelatedArtistsAsync(string artistId)
+        public async Task<List<Artist>> GetRelatedArtists(string artistId)
         {
             try
             {
