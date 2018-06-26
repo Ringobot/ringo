@@ -29,13 +29,7 @@ namespace Ringo.Common.Services
                 }
             }
             return Tuple.Create(result, artistsList);
-            /*
-             export function findMatch(artists: artist.Artist[]): [boolean, artist.Artist] {
-    let artistsWithImages = artists.filter(i => i.images.length > 0);
-    return artistsWithImages.length === 1 ? [true, artistsWithImages[0]] : [false, null];
-} 
-              
-             */
+
         }
 
         public async Task<List<Artist>> SearchArtists(string artist, int limit = 3)
