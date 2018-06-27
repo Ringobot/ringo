@@ -2,7 +2,8 @@
 import _canonical = require('./canonicalisation');
 import _servicebus = require('./servicebus');
 import artist = require('../models/artist');
-import _graph = require('./graphstorage')
+import _graph = require('./graphstorage');
+import entityrelation = require('../models/entityrelation');
 
 /**
  * Get all of the artists that a User likes
@@ -30,6 +31,7 @@ export async function userLikesArtist(userId: string, artist: artist.Artist) {
 
     //await _table.insert('UserLikesArtist', entity, true);
     */
+   let erList:entityrelation.EntityRelationship[] = [];
 
     var entityRelationship = {
         FromVertex: {
@@ -53,8 +55,10 @@ export async function userLikesArtist(userId: string, artist: artist.Artist) {
         RelationshipDate: new Date()
     }
 
+    erList.push(entityRelationship)
+
     try {
-        await _servicebus.sendMessage('graph', entityRelationship);
+        await _servicebus.sendMessage('graph', erList);
     } catch (e) {
         throw e;
     }
