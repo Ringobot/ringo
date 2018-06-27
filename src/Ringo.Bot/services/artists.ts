@@ -35,6 +35,8 @@ export async function getArtistByUri(uri: string): Promise<artist.Artist> {
 
 export async function pushRelatedArtist(baseArtist: artist.Artist, relatedArtistList: artist.Artist[]) {
     
+    let erList:entityrelation.EntityRelationship[] = [];
+
     try {
         relatedArtistList.forEach(async Artist => {
             let baseArtistId = `${baseArtist.name.toLowerCase()}:${_canonical.getArtistId(baseArtist.name).Id}`;
@@ -64,9 +66,10 @@ export async function pushRelatedArtist(baseArtist: artist.Artist, relatedArtist
                 Relationship: 'related',
                 RelationshipDate: new Date()
         }
-
-            await _servicebus.sendMessage('graph', er)
+        erList.push(er);
         });
+    
+        await _servicebus.sendMessage('graph', erList)
     } catch (e) {
         throw e;
     }
