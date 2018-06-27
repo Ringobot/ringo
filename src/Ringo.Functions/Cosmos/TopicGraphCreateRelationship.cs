@@ -1,9 +1,9 @@
-//using System.Threading.Tasks;
 //using Microsoft.Azure.WebJobs;
 //using Microsoft.Azure.WebJobs.Host;
 //using Newtonsoft.Json;
-//using Ringo.Common.Models;
 //using Ringo.Common.Heplers;
+//using Ringo.Common.Models;
+//using System.Threading.Tasks;
 
 //namespace Ringo.Functions
 //{

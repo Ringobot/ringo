@@ -17,8 +17,8 @@ namespace Ringo.Functions.Artists
             [OrchestrationTrigger] DurableOrchestrationContext context)
         {
             var outputs = new List<string>();
-            var entity = context.GetInputAsJson();
-            List<EntityRelationship> msgObj = JsonConvert.DeserializeObject<List<EntityRelationship>>(entity["Result"].ToString());
+            var entity = context.GetInput<string>();
+            List<EntityRelationship> msgObj = JsonConvert.DeserializeObject<List<EntityRelationship>>(entity);
 
             foreach (EntityRelationship er in msgObj)
             {

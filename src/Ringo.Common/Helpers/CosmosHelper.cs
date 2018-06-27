@@ -40,7 +40,7 @@ namespace Ringo.Common.Heplers
 
         }
 
-        private static async Task CheckOrCreateDocument(Entity entity)
+        public static async Task CheckOrCreateDocument(Entity entity)
         {
             try
             {
