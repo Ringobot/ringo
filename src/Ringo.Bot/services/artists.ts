@@ -4,6 +4,7 @@ import entityrelation = require('../models/entityrelation');
 import _servicebus = require('./servicebus');
 import { GremlinClient } from '../gremlin/bundle';
 import _canonical = require('./canonicalisation');
+import * as _httpj from "./httpjson";
 
 export async function searchArtists(artistName: string, limit?: number): Promise<artist.Artist[]> {
     return artist.mapToArtists(await _spotify.searchArtists(artistName, limit));
@@ -69,7 +70,8 @@ export async function pushRelatedArtist(baseArtist: artist.Artist, relatedArtist
         erList.push(er);
         });
     
-        await _servicebus.sendMessage('graph', erList)
+        //await _servicebus.sendMessage('graph', erList)
+        await _httpj.post('https://ringofuncbackend.azurewebsites.net/api/RelatedArtists_HttpStart', JSON.stringify(erList))
     } catch (e) {
         throw e;
     }

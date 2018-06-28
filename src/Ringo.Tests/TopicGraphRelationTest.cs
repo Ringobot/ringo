@@ -28,11 +28,13 @@ namespace Ringo.Tests
             entityRelationship.ToVertex = testArtist;
             entityRelationship.Relationship = "likes";
             entityRelationship.RelationshipDate = DateTime.UtcNow;
+            List<EntityRelationship> entityRelationships = new List<EntityRelationship>();
+            entityRelationships.Add(entityRelationship);
 
             // act
             try
             {
-                var mockMsgString = JsonConvert.SerializeObject(entityRelationship);
+                var mockMsgString = JsonConvert.SerializeObject(entityRelationships);
                 await TopicGraphCreateRelationship.Run(mockMsgString, null);
 
 
@@ -64,11 +66,13 @@ namespace Ringo.Tests
             entityRelationship.ToVertex = testArtist;
             entityRelationship.Relationship = "likes";
             entityRelationship.RelationshipDate = DateTime.UtcNow;
+            List<EntityRelationship> entityRelationships = new List<EntityRelationship>();
+            entityRelationships.Add(entityRelationship);
 
             // act
             try
             {
-                var mockMsgString = JsonConvert.SerializeObject(entityRelationship);
+                var mockMsgString = JsonConvert.SerializeObject(entityRelationships);
                 await TopicGraphCreateRelationship.Run(mockMsgString, null);
 
 

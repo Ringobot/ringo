@@ -4,6 +4,7 @@ import _servicebus = require('./servicebus');
 import artist = require('../models/artist');
 import _graph = require('./graphstorage');
 import entityrelation = require('../models/entityrelation');
+import * as _httpj from "./httpjson";
 
 /**
  * Get all of the artists that a User likes
@@ -58,7 +59,8 @@ export async function userLikesArtist(userId: string, artist: artist.Artist) {
     erList.push(entityRelationship)
 
     try {
-        await _servicebus.sendMessage('graph', erList);
+        //await _servicebus.sendMessage('graph', erList);
+        await _httpj.post('https://ringofuncbackend.azurewebsites.net/api/RelatedArtists_HttpStart', JSON.stringify(erList))
     } catch (e) {
         throw e;
     }
