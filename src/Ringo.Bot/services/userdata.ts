@@ -49,8 +49,8 @@ export async function userLikesArtist(userId: string, artist: artist.Artist) {
     erList.push(entityRelationship)
 
     try {
-        
-        await _httpj.post(process.env.API_BACKEND + 'RelatedArtists_HttpStart', JSON.stringify(erList), {"Content-Type": "application/json"});
+        let url = `${process.env.API_BACKEND}RelatedArtists_HttpStart`;
+        await _httpj.post(url, JSON.stringify(erList), {"Content-Type": "application/json"});
     } catch (e) {
         throw e;
     }

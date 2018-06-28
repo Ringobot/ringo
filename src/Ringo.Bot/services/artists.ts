@@ -67,8 +67,8 @@ export async function pushRelatedArtist(baseArtist: artist.Artist, relatedArtist
         }
         erList.push(er);
         });
-    
-        await _httpj.post(process.env.API_BACKEND + 'RelatedArtists_HttpStart', JSON.stringify(erList), {"Content-Type": "application/json"});
+        let url = `${process.env.API_BACKEND}RelatedArtists_HttpStart`;
+        await _httpj.post(url, JSON.stringify(erList), {"Content-Type": "application/json"});
     } catch (e) {
         throw e;
     }
