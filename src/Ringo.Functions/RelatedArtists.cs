@@ -17,8 +17,8 @@ namespace Ringo.Functions.Artists
             [OrchestrationTrigger] DurableOrchestrationContext context)
         {
             var outputs = new List<string>();
-            var entity = context.GetInput<string>();
-            List<EntityRelationship> msgObj = JsonConvert.DeserializeObject<List<EntityRelationship>>(entity);
+            dynamic entity = context.GetInput<object>();
+            List<EntityRelationship> msgObj = JsonConvert.DeserializeObject<List<EntityRelationship>>(entity.ToString());
 
             foreach (EntityRelationship er in msgObj)
             {
@@ -36,17 +36,18 @@ namespace Ringo.Functions.Artists
         }
 
         [FunctionName("RelatedArtists_HttpStart")]
-        public static async Task HttpStart(
-            [ServiceBusTrigger("graph", "addRelationship")]string msg,
+        public static async Task<HttpResponseMessage> HttpStart(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")]HttpRequestMessage req,
             [OrchestrationClient]DurableOrchestrationClient starter,
             TraceWriter log)
         {
             // Function input comes from the request content.
-            string instanceId = await starter.StartNewAsync("RelatedArtists", msg);
+            dynamic eventData = await req.Content.ReadAsAsync<object>();
+            string instanceId = await starter.StartNewAsync("RelatedArtists", eventData);
 
             log.Info($"Started orchestration with ID = '{instanceId}'.");
 
-            //return starter.CreateCheckStatusResponse(req, instanceId);
+            return starter.CreateCheckStatusResponse(req, instanceId);
         }
     }
 }
