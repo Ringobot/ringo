@@ -35,7 +35,7 @@ namespace Ringo.Tests
             try
             {
                 var mockMsgString = JsonConvert.SerializeObject(entityRelationships);
-                await TopicGraphCreateRelationship.Run(mockMsgString, null);
+                await GraphHelper.CreateRelationship(entityRelationship);
 
 
                 // assert
@@ -73,7 +73,7 @@ namespace Ringo.Tests
             try
             {
                 var mockMsgString = JsonConvert.SerializeObject(entityRelationships);
-                await TopicGraphCreateRelationship.Run(mockMsgString, null);
+                await GraphHelper.CreateRelationship(entityRelationship);
 
 
                 // assert

@@ -1,8 +1,6 @@
 import _spotify = require('./spotify');
 import artist = require('../models/artist');
 import entityrelation = require('../models/entityrelation');
-import _servicebus = require('./servicebus');
-import { GremlinClient } from '../gremlin/bundle';
 import _canonical = require('./canonicalisation');
 import * as _httpj from "./httpjson";
 
@@ -42,7 +40,7 @@ export async function pushRelatedArtist(baseArtist: artist.Artist, relatedArtist
         relatedArtistList.forEach(async Artist => {
             let baseArtistId = `${baseArtist.name.toLowerCase()}:${_canonical.getArtistId(baseArtist.name).Id}`;
             let relatedArtistId = `${Artist.name.toLowerCase()}:${_canonical.getArtistId(Artist.name).Id}`;
-            // let er:entityrelation.EntityRelationship = {
+            
         var er = {
                 FromVertex:
                     {
@@ -70,8 +68,7 @@ export async function pushRelatedArtist(baseArtist: artist.Artist, relatedArtist
         erList.push(er);
         });
     
-        //await _servicebus.sendMessage('graph', erList)
-        await _httpj.post('https://ringofuncbackend.azurewebsites.net/api/RelatedArtists_HttpStart', JSON.stringify(erList))
+        await _httpj.post(process.env.API_BACKEND + 'RelatedArtists_HttpStart', JSON.stringify(erList), {"Content-Type": "application/json"});
     } catch (e) {
         throw e;
     }
