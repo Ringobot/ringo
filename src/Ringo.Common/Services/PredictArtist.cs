@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.ML;
+using Microsoft.ML.Data;
 using Ringo.Common.Models;
 
 namespace Ringo.Common.Services
@@ -25,6 +26,19 @@ namespace Ringo.Common.Services
 
             Artist artist = new Artist();
             return artist;
+        }
+
+        public static async Task TrainModel()
+        {
+            var pipeline = new LearningPipeline();
+            var data = new List<Artist> {
+               new Artist { name = "radiohead" },
+               new Artist { name = "radiohead" }
+            };
+            var collection = CollectionDataSource.Create(data);
+            pipeline.Add(collection);
+
+
         }
 
 

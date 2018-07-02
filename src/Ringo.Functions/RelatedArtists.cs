@@ -32,6 +32,7 @@ namespace Ringo.Functions.Artists
         public static async Task<string> CreateRelationship([ActivityTrigger] EntityRelationship entityRelationship, TraceWriter log)
         {
             await GraphHelper.CreateRelationship(entityRelationship);
+            log.Info($"Added: {entityRelationship.FromVertex.Name}, {entityRelationship.Relationship}, To: {entityRelationship.ToVertex.Name}");
             return $"Added: {entityRelationship.FromVertex.Name}, {entityRelationship.Relationship}, To: {entityRelationship.ToVertex.Name}";
         }
 
