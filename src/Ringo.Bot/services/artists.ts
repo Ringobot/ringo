@@ -36,9 +36,9 @@ export async function getArtistByUri(uri: string): Promise<artist.Artist> {
 
 export async function pushRelatedArtist(baseArtist: artist.Artist, relatedArtistList: artist.Artist[]) {
 
-    let erList: entityrelation.EntityRelationship[] = [];
-
     try {
+        let erList: entityrelation.EntityRelationship[] = [];
+
         relatedArtistList.forEach(async Artist => {
             let baseArtistId = `${baseArtist.name.toLowerCase()}:${_canonical.getArtistId(baseArtist.name).Id}`;
             let relatedArtistId = `${Artist.name.toLowerCase()}:${_canonical.getArtistId(Artist.name).Id}`;
@@ -70,12 +70,8 @@ export async function pushRelatedArtist(baseArtist: artist.Artist, relatedArtist
             erList.push(er);
         });
 
-    } catch (e) {
-        throw e;
-    }
-
-    try {
         await postRelated(erList)
+
     } catch (e) {
         throw e;
     }
@@ -99,32 +95,33 @@ export async function userLikesArtist(userId: string, artist: artist.Artist) {
 
     let erList: entityrelation.EntityRelationship[] = [];
 
-    var entityRelationship = {
-        FromVertex: {
-            Id: userId,
-            Name: userId,
-            Properties: {
-                type: "user"
-            }
-        },
-        ToVertex: {
-            Id: artistId,
-            Name: artist.name,
-            Properties: {
-                type: "artist",
-                spotifyid: artist.spotify.id,
-                spotifyuri: artist.spotify.uri,
-                imageurl: artist.images[0].url
-            }
-        },
-        Relationship: "likes",
-        RelationshipDate: new Date()
-    }
-
-    erList.push(entityRelationship)
-
     try {
+        var entityRelationship = {
+            FromVertex: {
+                Id: userId,
+                Name: userId,
+                Properties: {
+                    type: "user"
+                }
+            },
+            ToVertex: {
+                Id: artistId,
+                Name: artist.name,
+                Properties: {
+                    type: "artist",
+                    spotifyid: artist.spotify.id,
+                    spotifyuri: artist.spotify.uri,
+                    imageurl: artist.images[0].url
+                }
+            },
+            Relationship: "likes",
+            RelationshipDate: new Date()
+        }
+
+        erList.push(entityRelationship)
+
         await postRelated(erList)
+        
     } catch (e) {
         throw e;
     }
@@ -133,7 +130,6 @@ export async function userLikesArtist(userId: string, artist: artist.Artist) {
 
 export async function postRelated(erList) {
     try {
-        await postRelated(erList)
         let url = process.env.API_BACKEND + 'RelatedArtists_HttpStart';
         await _httpj.post(url, JSON.stringify(erList), { 'Content-Type': 'application/json' });
     } catch (e) {
