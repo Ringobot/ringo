@@ -2,7 +2,9 @@ import _spotify = require('./spotify');
 import artist = require('../models/artist');
 import entityrelation = require('../models/entityrelation');
 import _canonical = require('./canonicalisation');
+import _graph = require('./graphstorage');
 import * as _httpj from "./httpjson";
+
 
 export async function searchArtists(artistName: string, limit?: number): Promise<artist.Artist[]> {
     return artist.mapToArtists(await _spotify.searchArtists(artistName, limit));
@@ -33,46 +35,107 @@ export async function getArtistByUri(uri: string): Promise<artist.Artist> {
 }
 
 export async function pushRelatedArtist(baseArtist: artist.Artist, relatedArtistList: artist.Artist[]) {
-    
-    let erList:entityrelation.EntityRelationship[] = [];
+
+    let erList: entityrelation.EntityRelationship[] = [];
 
     try {
         relatedArtistList.forEach(async Artist => {
             let baseArtistId = `${baseArtist.name.toLowerCase()}:${_canonical.getArtistId(baseArtist.name).Id}`;
             let relatedArtistId = `${Artist.name.toLowerCase()}:${_canonical.getArtistId(Artist.name).Id}`;
-            
-        var er = {
-                FromVertex:
-                    {
-                        Id: baseArtistId,
-                        Name: baseArtist.name,
-                        Properties: {
-                            type: 'artist'
-                        }
-                    },
-                ToVertex:
-                    {
-                        Id: relatedArtistId,
-                        Name: Artist.name,
-                        Properties: {
-                            type: 'artist',
-                            spotifyid: Artist.spotify.id,
-                            spotifyuri: Artist.spotify.uri,
-                            images: Artist.images[0].url
-                        }
 
-                    },
+            var er = {
+                FromVertex:
+                {
+                    Id: baseArtistId,
+                    Name: baseArtist.name,
+                    Properties: {
+                        type: 'artist'
+                    }
+                },
+                ToVertex:
+                {
+                    Id: relatedArtistId,
+                    Name: Artist.name,
+                    Properties: {
+                        type: 'artist',
+                        spotifyid: Artist.spotify.id,
+                        spotifyuri: Artist.spotify.uri,
+                        images: Artist.images[0].url
+                    }
+
+                },
                 Relationship: 'related',
                 RelationshipDate: new Date()
-        }
-        erList.push(er);
+            }
+            erList.push(er);
         });
-        let url = `${process.env.API_BACKEND}RelatedArtists_HttpStart`;
-        await _httpj.post(url, JSON.stringify(erList), {"Content-Type": "application/json"});
+
+    } catch (e) {
+        throw e;
+    }
+
+    try {
+        await postRelated(erList)
     } catch (e) {
         throw e;
     }
 }
+
+/**
+ * Get all of the artists that a User likes
+ * @param userId 
+ */
+
+export async function artistsUserLikes(userId) :Promise<artist.Artist[]> {
+    let data = await _graph.vertexEdgeVertices(userId, 'likes', 'artist')
+    return artist.mapGraphToArtists(data);
+}
+
+export async function userLikesArtist(userId: string, artist: artist.Artist) {
+    if (!userId) throw new Error('user cannot be null');
+
+    // graph artist Id
+    let artistId = `${artist.name.toLowerCase()}:${_canonical.getArtistId(artist.name).Id}`;
+
+   let erList:entityrelation.EntityRelationship[] = [];
+
+    var entityRelationship = {
+        FromVertex: {
+            Id: userId,
+            Name: userId,
+            Properties: {
+                type: "user"
+            }
+        },
+        ToVertex: {
+            Id: artistId,
+            Name: artist.name,
+            Properties: {
+                type: "artist",
+                spotifyId: artist.spotify.id,
+                spotifyUri: artist.spotify.uri,
+                imageUrl: artist.images[0].url
+            }
+        },
+        Relationship: "likes",
+        RelationshipDate: new Date()
+    }
+
+    erList.push(entityRelationship)
+
+    try {
+        await postRelated(erList)
+    } catch (e) {
+        throw e;
+    }
+};
+
+
+export async function postRelated(erList){
+    let url = process.env.API_BACKEND + 'RelatedArtists_HttpStart';
+    await _httpj.post(url, JSON.stringify(erList), {'Content-Type': 'application/json'});
+}
+
 
 /**
  * Finds true and the artist if only one artist (with an image) is found in the array

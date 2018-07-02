@@ -8,9 +8,7 @@ import builder = require('botbuilder');
 import _artists = require('./services/artists');
 import _cards = require('./services/cards');
 import _messages = require('./services/messages');
-import userdata = require('./services/userdata');
 import statedata = require('./services/statedata');
-import servicebus = require('./services/servicebus')
 import helpers = require('./helpers');
 import _spotify = require('./services/spotify');
 import _spotifyAuth = require('./services/spotifyauth');
@@ -266,7 +264,7 @@ intents.matches('Like Artist',
                 _metrics.trackEvent('Artist/Like');
                 
                 session.sendTyping();
-                await userdata.userLikesArtist(user.userId(session), artist);
+                await _artists.userLikesArtist(user.userId(session), artist);
                 let msg2 = await _messages.recommendArtist(session, artist);
                 if (msg2) session.endDialog(msg2) 
                 else session.endDialog()
@@ -300,7 +298,7 @@ intents.matches('Like Artist',
                     _metrics.trackEvent('Artist/Like');
 
                     session.sendTyping();
-                    await userdata.userLikesArtist(user.userId(session), match[1]);
+                    await _artists.userLikesArtist(user.userId(session), match[1]);
 
                     // Recommend another artist
                     let msg2 = await _messages.recommendArtist(session, match[1]);
