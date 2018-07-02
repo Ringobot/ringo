@@ -86,7 +86,7 @@ export async function pushRelatedArtist(baseArtist: artist.Artist, relatedArtist
  * @param userId 
  */
 
-export async function artistsUserLikes(userId) :Promise<artist.Artist[]> {
+export async function artistsUserLikes(userId): Promise<artist.Artist[]> {
     let data = await _graph.vertexEdgeVertices(userId, 'likes', 'artist')
     return artist.mapGraphToArtists(data);
 }
@@ -97,7 +97,7 @@ export async function userLikesArtist(userId: string, artist: artist.Artist) {
     // graph artist Id
     let artistId = `${artist.name.toLowerCase()}:${_canonical.getArtistId(artist.name).Id}`;
 
-   let erList:entityrelation.EntityRelationship[] = [];
+    let erList: entityrelation.EntityRelationship[] = [];
 
     var entityRelationship = {
         FromVertex: {
@@ -131,9 +131,14 @@ export async function userLikesArtist(userId: string, artist: artist.Artist) {
 };
 
 
-export async function postRelated(erList){
-    let url = process.env.API_BACKEND + 'RelatedArtists_HttpStart';
-    await _httpj.post(url, JSON.stringify(erList), {'Content-Type': 'application/json'});
+export async function postRelated(erList) {
+    try {
+        await postRelated(erList)
+        let url = process.env.API_BACKEND + 'RelatedArtists_HttpStart';
+        await _httpj.post(url, JSON.stringify(erList), { 'Content-Type': 'application/json' });
+    } catch (e) {
+        throw e;
+    }
 }
 
 
