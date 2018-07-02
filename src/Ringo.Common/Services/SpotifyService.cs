@@ -1,17 +1,21 @@
-﻿using Ringo.Common.Models;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using SpotifyApiDotNetCore;
+using SpotifyApi.NetCore;
 using System.Collections.Generic;
+using Microsoft.Extensions.Configuration;
 
 namespace Ringo.Common.Services
 {
 
     public class SpotifyService
     {
+
         public async Task<List<dynamic>> GetArtist(string artistId)
         {
+            
+            //dynamic response = await api.GetArtist("1tpXaFf2F55E7kVJON4j4G");
+            //var result = response.ToString();
             return await FakeArtist(artistId);
 
         }
