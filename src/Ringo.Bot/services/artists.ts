@@ -112,9 +112,9 @@ export async function userLikesArtist(userId: string, artist: artist.Artist) {
             Name: artist.name,
             Properties: {
                 type: "artist",
-                spotifyId: artist.spotify.id,
-                spotifyUri: artist.spotify.uri,
-                imageUrl: artist.images[0].url
+                spotifyid: artist.spotify.id,
+                spotifyuri: artist.spotify.uri,
+                imageurl: artist.images[0].url
             }
         },
         Relationship: "likes",
