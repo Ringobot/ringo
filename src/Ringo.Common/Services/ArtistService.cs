@@ -11,13 +11,13 @@ namespace Ringo.Common.Services
 {
     public class ArtistService : IArtistService
     {
-        SpotifyService SpotifyService = new SpotifyService();
+        SpotifyService spotifyService = new SpotifyService();
         
         public async Task<Tuple<bool, List<Artist>>> FindArtistMatch(string artist)
         {
             bool result = false;
             List<Artist> artistsList = new List<Artist>();
-            var artistRequest = await SpotifyService.SearchArtists(artist);
+            var artistRequest = await spotifyService.SearchArtists(artist);
             var artists = MapToArtist(artistRequest);
             foreach (Artist a in artists)
             {
@@ -34,7 +34,7 @@ namespace Ringo.Common.Services
 
         public async Task<List<Artist>> SearchArtists(string artist, int limit = 3)
         {
-            var artistRequest = await SpotifyService.SearchArtists(artist, limit);
+            var artistRequest = await spotifyService.SearchArtists(artist, limit);
             var artists = MapToArtist(artistRequest);
             return artists;
         }
@@ -43,7 +43,7 @@ namespace Ringo.Common.Services
         {
             try
             {
-                var artistRequest = await SpotifyService.GetArtist(artistId);
+                var artistRequest = await spotifyService.GetArtist(artistId);
                 var artists = MapToArtist(artistRequest);
                 return artists;
             }
@@ -60,7 +60,7 @@ namespace Ringo.Common.Services
             try
             {
                 string[] artist = artistUri.Split(new[] { ':' });
-                var artistRequest = await SpotifyService.GetRelatedArtists(artist[2]);
+                var artistRequest = await spotifyService.GetRelatedArtists(artist[2]);
                 var artists = MapToArtist(artistRequest);
                 return artists;
 
@@ -77,7 +77,7 @@ namespace Ringo.Common.Services
         {
             try
             {
-                var artistRequest = await SpotifyService.GetRelatedArtists(artistId);
+                var artistRequest = await spotifyService.GetRelatedArtists(artistId);
                 var artists = MapToArtist(artistRequest);
                 return artists;
             }

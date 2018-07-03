@@ -73,7 +73,7 @@ namespace Ringo.Tests
         [TestMethod]
         public async Task GetArtist_DoesNotError()
         {
-            var result = await artistService.GetArtist("4VnomLtKTm9Ahe1tZfmZju");
+            var result = await artistService.GetArtist("1tpXaFf2F55E7kVJON4j4G");
 
             Assert.AreEqual("Jackie Wilson", result[0].name);
             Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", result[0].spotify.uri);

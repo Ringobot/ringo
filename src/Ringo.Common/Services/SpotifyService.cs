@@ -10,13 +10,15 @@ namespace Ringo.Common.Services
 
     public class SpotifyService
     {
+        private static HttpClient httpClient = new HttpClient();
+        private static ClientCredentialsAuthorizationApi auth = new ClientCredentialsAuthorizationApi(httpClient);
+        private static ArtistsApi api = new ArtistsApi(httpClient, auth);
 
         public async Task<List<dynamic>> GetArtist(string artistId)
         {
-            
-            //dynamic response = await api.GetArtist("1tpXaFf2F55E7kVJON4j4G");
-            //var result = response.ToString();
-            return await FakeArtist(artistId);
+            Console.WriteLine(artistId);
+            dynamic response = await api.GetArtist(artistId);
+            return response;
 
         }
 
