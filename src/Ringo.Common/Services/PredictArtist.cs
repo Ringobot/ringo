@@ -10,7 +10,7 @@ namespace Ringo.Common.Services
 {
     public class PredictArtist
     {
-        public static async Task<Artist> GetPrediction()
+        public static Task GetPrediction()
         {
             var pipeline = new LearningPipeline();
 
@@ -24,11 +24,11 @@ namespace Ringo.Common.Services
 
             //var model = pipeline.Train<SentimentData, SentimentPrediction>();
 
-            Artist artist = new Artist();
-            return artist;
+            return null;
+
         }
 
-        public static async Task TrainModel()
+        public static Task TrainModel()
         {
             var pipeline = new LearningPipeline();
             var data = new List<Artist> {
@@ -38,7 +38,7 @@ namespace Ringo.Common.Services
             var collection = CollectionDataSource.Create(data);
             pipeline.Add(collection);
 
-
+            return null;
         }
 
 

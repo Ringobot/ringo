@@ -16,9 +16,6 @@ namespace Ringo.Tests
     public class ArtistTest
     {
         ArtistService artistService = new ArtistService();
-        static string artistsJson = File.ReadAllText(".\\TestData\\artists.json");
-        static string radiohead = "Radiohead";
-        List<dynamic> artistsList = JsonConvert.DeserializeObject<List<dynamic>>(artistsJson);
 
         [TestCategory("Unit")]
         [TestMethod]
@@ -103,22 +100,10 @@ namespace Ringo.Tests
         [TestMethod]
         public async Task SearchArtists_DoesNotError()
         {
-            var result = await artistService.SearchArtists("spotify:artist:4VnomLtKTm9Ahe1tZfmZju");
+            var result = await artistService.SearchArtists("Jackie Wilson", 3);
 
             Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", result[0].spotify.uri);
-        }
-
-        [TestCategory("Unit")]
-        [TestMethod]
-        public async Task FindArtistMatch_DoesNotError()
-        {
-            (bool result, List<Artist> artists) = await artistService.FindArtistMatch("Jackie Wilson");
-
-            if (result)
-            {
-                Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", artists[0].spotify.uri);
-            }
-
+            Assert.AreEqual(3, result.Count);
         }
 
 

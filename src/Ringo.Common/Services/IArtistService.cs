@@ -12,11 +12,9 @@ namespace Ringo.Common.Services
 
         Task<Artist> GetArtistByUri(string artistUri);
 
-        Task<Tuple<bool, List<Artist>>> FindArtistMatch(string artist);
+        Task<List<Artist>> GetRelatedArtists(string artist);
 
         Task<List<Artist>> SearchArtists(string artist, int limit = 3);
-
-        Task<List<Artist>> GetRelatedArtists(string artist);
 
         List<EntityRelationship> PushRelatedArtist(Artist baseArtist, List<Artist> relatedArtists);
 

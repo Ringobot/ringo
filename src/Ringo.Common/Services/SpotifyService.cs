@@ -29,12 +29,7 @@ namespace Ringo.Common.Services
             throw new NotImplementedException();
         }
 
-        public async Task<dynamic> GetRecommendation(string artistSeed)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<dynamic> GetRecommendation(string artistSeed, int limit)
+        public Task<dynamic> GetRecommendation(string artistSeed, int limit = 3)
         {
             throw new NotImplementedException();
         }
@@ -49,13 +44,7 @@ namespace Ringo.Common.Services
             throw new NotImplementedException();
         }
 
-        public async Task<dynamic> SearchArtists(string artistId)
-        {
-            return await api.SearchArtists(artistId);
-
-        }
-
-        public async Task<dynamic> SearchArtists(string artistId, int limit)
+        public async Task<dynamic> SearchArtists(string artistId, int limit = 3)
         {
             return await api.SearchArtists(artistId, limit);
         }

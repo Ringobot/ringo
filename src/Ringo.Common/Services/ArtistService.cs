@@ -16,29 +16,6 @@ namespace Ringo.Common.Services
             spotifyService = new SpotifyService();
         }
 
-        public async Task<Tuple<bool, List<Artist>>> FindArtistMatch(string artist)
-        {
-            bool result = false;
-            List<Artist> artistsList = new List<Artist>();
-            dynamic artistRequest = await spotifyService.SearchArtists(artist);
-            foreach (var item in artistRequest.artists.items)
-            {
-                artistsList.Add(ArtistHelper.MapToArtist(item));
-            }
-            
-            foreach (Artist a in artistsList)
-            {
-                if (a.image.Length > 0)
-                {
-                    result = true;
-                    artistsList.Remove(a);
-
-                }
-            }
-            return Tuple.Create(result, artistsList);
-
-        }
-
         public async Task<Artist> GetArtist(string artistId)
         {
             try
@@ -149,9 +126,13 @@ namespace Ringo.Common.Services
 
         public async Task<List<Artist>> SearchArtists(string artist, int limit = 3)
         {
-            var artistRequest = await spotifyService.SearchArtists(artist, limit);
-            var artists = ArtistHelper.MapToArtist(artistRequest);
-            return artists;
+            List<Artist> artistsList = new List<Artist>();
+            dynamic artistRequest = await spotifyService.SearchArtists(artist);
+            foreach (var item in artistRequest.artists.items)
+            {
+                artistsList.Add(ArtistHelper.MapToArtist(item));
+            }
+            return artistsList;
         }
 
     }
