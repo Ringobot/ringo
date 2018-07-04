@@ -85,7 +85,7 @@ namespace Ringo.Common.Services
                         type = "artist",
                         spotifyid = baseArtist.spotify.id,
                         spotifyuri = baseArtist.spotify.uri,
-                        images = baseArtist.image[0]
+                        images = baseArtist.images[0]
                     }
                 });
                 Entity baseArtistEntity = new Entity(baseArtistId, baseArtist.name, baseArtistProps);
@@ -100,7 +100,7 @@ namespace Ringo.Common.Services
                             type = "artist",
                             spotifyid = relatedArtist.spotify.id,
                             spotifyuri = relatedArtist.spotify.uri,
-                            images = relatedArtist.image[0]
+                            images = relatedArtist.images[0]
                         }
                     });
                     Entity relatedEntity = new Entity(relatedArtistId, relatedArtist.name, relatedArtistProps);

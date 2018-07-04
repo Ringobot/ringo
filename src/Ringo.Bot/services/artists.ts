@@ -1,21 +1,21 @@
-import _spotify = require('./spotify');
 import artist = require('../models/artist');
 import entityrelation = require('../models/entityrelation');
 import _canonical = require('./canonicalisation');
 import _graph = require('./graphstorage');
 import * as _httpj from "./httpjson";
+import _backend = require('./backend');
 
 
 export async function searchArtists(artistName: string, limit?: number): Promise<artist.Artist[]> {
-    return artist.mapToArtists(await _spotify.searchArtists(artistName, limit));
+    return await _backend.searchArtists(artistName, limit);
 }
 
 export async function getRelatedArtists(artistId: string): Promise<artist.Artist[]> {
-    return artist.mapToArtists(await _spotify.getRelatedArtists(artistId));
+    return await _backend.getRelatedArtists(artistId);
 };
 
 export function getArtist(artistId: string) {
-    return _spotify.getArtist(artistId);
+    return _backend.getArtist(artistId);
 };
 
 export async function getArtistByUri(uri: string): Promise<artist.Artist> {
@@ -28,7 +28,7 @@ export async function getArtistByUri(uri: string): Promise<artist.Artist> {
     let artistId = uri.split(":")[2];
 
     try {
-        return await artist.mapToArtist(await _spotify.getArtist(artistId));
+        return await artist.mapToArtist(await _backend.getArtist(artistId));
     } catch (e) {
         throw e;
     }

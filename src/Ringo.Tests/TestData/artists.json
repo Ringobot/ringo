@@ -5,7 +5,7 @@
       "id": "somestring",
       "uri": "someuri"
     },
-    "image":
+    "images":
       {
         "height": 640,
         "width": 480,
@@ -18,7 +18,7 @@
       "id": "4VnomLtKTm9Ahe1tZfmZju",
       "uri": "spotify:artist:4VnomLtKTm9Ahe1tZfmZju"
     },
-    "image": {
+    "images": {
       "height": 640,
       "width": 480,
       "url": "https://i.scdn.co/image/66cadd255a5f01b6496c0854bed1267888b312d1"
@@ -30,7 +30,7 @@
       "id": "somestring",
       "uri": "someuri"
     },
-    "image":
+    "images":
       {
         "height": 640,
         "width": 480,

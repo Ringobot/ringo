@@ -17,7 +17,7 @@ namespace Ringo.Common.Helpers
                         id = data.id,
                         uri = data.uri
                     },
-                    image = data.images.ToObject<Image[]>()
+                    images = data.images.ToObject<Image[]>()
                 };
 
                 return artist;

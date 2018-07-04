@@ -1,9 +1,9 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Ringo.Common.Services;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Ringo.Functions
@@ -11,18 +11,38 @@ namespace Ringo.Functions
     public static class GetArtist
     {
         [FunctionName("GetArtist")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]HttpRequestMessage req, TraceWriter log)
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Admin, "get", Route = "artist/{type}")]HttpRequest req, string type, TraceWriter log)
         {
-            log.Info("C# HTTP trigger function processed a request.");
-
-            dynamic data = await req.Content.ReadAsAsync<object>();
+            if (log != null) log.Info($"Processed request for {type}");
+            string artist = req.Query["artist"];
+            if (log != null) log.Info($"Processed request for {artist}");
 
             ArtistService artistService = new ArtistService();
-            var result = await artistService.GetArtist(data.artistId.ToString());
+            if (type == "id")
+            {
+                var result = await artistService.GetArtist(artist);
+                return (ActionResult)new OkObjectResult(result);
+            }
+            else if (type == "uri")
+            {
+                var result = await artistService.GetArtistByUri(artist);
+                return (ActionResult)new OkObjectResult(result);
+            }
+            else if (type == "related")
+            {
+                var result = await artistService.GetRelatedArtists(artist);
+                return (ActionResult)new OkObjectResult(result);
+            }
+            else if (type == "search")
+            {
+                var result = await artistService.SearchArtists(artist);
+                return (ActionResult)new OkObjectResult(result);
+            }
+            else
+            {
+                return (ActionResult)new BadRequestObjectResult("Unable to find artist");
+            }
 
-            return result.Count != 0
-                ? (ActionResult)new OkObjectResult(result)
-                : new BadRequestObjectResult("Unable to find artist");
         }
     }
 }

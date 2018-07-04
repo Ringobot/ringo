@@ -5,7 +5,7 @@
     {
         public string name { get; set; }
         public Spotify spotify { get; set; }
-        public Image[] image { get; set; }
+        public Image[] images { get; set; }
     }
 
     public class Spotify
