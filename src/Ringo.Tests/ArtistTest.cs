@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
+using Ringo.Common.Helpers;
 using Ringo.Common.Models;
 using Ringo.Common.Services;
 using System;
@@ -24,14 +25,15 @@ namespace Ringo.Tests
         public void MapDataToArtist_DoesNotError()
         {
             // arrange
-
+            string spotifyJson = File.ReadAllText(".\\TestData\\artistSpotify.json");
+            dynamic spotifyList = JsonConvert.DeserializeObject<dynamic>(spotifyJson);
             // act
             try
             {
-                List<Artist> artist = artistService.MapToArtist(artistsList);
+                Artist artist = ArtistHelper.MapToArtist(spotifyList);
 
                 // assert
-                Assert.AreEqual(radiohead, artist[0].name);
+                Assert.AreEqual("Band of Horses", artist.name);
             }
             catch (Exception ex)
             {
@@ -43,7 +45,7 @@ namespace Ringo.Tests
 
         [TestCategory("Unit")]
         [TestMethod]
-        public void PushRelatedArtist_DoesNotError()
+        public async Task PushRelatedArtist_DoesNotError()
         {
             // arrange
           
@@ -51,15 +53,15 @@ namespace Ringo.Tests
             // act
             try
             {
-                
-                List<Artist> artists = artistService.MapToArtist(artistsList);
-                List<EntityRelationship> entityRelationships = artistService.PushRelatedArtist(artists[0], artists);
+                var baseArtist = await artistService.GetArtist("4VnomLtKTm9Ahe1tZfmZju");
+                var relatedArtist = await artistService.GetRelatedArtists(baseArtist.spotify.id);
+                List<EntityRelationship> entityRelationships = artistService.PushRelatedArtist(baseArtist, relatedArtist);
 
                 // assert 
-                Assert.AreEqual(radiohead, entityRelationships[0].FromVertex.Name);
-                Assert.AreEqual(radiohead, entityRelationships[0].ToVertex.Name);
+                Assert.AreEqual(baseArtist.name, entityRelationships[0].FromVertex.Name);
+                Assert.AreEqual(relatedArtist[0].name, entityRelationships[0].ToVertex.Name);
                 Assert.AreEqual("related", entityRelationships[0].Relationship);
-                Assert.AreEqual(3, entityRelationships.Count());
+                Assert.AreEqual(relatedArtist.Count, entityRelationships.Count);
             }
             catch (Exception ex)
             {
@@ -73,10 +75,10 @@ namespace Ringo.Tests
         [TestMethod]
         public async Task GetArtist_DoesNotError()
         {
-            var result = await artistService.GetArtist("1tpXaFf2F55E7kVJON4j4G");
+            var result = await artistService.GetArtist("4VnomLtKTm9Ahe1tZfmZju");
 
-            Assert.AreEqual("Jackie Wilson", result[0].name);
-            Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", result[0].spotify.uri);
+            Assert.AreEqual("Jackie Wilson", result.name);
+            Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", result.spotify.uri);
         }
 
         [TestCategory("Unit")]
@@ -85,16 +87,16 @@ namespace Ringo.Tests
         {
             var result = await artistService.GetArtistByUri("spotify:artist:4VnomLtKTm9Ahe1tZfmZju");
 
-            Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", result[0].spotify.uri);
+            Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", result.spotify.uri);
         }
 
         [TestCategory("Unit")]
         [TestMethod]
         public async Task GetRelatedArtists_DoesNotError()
         {
-            var result = await artistService.GetRelatedArtists("spotify:artist:4VnomLtKTm9Ahe1tZfmZju");
+            var result = await artistService.GetRelatedArtists("4VnomLtKTm9Ahe1tZfmZju");
 
-            Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", result[0].spotify.uri);
+            Assert.IsTrue(result.Count > 0);
         }
 
         [TestCategory("Unit")]
@@ -110,24 +112,11 @@ namespace Ringo.Tests
         [TestMethod]
         public async Task FindArtistMatch_DoesNotError()
         {
-            (bool result, List<Artist> artists) = await artistService.FindArtistMatch("spotify:artist:4VnomLtKTm9Ahe1tZfmZju");
+            (bool result, List<Artist> artists) = await artistService.FindArtistMatch("Jackie Wilson");
 
             if (result)
             {
                 Assert.AreEqual("spotify:artist:4VnomLtKTm9Ahe1tZfmZju", artists[0].spotify.uri);
-            }
-
-        }
-
-        [TestCategory("Unit")]
-        [TestMethod]
-        public async Task FindArtistNoMatch_DoesNotError()
-        {
-            (bool result, List<Artist> artists) = await artistService.FindArtistMatch(string.Empty);
-
-            if (result)
-            {
-                Assert.AreEqual(0, artists.Count);
             }
 
         }
@@ -137,6 +126,9 @@ namespace Ringo.Tests
         public void Init()
         {
             IConfiguration config = TestHelper.GetIConfigurationRoot();
+            Environment.SetEnvironmentVariable("SpotifyApiClientId", config.GetValue<string>("SpotifyApiClientId"));
+            Environment.SetEnvironmentVariable("SpotifyApiClientSecret", config.GetValue<string>("SpotifyApiClientSecret"));
+
         }
     }
 }

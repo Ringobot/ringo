@@ -1,30 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Newtonsoft.Json.Linq;
 using Ringo.Common.Models;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Ringo.Common.Helpers;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Ringo.Common.Heplers;
 
 namespace Ringo.Common.Services
 {
     public class ArtistService : IArtistService
     {
-        SpotifyService spotifyService = new SpotifyService();
-        
+        private static SpotifyService spotifyService;
+
+        public ArtistService()
+        {
+            spotifyService = new SpotifyService();
+        }
+
         public async Task<Tuple<bool, List<Artist>>> FindArtistMatch(string artist)
         {
             bool result = false;
             List<Artist> artistsList = new List<Artist>();
-            var artistRequest = await spotifyService.SearchArtists(artist);
-            var artists = MapToArtist(artistRequest);
-            foreach (Artist a in artists)
+            dynamic artistRequest = await spotifyService.SearchArtists(artist);
+            foreach (var item in artistRequest.artists.items)
             {
-                if (a.image.url.Length > 0)
+                artistsList.Add(ArtistHelper.MapToArtist(item));
+            }
+            
+            foreach (Artist a in artistsList)
+            {
+                if (a.image.Length > 0)
                 {
                     result = true;
-                    artistsList.Add(a);
+                    artistsList.Remove(a);
 
                 }
             }
@@ -32,20 +39,13 @@ namespace Ringo.Common.Services
 
         }
 
-        public async Task<List<Artist>> SearchArtists(string artist, int limit = 3)
-        {
-            var artistRequest = await spotifyService.SearchArtists(artist, limit);
-            var artists = MapToArtist(artistRequest);
-            return artists;
-        }
-
-        public async Task<List<Artist>> GetArtist(string artistId)
+        public async Task<Artist> GetArtist(string artistId)
         {
             try
             {
-                var artistRequest = await spotifyService.GetArtist(artistId);
-                var artists = MapToArtist(artistRequest);
-                return artists;
+                var artists = await spotifyService.GetArtist(artistId);
+                var result = ArtistHelper.MapToArtist(artists);
+                return result;
             }
             catch (Exception ex)
             {
@@ -55,13 +55,13 @@ namespace Ringo.Common.Services
 
         }
 
-        public async Task<List<Artist>> GetArtistByUri(string artistUri)
+        public async Task<Artist> GetArtistByUri(string artistUri)
         {
             try
             {
                 string[] artist = artistUri.Split(new[] { ':' });
-                var artistRequest = await spotifyService.GetRelatedArtists(artist[2]);
-                var artists = MapToArtist(artistRequest);
+                var artistRequest = await spotifyService.GetArtist(artist[2]);
+                var artists = ArtistHelper.MapToArtist(artistRequest);
                 return artists;
 
             }
@@ -77,52 +77,23 @@ namespace Ringo.Common.Services
         {
             try
             {
-                var artistRequest = await spotifyService.GetRelatedArtists(artistId);
-                var artists = MapToArtist(artistRequest);
-                return artists;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                throw;
-            }
-
-        }
-
-        public List<Artist> MapToArtist(List<dynamic> data)
-        {
-            List<Artist> artists = new List<Artist>();
-            try
-            {
-                foreach (var a in data)
+                List<Artist> artistsList = new List<Artist>();
+                dynamic artistRequest = await spotifyService.GetRelatedArtists(artistId);
+                foreach (var item in artistRequest.artists)
                 {
-                    Artist artist = new Artist()
-                    {
-                        name = a.name,
-                        spotify = new Spotify()
-                        {
-                            id = a.spotify.id,
-                            uri = a.spotify.uri
-                        },
-                        image = new Image()
-                        {
-                            height = a.image.height,
-                            width = a.image.width,
-                            url = a.image.url
-                        }
-
-                    };
-                    artists.Add(artist);
+                    artistsList.Add(ArtistHelper.MapToArtist(item));
                 }
+                return artistsList;
+
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 throw;
             }
-            return artists;
 
         }
+
 
         public List<EntityRelationship> PushRelatedArtist(Artist baseArtist, List<Artist> relatedArtists)
         {
@@ -137,7 +108,7 @@ namespace Ringo.Common.Services
                         type = "artist",
                         spotifyid = baseArtist.spotify.id,
                         spotifyuri = baseArtist.spotify.uri,
-                        images = baseArtist.image.url
+                        images = baseArtist.image[0]
                     }
                 });
                 Entity baseArtistEntity = new Entity(baseArtistId, baseArtist.name, baseArtistProps);
@@ -152,7 +123,7 @@ namespace Ringo.Common.Services
                             type = "artist",
                             spotifyid = relatedArtist.spotify.id,
                             spotifyuri = relatedArtist.spotify.uri,
-                            images = relatedArtist.image.url
+                            images = relatedArtist.image[0]
                         }
                     });
                     Entity relatedEntity = new Entity(relatedArtistId, relatedArtist.name, relatedArtistProps);
@@ -174,6 +145,13 @@ namespace Ringo.Common.Services
             }
 
             return entityRelationshipList;
+        }
+
+        public async Task<List<Artist>> SearchArtists(string artist, int limit = 3)
+        {
+            var artistRequest = await spotifyService.SearchArtists(artist, limit);
+            var artists = ArtistHelper.MapToArtist(artistRequest);
+            return artists;
         }
 
     }

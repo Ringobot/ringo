@@ -5,7 +5,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
-using Ringo.Common.Heplers;
+using Ringo.Common.Helpers;
 using Ringo.Common.Models;
 
 namespace Ringo.Functions.Artists

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Ringo.Common.Helpers;
 using Ringo.Common.Models;
 using System;
 using System.Net.Http;

@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Ringo.Common.Models
+﻿namespace Ringo.Common.Models
 {
 
     public class Artist
     {
         public string name { get; set; }
         public Spotify spotify { get; set; }
-        public Image image { get; set; }
+        public Image[] image { get; set; }
     }
 
     public class Spotify

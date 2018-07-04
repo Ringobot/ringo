@@ -8,11 +8,9 @@ namespace Ringo.Common.Services
 {
     public interface IArtistService
     {
-        List<Artist> MapToArtist(List<dynamic> data);
+        Task<Artist> GetArtist(string artistId);
 
-        Task<List<Artist>> GetArtist(string artistId);
-
-        Task<List<Artist>> GetArtistByUri(string artistUri);
+        Task<Artist> GetArtistByUri(string artistUri);
 
         Task<Tuple<bool, List<Artist>>> FindArtistMatch(string artist);
 
