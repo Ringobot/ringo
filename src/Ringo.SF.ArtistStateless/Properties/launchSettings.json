@@ -1,0 +1,31 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:5268/",
+      "sslPort": 0
+    }
+  },
+  "profiles": {
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "launchUrl": "api/values",
+      "environmentVariables": {
+        "SpotifyApiClientSecret": "6544d1e09b604b4b90038153e216afa5",
+        "SpotifyApiClientId": "944843be09874db29728e51a0a4e8376",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "Ringo.SF.ArtistStateless": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "api/values",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:5269/"
+    }
+  }
+}
