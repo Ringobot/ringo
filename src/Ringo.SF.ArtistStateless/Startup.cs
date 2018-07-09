@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Ringo.Common.Services;
+using Ringo.SF.ArtistStateless.Controllers;
 
 namespace Ringo.SF.ArtistStateless
 {
@@ -35,6 +37,7 @@ namespace Ringo.SF.ArtistStateless
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+            services.AddSingleton<IArtistService, ArtistController>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

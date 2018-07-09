@@ -6,52 +6,52 @@ using System.Security;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Ringo.Common.Models;
 using Ringo.Common.Services;
 
 namespace Ringo.SF.ArtistStateless.Controllers
 {
     [Route("api/[controller]")]
-    public class ArtistController : Controller
+    public class ArtistController : Controller, IArtistService
     {
         private ArtistService artistService;
-        private readonly string spotifyApiClientId;
         private IConfiguration Configuration;
 
         public ArtistController(IConfiguration configuration)
         {
-            artistService = new ArtistService();
-            this.spotifyApiClientId = Environment.GetEnvironmentVariable("SpotifyApiClientId");
+            artistService = new ArtistService(configuration);
             Configuration = configuration;
         }
 
         // GET api/values/5
         [HttpGet("{artist}")]
-        public async Task<ActionResult> Get(string artist)
+        public async Task<Artist> GetArtist(string artist)
         {
-            var testEnvId = Environment.GetEnvironmentVariable("SpotifyApiClientId");
-            var testEnvSec = Environment.GetEnvironmentVariable("SpotifyApiClientSecret");
 
             Console.WriteLine();
-            var result = await artistService.GetArtist(artist);
-            return (ActionResult)new OkObjectResult(result);
+            var result = await ((IArtistService)artistService).GetArtist(artist);
+
+            return result;
         }
 
-        // POST api/values
-        [HttpPost]
-        public void Post([FromBody]string value)
+        public Task<Artist> GetArtistByUri(string artistUri)
         {
+            return ((IArtistService)artistService).GetArtistByUri(artistUri);
         }
 
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        public Task<List<Artist>> GetRelatedArtists(string artist)
         {
+            return ((IArtistService)artistService).GetRelatedArtists(artist);
         }
 
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        public Task<List<Artist>> SearchArtists(string artist, int limit = 3)
         {
+            return ((IArtistService)artistService).SearchArtists(artist, limit);
+        }
+
+        public List<EntityRelationship> PushRelatedArtist(Artist baseArtist, List<Artist> relatedArtists)
+        {
+            return ((IArtistService)artistService).PushRelatedArtist(baseArtist, relatedArtists);
         }
     }
 }

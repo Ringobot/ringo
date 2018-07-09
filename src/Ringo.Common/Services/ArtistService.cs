@@ -1,6 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
-using Ringo.Common.Models;
+﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
 using Ringo.Common.Helpers;
+using Ringo.Common.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -9,11 +10,11 @@ namespace Ringo.Common.Services
 {
     public class ArtistService : IArtistService
     {
-        private static SpotifyService spotifyService;
+        private SpotifyService spotifyService;
 
-        public ArtistService()
+        public ArtistService(IConfiguration configuration)
         {
-            spotifyService = new SpotifyService();
+            spotifyService = new SpotifyService(configuration);
         }
 
         public async Task<Artist> GetArtist(string artistId)
@@ -74,10 +75,11 @@ namespace Ringo.Common.Services
 
         public List<EntityRelationship> PushRelatedArtist(Artist baseArtist, List<Artist> relatedArtists)
         {
+            CanonicalService canonicalService = new CanonicalService();
             List<EntityRelationship> entityRelationshipList = new List<EntityRelationship>();
             try
             {
-                RdostrId baseArtistRdo = CanonicalService.GetArtistId(baseArtist.name);
+                RdostrId baseArtistRdo = canonicalService.GetArtistId(baseArtist.name);
                 string baseArtistId = $"{baseArtist.name}:{baseArtistRdo.Id}";
                 JObject baseArtistProps = JObject.FromObject(new {
                     Properties = new
@@ -91,7 +93,7 @@ namespace Ringo.Common.Services
                 Entity baseArtistEntity = new Entity(baseArtistId, baseArtist.name, baseArtistProps);
                 foreach (Artist relatedArtist in relatedArtists)
                 {
-                    RdostrId relatedArtistRdo = CanonicalService.GetArtistId(relatedArtist.name);
+                    RdostrId relatedArtistRdo = canonicalService.GetArtistId(relatedArtist.name);
                     string relatedArtistId = $"{relatedArtist.name}:{relatedArtistRdo.Id}";
                     JObject relatedArtistProps = JObject.FromObject(new
                     {

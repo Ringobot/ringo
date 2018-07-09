@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Configuration;
 using Ringo.Common.Services;
 using System.Threading.Tasks;
 
@@ -17,7 +18,11 @@ namespace Ringo.Functions
             string artist = req.Query["artist"];
             if (log != null) log.Info($"Processed request for {artist}");
 
-            ArtistService artistService = new ArtistService();
+            var config = new ConfigurationBuilder()
+                .AddEnvironmentVariables()
+                .Build();
+
+            ArtistService artistService = new ArtistService(config);
             if (type == "id")
             {
                 var result = await artistService.GetArtist(artist);

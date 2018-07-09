@@ -15,7 +15,7 @@ namespace Ringo.Tests
     [TestClass]
     public class ArtistTest
     {
-        ArtistService artistService = new ArtistService();
+        ArtistService artistService;
 
         [TestCategory("Unit")]
         [TestMethod]
@@ -72,6 +72,8 @@ namespace Ringo.Tests
         [TestMethod]
         public async Task GetArtist_DoesNotError()
         {
+
+
             var result = await artistService.GetArtist("4VnomLtKTm9Ahe1tZfmZju");
 
             Assert.AreEqual("Jackie Wilson", result.name);
@@ -110,10 +112,10 @@ namespace Ringo.Tests
         [TestInitialize]
         public void Init()
         {
-            IConfiguration config = TestHelper.GetIConfigurationRoot();
-            Environment.SetEnvironmentVariable("SpotifyApiClientId", config.GetValue<string>("SpotifyApiClientId"));
-            Environment.SetEnvironmentVariable("SpotifyApiClientSecret", config.GetValue<string>("SpotifyApiClientSecret"));
-
+            var config = new ConfigurationBuilder()
+                .AddJsonFile(".\\appsettings.test.json", false)
+                .Build();
+            artistService = new ArtistService(config);
         }
     }
 }

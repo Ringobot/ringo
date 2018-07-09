@@ -6,9 +6,9 @@ using Ringo.Common.Models;
 
 namespace Ringo.Common.Services
 {
-    public class CanonicalService
+    public class CanonicalService : ICanonicalService
     {
-        public static RdostrId GetArtistId(string input)
+        public RdostrId GetArtistId(string input)
         {
             string token = input.Trim().ToLower();
             string urn = $"urn:rdostr:v1:artist/{token}";

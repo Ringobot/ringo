@@ -1,21 +1,34 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using SpotifyApi.NetCore;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using SpotifyApi.NetCore;
-using System.Collections.Generic;
 
 namespace Ringo.Common.Services
 {
 
-    public class SpotifyService
+    public class SpotifyService : ISpotifyService
     {
-        private static HttpClient httpClient = new HttpClient();
-        private static ClientCredentialsAuthorizationApi auth = new ClientCredentialsAuthorizationApi(httpClient);
-        private static ArtistsApi api = new ArtistsApi(httpClient, auth);
+        private static HttpClient _httpClient;
+        private static IConfiguration _configuration;
+        private static ClientCredentialsAuthorizationApi _auth;
+        private static ArtistsApi _api;
+
+        public SpotifyService(IConfiguration configuration)
+        {
+            _configuration = configuration;
+            _httpClient = new HttpClient();
+            _auth = new ClientCredentialsAuthorizationApi(_httpClient, configuration);
+            _api = new ArtistsApi(_httpClient, _auth);
+        }
+
+        public SpotifyService() : this(null)
+        {
+        }
 
         public async Task<dynamic> GetArtist(string artistId)
         {
-            return await api.GetArtist(artistId);
+            return await _api.GetArtist(artistId);
 
         }
 
@@ -36,7 +49,7 @@ namespace Ringo.Common.Services
 
         public async Task<dynamic> GetRelatedArtists(string artistId)
         {
-            return await api.GetRelatedArtists(artistId);
+            return await _api.GetRelatedArtists(artistId);
         }
 
         public Task PlayArtist(string userHash, string spotifyUri)
@@ -46,7 +59,7 @@ namespace Ringo.Common.Services
 
         public async Task<dynamic> SearchArtists(string artistId, int limit = 3)
         {
-            return await api.SearchArtists(artistId, limit);
+            return await _api.SearchArtists(artistId, limit);
         }
 
     }

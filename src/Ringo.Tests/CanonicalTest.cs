@@ -23,12 +23,13 @@ namespace Ringo.Tests
             RdostrId[] rdostrId = JsonConvert.DeserializeObject<RdostrId[]>(canonJson);
             string radiohead = "Radiohead";
             string jackieWilson = "Jackie Wilson";
+            CanonicalService canonicalService = new CanonicalService();
             // act
             try
             {
 
-                RdostrId artistRdostrId0 = CanonicalService.GetArtistId(radiohead);
-                RdostrId artistRdostrId1 = CanonicalService.GetArtistId(jackieWilson);
+                RdostrId artistRdostrId0 = canonicalService.GetArtistId(radiohead);
+                RdostrId artistRdostrId1 = canonicalService.GetArtistId(jackieWilson);
 
                 // assert
                 Assert.AreEqual(rdostrId[0].Urn, artistRdostrId0.Urn);
