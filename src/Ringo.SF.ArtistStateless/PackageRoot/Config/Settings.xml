@@ -1,10 +1,4 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Settings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/2011/01/fabric">
-  <!-- Add your custom configuration sections and parameters here -->
-
-  <!--<Section Name="MyConfigSection">
-    <Parameter Name="SpotifyApiClientId" Value="MIIB4gYJKoZIhvcNAQcDoIIB0zCCAc8CAQAxggFKMIIBRgIBADAuMBoxGDAWBgNVBAMMD215U2VydmljZUZhYnJpYwIQGPY5KxS0P7hG3sWXlNm90jANBgkqhkiG9w0BAQcwAASCAQA5a9XERTLJQ8frigXrGxBG4qo/jiihNSvzd6musoRM0Fqm4xbjiKGtUncGCiwjIJunGEHVW1ak0DPC8V3jy82+TYG0a7o8dFS/0xroqI9OJXRLC95T4SVp+aY1EiOTmCn0kUrFUuQ7o9S3HrQ055SMkX+qWoqgUZlvKWNftREIFeoqDmAlgOvVVqL3LINtEAO99L7xn5BHnYDkg8c9k8jD9hD80WdO+Ps+qYgG7e0Iak8bcuC4NNFyfdHiLQYIcMa1t8qOgK7eCO2K5d8scvCCtyJmZ3wnUAOINRU+i5dD82s5S0gzkRIYjz8zW7IC6N+jRCD7exvJTkWXgRejAbISMHwGCSqGSIb3DQEHATAdBglghkgBZQMEASoEEPXVCaNcWX6AtOJJOduVniSAULCv6XxBVXrdOnojrG9JHlZBkftquFnCRAFLhxAVLE8z6j2imj8MFNWSAB02t/X+4/HiwMQqcEsV3agUcKs2gxFN+d/atinqSUkzHXBWep7Y" IsEncrypted="true" />
-    <Parameter Name="SpotifyApiClientSecret" Value="MIIB4gYJKoZIhvcNAQcDoIIB0zCCAc8CAQAxggFKMIIBRgIBADAuMBoxGDAWBgNVBAMMD215U2VydmljZUZhYnJpYwIQGPY5KxS0P7hG3sWXlNm90jANBgkqhkiG9w0BAQcwAASCAQCMP2RPfWhtlnZMk6dknxNL6M0VLkgcgnX+2Ec14SyC4VWS57I4kTpgTDj5Gz0oSKXFxBsfhAVfYjOg1uxp8icfo2zgAQnxownjtSTMg+7M0pdnVN3wFHbjepqvuBhchcbAgg8EzbQFPvldmf5qL9h9fLLJs0CrreWD5Bl/p6q4T2YsWqqzesOfsUn5oA3/WmbopE/D7d0IrcgpVhG6seISqKpvR+7QfbX8+tBNpi7NwwsbjGlQIXzQwNw7PnWEHYcJ6nfbd/bBp65bhPev4GzQvHPS6pbVlpmD5zdtZJ5Nsmg49EkF9OrACfyLKshy4rmci00Ef0r8NbyrUmkHOAr+MHwGCSqGSIb3DQEHATAdBglghkgBZQMEASoEEEKX6WuOuW4PSKjZs6eiZWuAUB5FQTO2nlzbs8Iz8u8pZmhFm0NgaUj7CmA/mIgp25S4es2Mj1DddRNhBchB8nU3q5ohnfqwMO/IU9YLJbPAKfZ6MMriuk4+uR6PguIS/abn" IsEncrypted="true" />
-  </Section>-->
 
 </Settings>

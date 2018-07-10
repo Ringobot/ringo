@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Ringo.Common.Services;
 using Ringo.SF.ArtistStateless.Controllers;
 
@@ -27,8 +21,8 @@ namespace Ringo.SF.ArtistStateless
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
-            Configuration = builder.Build();
 
+            Configuration = builder.Build();
         }
 
         public IConfiguration Configuration { get; }
@@ -36,6 +30,7 @@ namespace Ringo.SF.ArtistStateless
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton(Configuration);
             services.AddMvc();
             services.AddSingleton<IArtistService, ArtistController>();
         }

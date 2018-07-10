@@ -11,6 +11,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "environmentVariables": {
+        "KeyVaultUrl": "https://mjsdemokv.vault.azure.net/",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
