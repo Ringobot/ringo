@@ -1,6 +1,6 @@
 import * as _httpj from "./httpjson";
 
-const baseUrl = 'https://ringofuncbackend.azurewebsites.net/api';
+const baseUrl = process.env.API_BACKEND;
 
 export async function searchArtists(artist: string, limit?: number) {
     try {

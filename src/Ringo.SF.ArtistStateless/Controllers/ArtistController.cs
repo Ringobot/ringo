@@ -24,29 +24,28 @@ namespace Ringo.SF.ArtistStateless.Controllers
         }
 
         // GET api/values/5
-        [HttpGet("{artist}")]
-        public async Task<Artist> GetArtist(string artist)
+        [HttpGet("id")]
+        public async Task<Artist> GetArtist([FromQuery(Name = "artist")]string artist)
         {
-
-            Console.WriteLine();
-            var result = await ((IArtistService)artistService).GetArtist(artist);
-
-            return result;
+            return await ((IArtistService)artistService).GetArtist(artist);
         }
 
-        public Task<Artist> GetArtistByUri(string artistUri)
+        [HttpGet("uri")]
+        public async Task<Artist> GetArtistByUri([FromQuery(Name = "artist")]string artistUri)
         {
-            return ((IArtistService)artistService).GetArtistByUri(artistUri);
+            return await ((IArtistService)artistService).GetArtistByUri(artistUri);
         }
 
-        public Task<List<Artist>> GetRelatedArtists(string artist)
+        [HttpGet("related")]
+        public async Task<List<Artist>> GetRelatedArtists([FromQuery(Name = "artist")]string artist)
         {
-            return ((IArtistService)artistService).GetRelatedArtists(artist);
+            return await ((IArtistService)artistService).GetRelatedArtists(artist);
         }
 
-        public Task<List<Artist>> SearchArtists(string artist, int limit = 3)
+        [HttpGet("search")]
+        public async Task<List<Artist>> SearchArtists([FromQuery(Name = "artist")]string artist, int limit = 3)
         {
-            return ((IArtistService)artistService).SearchArtists(artist, limit);
+            return await ((IArtistService)artistService).SearchArtists(artist, limit);
         }
 
         public List<EntityRelationship> PushRelatedArtist(Artist baseArtist, List<Artist> relatedArtists)
