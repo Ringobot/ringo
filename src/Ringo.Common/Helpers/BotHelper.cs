@@ -8,7 +8,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ringo.Common.Heplers
+namespace Ringo.Common.Helpers
 {
     class BotHelper
     {

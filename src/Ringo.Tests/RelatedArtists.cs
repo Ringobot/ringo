@@ -2,7 +2,7 @@
 //using Microsoft.VisualStudio.TestTools.UnitTesting;
 //using Newtonsoft.Json;
 //using Ringo.Common.Models;
-//using Ringo.Common.Heplers;
+//using Ringo.Common.Helpers;
 //using Ringo.Functions;
 //using System;
 //using System.Collections.Generic;

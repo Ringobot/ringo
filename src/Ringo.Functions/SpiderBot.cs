@@ -2,7 +2,7 @@
 //using Microsoft.Azure.WebJobs.Host;
 //using System;
 //using System.Threading.Tasks;
-//using Ringo.Common.Heplers;
+//using Ringo.Common.Helpers;
 
 //namespace Ringo.Functions
 //{

@@ -33,6 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Ringo.SF.ArtistStateless\Ringo.SF.ArtistStateless.csproj" />
+    <ProjectReference Include="..\Ringo.SF.RelatedStateful\Ringo.SF.RelatedStateful.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
   <PropertyGroup>

@@ -32,7 +32,6 @@ namespace Ringo.SF.ArtistStateless
         {
             services.AddSingleton(Configuration);
             services.AddMvc();
-            services.AddSingleton<IArtistService, ArtistController>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

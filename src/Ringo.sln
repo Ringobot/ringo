@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ringo.Tests", "Ringo.Tests\
 EndProject
 Project("{A07B5EB6-E848-4116-A8D0-A826331D98C6}") = "Ringo.ServiceFabric", "Ringo.ServiceFabric\Ringo.ServiceFabric.sfproj", "{E2D8A85B-5ABC-4EC4-B6A6-BFDC296EEA1E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ringo.SF.ArtistStateless", "Ringo.SF.ArtistStateless\Ringo.SF.ArtistStateless.csproj", "{AE068A5E-CC94-4C20-85AF-AFE11D4BA0D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ringo.SF.ArtistStateless", "Ringo.SF.ArtistStateless\Ringo.SF.ArtistStateless.csproj", "{AE068A5E-CC94-4C20-85AF-AFE11D4BA0D7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ringo.SF.RelatedStateful", "Ringo.SF.RelatedStateful\Ringo.SF.RelatedStateful.csproj", "{DAA55ECE-664F-4F95-8B05-9827A52476FA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +63,14 @@ Global
 		{AE068A5E-CC94-4C20-85AF-AFE11D4BA0D7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AE068A5E-CC94-4C20-85AF-AFE11D4BA0D7}.Release|x64.ActiveCfg = Release|Any CPU
 		{AE068A5E-CC94-4C20-85AF-AFE11D4BA0D7}.Release|x64.Build.0 = Release|Any CPU
+		{DAA55ECE-664F-4F95-8B05-9827A52476FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAA55ECE-664F-4F95-8B05-9827A52476FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAA55ECE-664F-4F95-8B05-9827A52476FA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DAA55ECE-664F-4F95-8B05-9827A52476FA}.Debug|x64.Build.0 = Debug|Any CPU
+		{DAA55ECE-664F-4F95-8B05-9827A52476FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAA55ECE-664F-4F95-8B05-9827A52476FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAA55ECE-664F-4F95-8B05-9827A52476FA}.Release|x64.ActiveCfg = Release|Any CPU
+		{DAA55ECE-664F-4F95-8B05-9827A52476FA}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
