@@ -34,6 +34,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Ringo.SF.ArtistStateless\Ringo.SF.ArtistStateless.csproj" />
     <ProjectReference Include="..\Ringo.SF.RelatedStateful\Ringo.SF.RelatedStateful.csproj" />
+    <ProjectReference Include="..\Ringo.SF.StatefulBackend\Ringo.SF.StatefulBackend.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
   <PropertyGroup>

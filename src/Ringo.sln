@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ringo.SF.ArtistStateless", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ringo.SF.RelatedStateful", "Ringo.SF.RelatedStateful\Ringo.SF.RelatedStateful.csproj", "{DAA55ECE-664F-4F95-8B05-9827A52476FA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ringo.SF.StatefulBackend", "Ringo.SF.StatefulBackend\Ringo.SF.StatefulBackend.csproj", "{4237C822-CBBE-4877-ACDC-6A33C5E44030}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,14 @@ Global
 		{DAA55ECE-664F-4F95-8B05-9827A52476FA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DAA55ECE-664F-4F95-8B05-9827A52476FA}.Release|x64.ActiveCfg = Release|Any CPU
 		{DAA55ECE-664F-4F95-8B05-9827A52476FA}.Release|x64.Build.0 = Release|Any CPU
+		{4237C822-CBBE-4877-ACDC-6A33C5E44030}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4237C822-CBBE-4877-ACDC-6A33C5E44030}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4237C822-CBBE-4877-ACDC-6A33C5E44030}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4237C822-CBBE-4877-ACDC-6A33C5E44030}.Debug|x64.Build.0 = Debug|Any CPU
+		{4237C822-CBBE-4877-ACDC-6A33C5E44030}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4237C822-CBBE-4877-ACDC-6A33C5E44030}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4237C822-CBBE-4877-ACDC-6A33C5E44030}.Release|x64.ActiveCfg = Release|Any CPU
+		{4237C822-CBBE-4877-ACDC-6A33C5E44030}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
