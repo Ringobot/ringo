@@ -8,8 +8,10 @@ import artist = require('../../models/artist');
 describe('artists.searchArtists', function () {
     var data: artist.Artist[];
 
-    before(async function () {
+    before(async function (done) {
+        this.timeout(10000);
         data = await _artists.searchArtists("Radiohead");
+        done();
     });
 
     it('should return a response', () => {

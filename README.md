@@ -106,6 +106,14 @@ Try VSTS for free: <https://www.visualstudio.com/team-services/>
 
 ![build status](https://dalars.visualstudio.com/_apis/public/build/definitions/176b1958-0be0-498a-a881-71fcaf8b338c/26/badge)
 
+### Run tests
+
+    npm test
+
+In CI/CD environment
+
+    npm run-script test-vsts
+
 ## More information and Links
 
 ### Deployment
