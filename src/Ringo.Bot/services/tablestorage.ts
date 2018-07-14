@@ -16,29 +16,22 @@ export function insert(table: string, entity: TableEntity, insertOrReplace: bool
     var tableService = getTableService();
 
     return new Promise<any>((resolve, reject) => {
-        createTableIfNotExists(tableService, table, function (error) {
+        var entry = mapToEntry(entity);
+        let callback = function (error, data) {
             if (error) {
                 reject(error);
                 return;
             }
+            console.log(`tablestorage ${insertOrReplace ? 'insertOrReplace' : 'insert'} into ${table}`);
+            resolve(mapToEntity(data));
+            return;
+        };
 
-            var entry = mapToEntry(entity);
-            let callback = function (error, data) {
-                if (error) {
-                    reject(error);
-                    return;
-                }
-                console.log(`tablestorage ${insertOrReplace ? 'insertOrReplace' : 'insert'} into ${table}`);
-                resolve(mapToEntity(data));
-                return;
-            };
-
-            insertOrReplace
-                ? tableService.insertOrReplaceEntity(table, entry, callback)
-                : tableService.insertEntity(table, entry, callback);
-        });
-    });
-};
+        insertOrReplace
+            ? tableService.insertOrReplaceEntity(table, entry, callback)
+            : tableService.insertEntity(table, entry, callback);
+    })
+}
 
 export function update(table: string, entity: TableEntity): Promise<TableEntity> {
     var tableService = getTableService();
@@ -89,6 +82,20 @@ export function get(table, query: _azure.TableQuery) {
     });
 }
 
+export function createTableIfNotExists(table: string): Promise<any> {
+    var tableService = getTableService();
+
+    return new Promise<any>((resolve, reject) => {
+        tableService.createTableIfNotExists(table, function (error) {
+            if (error) {
+                reject(error);
+                return;
+            }
+            resolve();
+        });
+    })
+};
+
 // Maps an Array of Azure Table Storage entries to an Array of simple JS objects
 var mapToEntities = function (entries): TableEntity[] {
     var entities = [];
@@ -121,17 +128,8 @@ var mapToEntry = function (entity: TableEntity) {
     return entry;
 }
 
-var createTableIfNotExists = function (tableService, table, callback) {
-    tableService.createTableIfNotExists(table, function (error) {
-        if (error) {
-            callback(error);
-            return;
-        }
-        callback(null);
-    });
-};
-
 var getTableService = function () {
+    //TODO: Reuse Table Service?
     var tableService = _azure.createTableService();
     return tableService;
 };

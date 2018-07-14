@@ -1,9 +1,5 @@
 import * as _httpj from "./httpjson";
-import _table = require('./tablestorage');
-import errs = require('restify-errors');
-import _helper = require('./spotifyhelper');
 import _auth = require('./spotifyauth');
-import _crypto = require('../helpers/crypto')
 
 const baseUrl = 'https://api.spotify.com/v1';
 

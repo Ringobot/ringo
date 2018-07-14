@@ -1,8 +1,10 @@
 import _table = require('../services/tablestorage');
 
-const UserAuthTable = "UserSpotifyAuth";
+const UserAuthTable = "UserSpotifyAuth"
 
-let rowQuery = (userHash) => _table.createQuery().where('PartitionKey eq ? and RowKey eq ?', partitionKey(userHash), userHash)
+_table.createTableIfNotExists(UserAuthTable).catch(console.log)
+
+let rowQuery = (userHash) => _table.createQuery().where('PartitionKey eq ? and RowKey eq ?', partitionKey(userHash), userHash);
 
 function partitionKey(userHash: string): string {
     return userHash.substr(0, 5);
