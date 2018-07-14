@@ -16,7 +16,7 @@ namespace Ringo.Common.Services
 
         Task<List<Artist>> SearchArtists(string artist, int limit = 3);
 
-        List<EntityRelationship> PushRelatedArtist(Artist baseArtist, List<Artist> relatedArtists);
+        //List<EntityRelationship> PushRelatedArtist(Artist baseArtist, List<Artist> relatedArtists);
 
     }
 }
