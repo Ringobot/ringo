@@ -1,46 +1,40 @@
-{
-  "artists": [
-    {
-      "name": "Radiohead",
-      "spotify": {
-        "id": "somestring",
-        "uri": "someuri"
-      },
-      "image": [
-        {
-          "height": 640,
-          "width": 480,
-          "url": "some image url"
-        }
-      ]
+[
+  {
+    "name": "Radiohead",
+    "spotify": {
+      "id": "somestring",
+      "uri": "someuri"
     },
-    {
-      "name": "Radiohead",
-      "spotify": {
-        "id": "somestring",
-        "uri": "someuri"
-      },
-      "image": [
-        {
-          "height": 640,
-          "width": 480,
-          "url": "some image url"
-        }
-      ]
+    "images":
+      {
+        "height": 640,
+        "width": 480,
+        "url": "some image url"
+      }
+  },
+  {
+    "name": "Jackie Wilson",
+    "spotify": {
+      "id": "4VnomLtKTm9Ahe1tZfmZju",
+      "uri": "spotify:artist:4VnomLtKTm9Ahe1tZfmZju"
     },
-    {
-      "name": "Radiohead",
-      "spotify": {
-        "id": "somestring",
-        "uri": "someuri"
-      },
-      "image": [
-        {
-          "height": 640,
-          "width": 480,
-          "url": "some image url"
-        }
-      ]
+    "images": {
+      "height": 640,
+      "width": 480,
+      "url": "https://i.scdn.co/image/66cadd255a5f01b6496c0854bed1267888b312d1"
     }
-  ]
-}
+  },
+  {
+    "name": "somerealtion",
+    "spotify": {
+      "id": "somestring",
+      "uri": "someuri"
+    },
+    "images":
+      {
+        "height": 640,
+        "width": 480,
+        "url": "some image url"
+      }
+  }
+]

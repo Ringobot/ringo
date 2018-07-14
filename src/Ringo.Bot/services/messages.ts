@@ -3,9 +3,7 @@ import _cards = require('./cards');
 import _artists = require('./artists');
 import _artist = require('../models/artist');
 import _metrics = require('./metrics');
-import _userdata = require('./userdata');
 import user = require('../models/user');
-import _servicebus = require('./servicebus')
 
 
 export function artist(session: builder.Session, artist: any): builder.Message {
@@ -40,10 +38,10 @@ export async function recommendArtist(session: builder.Session, artistId: _artis
         // filter out artists without images and sort by popularity desc
         let sorted = artists.filter(a => a.images.length > 0).sort(popularityDesc);
 
-        let related = await _artists.pushRelatedArtist(artistId, sorted);
+        await _artists.pushRelatedArtist(artistId, sorted);
 
         // get the artists that are already liked
-        let likedArtists = await _userdata.artistsUserLikes(user.userId(session));
+        let likedArtists = await _artists.artistsUserLikes(user.userId(session));
 
         // go through the list until one that has not been list is found, or return null
         var artist = null;

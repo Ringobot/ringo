@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Ringo.Common.Helpers;
 using Ringo.Common.Models;
 using System;
 using System.Net.Http;
@@ -7,7 +8,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ringo.Common.Heplers
+namespace Ringo.Common.Helpers
 {
     class BotHelper
     {

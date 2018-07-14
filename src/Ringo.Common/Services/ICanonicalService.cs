@@ -1,7 +1,9 @@
-﻿namespace Ringo.Common.Services
+﻿using Ringo.Common.Models;
+
+namespace Ringo.Common.Services
 {
     public interface ICanonicalService
     {
-        string GetArtistId(string input);
+        RdostrId GetArtistId(string input);
     }
 }

@@ -25,7 +25,7 @@
     <None Update="TestData\artists.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestData\artist.json">
+    <None Update="TestData\artistSpotify.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestData\canon.json">

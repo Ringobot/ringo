@@ -6,7 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Ringo.Common.Heplers
+namespace Ringo.Common.Helpers
 {
     public static class CosmosHelper
     {
@@ -40,7 +40,7 @@ namespace Ringo.Common.Heplers
 
         }
 
-        private static async Task CheckOrCreateDocument(Entity entity)
+        public static async Task CheckOrCreateDocument(Entity entity)
         {
             try
             {

@@ -1,33 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Ringo.Common.Models;
-using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
+using Ringo.Common.Helpers;
+using Ringo.Common.Models;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Ringo.Common.Heplers;
 
 namespace Ringo.Common.Services
 {
     public class ArtistService : IArtistService
     {
-        public static SpotifyService SpotifyService = new SpotifyService();
-        
-        public bool FindArtistMatch(Artist artist)
+        private SpotifyService spotifyService;
+
+        public ArtistService(IConfiguration configuration)
         {
-            throw new NotImplementedException();
+            spotifyService = new SpotifyService(configuration);
         }
 
         public async Task<Artist> GetArtist(string artistId)
         {
             try
             {
-                dynamic artistRequest = await SpotifyService.GetArtist(artistId);
-                Artist artist = new Artist()
-                {
-                    name = artistRequest.name,
-                };
-                return artist;
+                var artists = await spotifyService.GetArtist(artistId);
+                var result = ArtistHelper.MapToArtist(artists);
+                return result;
             }
             catch (Exception ex)
             {
@@ -37,23 +33,15 @@ namespace Ringo.Common.Services
 
         }
 
-        public async Task<Artist> GetArtistByUriAsync(string artistUri)
-        {
-            return await SpotifyService.GetArtist(artistUri);
-        }
-
-        public async Task<Artists> GetRelatedArtistsAsync(string artistId)
-        {
-            return await SpotifyService.GetRelatedArtists(artistId);
-
-        }
-
-        public Artists MapToArtist(string data)
+        public async Task<Artist> GetArtistByUri(string artistUri)
         {
             try
             {
-                Artists artist = JsonConvert.DeserializeObject<Artists>(data);
-                return artist;
+                string[] artist = artistUri.Split(new[] { ':' });
+                var artistRequest = await spotifyService.GetArtist(artist[2]);
+                var artists = ArtistHelper.MapToArtist(artistRequest);
+                return artists;
+
             }
             catch (Exception ex)
             {
@@ -63,12 +51,35 @@ namespace Ringo.Common.Services
 
         }
 
-        public List<EntityRelationship> PushRelatedArtist(Artist baseArtist, Artists relatedArtists)
+        public async Task<List<Artist>> GetRelatedArtists(string artistId)
         {
+            try
+            {
+                List<Artist> artistsList = new List<Artist>();
+                dynamic artistRequest = await spotifyService.GetRelatedArtists(artistId);
+                foreach (var item in artistRequest.artists)
+                {
+                    artistsList.Add(ArtistHelper.MapToArtist(item));
+                }
+                return artistsList;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+
+        }
+
+
+        public List<EntityRelationship> PushRelatedArtist(Artist baseArtist, List<Artist> relatedArtists)
+        {
+            CanonicalService canonicalService = new CanonicalService();
             List<EntityRelationship> entityRelationshipList = new List<EntityRelationship>();
             try
             {
-                RdostrId baseArtistRdo = CanonicalService.GetArtistId(baseArtist.name);
+                RdostrId baseArtistRdo = canonicalService.GetArtistId(baseArtist.name);
                 string baseArtistId = $"{baseArtist.name}:{baseArtistRdo.Id}";
                 JObject baseArtistProps = JObject.FromObject(new {
                     Properties = new
@@ -76,13 +87,13 @@ namespace Ringo.Common.Services
                         type = "artist",
                         spotifyid = baseArtist.spotify.id,
                         spotifyuri = baseArtist.spotify.uri,
-                        images = baseArtist.image[0].url
+                        images = baseArtist.images[0]
                     }
                 });
                 Entity baseArtistEntity = new Entity(baseArtistId, baseArtist.name, baseArtistProps);
-                foreach (Artist relatedArtist in relatedArtists.artists)
+                foreach (Artist relatedArtist in relatedArtists)
                 {
-                    RdostrId relatedArtistRdo = CanonicalService.GetArtistId(relatedArtist.name);
+                    RdostrId relatedArtistRdo = canonicalService.GetArtistId(relatedArtist.name);
                     string relatedArtistId = $"{relatedArtist.name}:{relatedArtistRdo.Id}";
                     JObject relatedArtistProps = JObject.FromObject(new
                     {
@@ -91,7 +102,7 @@ namespace Ringo.Common.Services
                             type = "artist",
                             spotifyid = relatedArtist.spotify.id,
                             spotifyuri = relatedArtist.spotify.uri,
-                            images = relatedArtist.image[0].url
+                            images = relatedArtist.images[0]
                         }
                     });
                     Entity relatedEntity = new Entity(relatedArtistId, relatedArtist.name, relatedArtistProps);
@@ -115,11 +126,16 @@ namespace Ringo.Common.Services
             return entityRelationshipList;
         }
 
-        public async Task<Artists> SearchArtists(string artist, int limit = 3)
+        public async Task<List<Artist>> SearchArtists(string artist, int limit = 3)
         {
-            throw new NotImplementedException();
+            List<Artist> artistsList = new List<Artist>();
+            dynamic artistRequest = await spotifyService.SearchArtists(artist);
+            foreach (var item in artistRequest.artists.items)
+            {
+                artistsList.Add(ArtistHelper.MapToArtist(item));
+            }
+            return artistsList;
         }
-
 
     }
 }

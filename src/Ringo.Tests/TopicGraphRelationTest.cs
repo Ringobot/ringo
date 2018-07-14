@@ -1,12 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
+using Ringo.Common.Helpers;
 using Ringo.Common.Models;
-using Ringo.Common.Heplers;
-using Ringo.Functions;
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace Ringo.Tests
@@ -28,12 +26,14 @@ namespace Ringo.Tests
             entityRelationship.ToVertex = testArtist;
             entityRelationship.Relationship = "likes";
             entityRelationship.RelationshipDate = DateTime.UtcNow;
+            List<EntityRelationship> entityRelationships = new List<EntityRelationship>();
+            entityRelationships.Add(entityRelationship);
 
             // act
             try
             {
-                var mockMsgString = JsonConvert.SerializeObject(entityRelationship);
-                await TopicGraphCreateRelationship.Run(mockMsgString, null);
+                var mockMsgString = JsonConvert.SerializeObject(entityRelationships);
+                await GraphHelper.CreateRelationship(entityRelationship);
 
 
                 // assert
@@ -64,12 +64,14 @@ namespace Ringo.Tests
             entityRelationship.ToVertex = testArtist;
             entityRelationship.Relationship = "likes";
             entityRelationship.RelationshipDate = DateTime.UtcNow;
+            List<EntityRelationship> entityRelationships = new List<EntityRelationship>();
+            entityRelationships.Add(entityRelationship);
 
             // act
             try
             {
-                var mockMsgString = JsonConvert.SerializeObject(entityRelationship);
-                await TopicGraphCreateRelationship.Run(mockMsgString, null);
+                var mockMsgString = JsonConvert.SerializeObject(entityRelationships);
+                await GraphHelper.CreateRelationship(entityRelationship);
 
 
                 // assert
