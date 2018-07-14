@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "mocha -r ts-node/register tests/**/*.tests.ts --reporter mocha-junit-reporter --reporter-options mochaFile=./test-results.xml --exit",
+    "test-local": "mocha -r ts-node/register tests/**/*.tests.ts --exit",
     "start": "node app.js"
   },
   "author": "@DanielLarsenNZ",
