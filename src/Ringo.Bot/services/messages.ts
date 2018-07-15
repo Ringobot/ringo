@@ -82,3 +82,12 @@ export function whoops(session, e) {
     console.error(e);
     session.endDialog(`Whoops! Something is wrong 😞 Please try again`);
 }
+
+export function welcome(session){
+    session.send(
+        "Hey! I'm Ringo, the music bot 😎🎧🎵\r\nI love to discover new music and share my discoveries. "
+        + "Tell me about Artists and Bands that you like, for example:\r\n"
+        + "`I like Metallica`.\r\n"
+        + "And you can type `help`, `quit` or `feedback` at any time."
+    )
+}
