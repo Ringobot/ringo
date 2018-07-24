@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Ringo.Common.Services;
 using Ringo.Common.Models;
+using Ringo.Common.Services;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Ringo.SF.StatefulBackend.Controllers
 {
@@ -13,12 +11,10 @@ namespace Ringo.SF.StatefulBackend.Controllers
     public class ArtistController : Controller
     {
         private ArtistService artistService;
-        private IConfiguration Configuration;
 
         public ArtistController(IConfiguration configuration)
         {
             artistService = new ArtistService(configuration);
-            Configuration = configuration;
 
         }
 
@@ -26,6 +22,7 @@ namespace Ringo.SF.StatefulBackend.Controllers
         [HttpGet("id")]
         public async Task<Artist> GetArtist([FromQuery(Name = "artist")]string artist)
         {
+
             return await artistService.GetArtist(artist);
         }
 
