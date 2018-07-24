@@ -159,6 +159,17 @@ bot.dialog('Welcome', [
     }
 ]);
 
+intents.matches('Hi', [
+    async function (session){
+        if (notListening(session.message)) return;
+        _metrics.setAuthenticatedUserContext(sessionHash(session), user.userHash(session));
+        _metrics.trackEvent('Bot/Hi');
+
+        _messages.welcome(session)
+        session.endDialog()
+    }
+])
+
 intents.matches('Feedback', [
     async function (session) {
         if (notListening(session.message)) return;
@@ -244,7 +255,7 @@ intents.matches('Like Artist',
         session.userData.lastSessionMessage = session.message;
         session.userData.lastArgs = args;
 
-        if (args.entities == null) {
+        if (args.entities == null || args.entities.length === 0) {
             _messages.sorry(session);
             return;
         }
@@ -346,7 +357,7 @@ intents.matches('Play',
         session.userData.lastSessionMessage = session.message;
         session.userData.lastArgs = args;
 
-        if (args.entities == null) {
+        if (args.entities == null || args.entities.length === 0) {
             _messages.sorry(session);
             return;
         }

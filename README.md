@@ -106,13 +106,30 @@ Try VSTS for free: <https://www.visualstudio.com/team-services/>
 
 ![build status](https://dalars.visualstudio.com/_apis/public/build/definitions/176b1958-0be0-498a-a881-71fcaf8b338c/26/badge)
 
-### Run tests
+## Tests
+
+To run the mocha (Javascript) tests:
 
     npm test
 
 In CI/CD environment
 
     npm run-script test-vsts
+
+## Debugging
+
+To enable Diagnostic logging of the `console` output from nodejs in Azure App Services
+(Windows), ensure this property is present in `web.config`:
+
+```xml
+<iisnode loggingEnabled="true" />
+```
+
+Then you can stream the log output to a console using `curl`, e.g:
+
+    curl --user (deployment-username) https://ringobot.scm.azurewebsites.net/api/logstream
+
+> **Note**: `curl` now ships with Windows! <https://blogs.technet.microsoft.com/virtualization/2017/12/19/tar-and-curl-come-to-windows/>
 
 ## More information and Links
 
@@ -175,6 +192,10 @@ Install latest nodejs and npm (on Ubuntu): <https://nodejs.org/en/download/packa
     curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash - sudo apt-get install -y nodejs
 
 Dockerizing a Node.js web app: <https://nodejs.org/en/docs/guides/nodejs-docker-webapp/>
+
+### App Services and IIS Node
+
+IIS Node config: <https://github.com/tjanczuk/iisnode/blob/master/src/samples/configuration/web.config>
 
 ### Application insights
 

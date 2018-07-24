@@ -2,6 +2,10 @@ import _table = require('./tablestorage')
 import errs = require('restify-errors');
 import _graph = require('./graphstorage')
 
+const UserAuthTable = "UserSpotifyAuth"
+
+_table.createTableIfNotExists(UserAuthTable).catch(console.log)
+
 /**
  * Restify handler for Health API
  * @param req 
@@ -67,7 +71,7 @@ async function getTableStorageHealth() : Promise<ServiceHealth> {
         // use a high-res timer
         let start = process.hrtime()
         // get top 1 from a table TODO: Health table
-        await _table.get('UserSpotifyAuth', _table.createQuery().top(1))
+        await _table.get(UserAuthTable, _table.createQuery().top(1))
         let elapsed = elapsedMs(process.hrtime(start))
 
         // Business logic for deciding if Table Storage is Up, Trouble or Down

@@ -1,15 +1,15 @@
-import 'mocha';
-import { expect } from 'chai';
-import './helper';
+import 'mocha'
+import { expect } from 'chai'
+import './helper'
 
-import _artists = require('../../services/artists');
-import artist = require('../../models/artist');
+import _artists = require('../../services/artists')
+import artist = require('../../models/artist')
 
 describe('artists.searchArtists', function () {
     var data: artist.Artist[];
 
     before(async function () {
-        this.timeout(10000);
+        this.timeout(30000);
         data = await _artists.searchArtists("Radiohead");
     });
 
@@ -39,7 +39,7 @@ describe('artists.getRelatedArtists', function () {
     var data: artist.Artist[];
 
     before(async function () {
-        this.timeout(10000);
+        this.timeout(30000);
         data = await _artists.getRelatedArtists("3vbKDsSS70ZX9D2OcvbZmS");
     });
 
