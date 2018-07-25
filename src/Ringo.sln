@@ -13,9 +13,11 @@ Project("{A07B5EB6-E848-4116-A8D0-A826331D98C6}") = "Ringo.ServiceFabric", "Ring
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ringo.SF.ArtistStateless", "Ringo.SF.ArtistStateless\Ringo.SF.ArtistStateless.csproj", "{AE068A5E-CC94-4C20-85AF-AFE11D4BA0D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ringo.SF.RelatedStateful", "Ringo.SF.RelatedStateful\Ringo.SF.RelatedStateful.csproj", "{DAA55ECE-664F-4F95-8B05-9827A52476FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ringo.SF.RelatedStateful", "Ringo.SF.RelatedStateful\Ringo.SF.RelatedStateful.csproj", "{DAA55ECE-664F-4F95-8B05-9827A52476FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ringo.SF.StatefulBackend", "Ringo.SF.StatefulBackend\Ringo.SF.StatefulBackend.csproj", "{4237C822-CBBE-4877-ACDC-6A33C5E44030}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ringo.SF.StatefulBackend", "Ringo.SF.StatefulBackend\Ringo.SF.StatefulBackend.csproj", "{4237C822-CBBE-4877-ACDC-6A33C5E44030}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ringo.Functions.K8s", "Ringo.Functions.K8s\Ringo.Functions.K8s.csproj", "{084982DE-7D88-434A-A8A3-7287FCB1C8BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,14 @@ Global
 		{4237C822-CBBE-4877-ACDC-6A33C5E44030}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4237C822-CBBE-4877-ACDC-6A33C5E44030}.Release|x64.ActiveCfg = Release|Any CPU
 		{4237C822-CBBE-4877-ACDC-6A33C5E44030}.Release|x64.Build.0 = Release|Any CPU
+		{084982DE-7D88-434A-A8A3-7287FCB1C8BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{084982DE-7D88-434A-A8A3-7287FCB1C8BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{084982DE-7D88-434A-A8A3-7287FCB1C8BD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{084982DE-7D88-434A-A8A3-7287FCB1C8BD}.Debug|x64.Build.0 = Debug|Any CPU
+		{084982DE-7D88-434A-A8A3-7287FCB1C8BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{084982DE-7D88-434A-A8A3-7287FCB1C8BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{084982DE-7D88-434A-A8A3-7287FCB1C8BD}.Release|x64.ActiveCfg = Release|Any CPU
+		{084982DE-7D88-434A-A8A3-7287FCB1C8BD}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
