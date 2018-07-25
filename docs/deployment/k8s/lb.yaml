@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ringo-functions-deployment
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: ringo-functions-deployment
