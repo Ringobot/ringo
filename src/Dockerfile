@@ -1,7 +1,7 @@
 FROM microsoft/dotnet:2.1-sdk AS installer-env
 
-COPY ./Ringo.Common /src/dotnet-function-app
-COPY ./Ringo.Functions.K8s /src/dotnet-function-app
+COPY ./Ringo.Common/ /src/Ringo.Common
+COPY ./Ringo.Functions.K8s/ /src/dotnet-function-app
 RUN cd /src/dotnet-function-app && \
     mkdir -p /home/site/wwwroot && \
     dotnet publish *.csproj --output /home/site/wwwroot
