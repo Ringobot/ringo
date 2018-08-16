@@ -9,9 +9,12 @@
     <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="1.9.1" />
     <PackageReference Include="Microsoft.Azure.Graphs" Version="0.3.1-preview" />
     <PackageReference Include="Microsoft.ML" Version="0.3.0" />
-    <PackageReference Include="Microsoft.ServiceFabric.Services.Remoting" Version="3.1.306" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="SpotifyApi.NetCore" Version="1.0.3-alpha" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
   </ItemGroup>
 
 </Project>
