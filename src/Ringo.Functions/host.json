@@ -1,2 +1,6 @@
 {
+  "durableTask": {
+    "EventGridTopicEndpoint": "https://mjsdemoeventgrid.australiasoutheast-1.eventgrid.azure.net/api/events",
+    "EventGridKeySettingName": "EventGridKey"
+  }
 }
