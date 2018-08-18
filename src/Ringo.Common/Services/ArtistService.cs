@@ -69,12 +69,17 @@ namespace Ringo.Common.Services
                 Console.WriteLine(ex.Message);
                 throw;
             }
+            finally
+            {
+
+            }
 
         }
 
 
-        public List<EntityRelationship> PushRelatedArtist(Artist baseArtist, List<Artist> relatedArtists)
+        public async Task<List<EntityRelationship>> PushRelatedArtist(string artistId, List<Artist> relatedArtists)
         {
+            Artist baseArtist = await GetArtist(artistId);
             CanonicalService canonicalService = new CanonicalService();
             List<EntityRelationship> entityRelationshipList = new List<EntityRelationship>();
             try

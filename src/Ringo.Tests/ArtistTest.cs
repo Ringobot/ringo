@@ -50,12 +50,13 @@ namespace Ringo.Tests
             // act
             try
             {
-                var baseArtist = await artistService.GetArtist("4VnomLtKTm9Ahe1tZfmZju");
-                var relatedArtist = await artistService.GetRelatedArtists(baseArtist.spotify.id);
-                List<EntityRelationship> entityRelationships = artistService.PushRelatedArtist(baseArtist, relatedArtist);
+                var baseArtist = "4VnomLtKTm9Ahe1tZfmZju";
+                var relatedArtist = await artistService.GetRelatedArtists(baseArtist);
+                List<EntityRelationship> entityRelationships = await artistService.PushRelatedArtist(baseArtist, relatedArtist);
 
+                var er = entityRelationships[0].FromVertex.Properties["Properties"]["spotifyid"];
                 // assert 
-                Assert.AreEqual(baseArtist.name, entityRelationships[0].FromVertex.Name);
+                Assert.AreEqual(baseArtist, entityRelationships[0].FromVertex.Properties["Properties"]["spotifyid"]);
                 Assert.AreEqual(relatedArtist[0].name, entityRelationships[0].ToVertex.Name);
                 Assert.AreEqual("related", entityRelationships[0].Relationship);
                 Assert.AreEqual(relatedArtist.Count, entityRelationships.Count);

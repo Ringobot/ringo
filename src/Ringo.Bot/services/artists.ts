@@ -49,7 +49,10 @@ export async function pushRelatedArtist(baseArtist: artist.Artist, relatedArtist
                     Id: baseArtistId,
                     Name: baseArtist.name,
                     Properties: {
-                        type: 'artist'
+                        type: 'artist',
+                        spotifyid: Artist.spotify.id,
+                        spotifyuri: Artist.spotify.uri,
+                        images: Artist.images[0].url
                     }
                 },
                 ToVertex:
