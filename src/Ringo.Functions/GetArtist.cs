@@ -23,31 +23,34 @@ namespace Ringo.Functions
                 .Build();
 
             ArtistService artistService = new ArtistService(config);
-            if (type == "id")
-            {
-                var result = await artistService.GetArtist(artist);
-                return (ActionResult)new OkObjectResult(result);
-            }
-            else if (type == "uri")
-            {
-                var result = await artistService.GetArtistByUri(artist);
-                return (ActionResult)new OkObjectResult(result);
-            }
-            else if (type == "related")
-            {
-                var result = await artistService.GetRelatedArtists(artist);
-                return (ActionResult)new OkObjectResult(result);
-            }
-            else if (type == "search")
-            {
-                var result = await artistService.SearchArtists(artist);
-                return (ActionResult)new OkObjectResult(result);
-            }
-            else
-            {
-                return (ActionResult)new BadRequestObjectResult("Unable to find artist");
-            }
 
+            switch (type)
+            {
+                case "id":
+                    {
+                        var result = await artistService.GetArtist(artist);
+                        return (ActionResult)new OkObjectResult(result);
+                    }
+                case "uri":
+                    {
+                        var result = await artistService.GetArtistByUri(artist);
+                        return (ActionResult)new OkObjectResult(result);
+                    }
+                case "related":
+                    {
+                        var result = await artistService.GetRelatedArtists(artist);
+                        return (ActionResult)new OkObjectResult(result);
+                    }
+                case "search":
+                    {
+                        var result = await artistService.SearchArtists(artist);
+                        return (ActionResult)new OkObjectResult(result);
+                    }
+                default:
+                    {
+                        return (ActionResult)new BadRequestObjectResult("Unable to find artist");
+                    }
+            }
         }
     }
 }
