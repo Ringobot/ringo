@@ -133,7 +133,7 @@ export async function userLikesArtist(userId: string, artist: artist.Artist) {
 
 export async function postRelated(erList) {
     try {
-        let url = process.env.API_BACKEND + 'RelatedArtists_HttpStart';
+        let url = process.env.API_BACKEND + '/RelatedArtists_HttpStart';
         await _httpj.post(url, JSON.stringify(erList), { 'Content-Type': 'application/json' });
     } catch (e) {
         throw e;
