@@ -15,7 +15,7 @@ export interface Artist {
 
 export function mapToArtist(spotifyArtist: any): Artist {
     if (!spotifyArtist) return null;
-    if (!spotifyArtist.name && !spotifyArtist.id && !spotifyArtist.uri) {
+    if (!(spotifyArtist.name && spotifyArtist.spotify.id && spotifyArtist.spotify.uri)) {
         // it's not an artist
         throw new Error(`${spotifyArtist} is not a Spotify artist`)
     }
@@ -23,8 +23,8 @@ export function mapToArtist(spotifyArtist: any): Artist {
     return {
         name: spotifyArtist.name,
         spotify: {
-            id: spotifyArtist.id,
-            uri: spotifyArtist.uri
+            id: spotifyArtist.spotify.id,
+            uri: spotifyArtist.spotify.uri
         },
         images: spotifyArtist.images
     };
