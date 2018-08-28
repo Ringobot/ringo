@@ -8,13 +8,13 @@ describe('graphstorage', () => {
       const userId = 'defaultUser'
       let data = await _graph.vertexEdgeVertices(userId, 'likes', 'artist')
       expect(data).to.not.be.null;
-    });
+    }).timeout(10000);
 
     it('execute returns not null', async () => {
         const userId = 'defaultUser'
         let data = await _graph.execute('g.V().limit(limit)', {limit: 1})
         expect(data).to.not.be.null;
-      });
+      }).timeout(10000);
   
   });
   
