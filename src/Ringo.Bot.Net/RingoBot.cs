@@ -3,13 +3,16 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Choices;
 using Microsoft.Bot.Schema;
+using SpotifyApi.NetCore;
 
 namespace Ringo.Bot.Net
 {
@@ -39,6 +42,8 @@ namespace Ringo.Bot.Net
 
         private readonly RingoBotAccessors _stateAccessors;
         private readonly DialogSet _dialogs;
+
+        private static readonly HttpClient _http = new HttpClient();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthenticationBot"/> class.
@@ -95,6 +100,40 @@ namespace Ringo.Bot.Net
                         await turnContext.SendActivityAsync("You have been signed out.", cancellationToken: cancellationToken);
                         await turnContext.SendActivityAsync(WelcomeText, cancellationToken: cancellationToken);
                         break;
+                    }
+
+                    if (text.StartsWith("/play ", true, CultureInfo.InvariantCulture))
+                    {
+
+                        var prompt = await dc.BeginDialogAsync(LoginPromptName, cancellationToken: cancellationToken);
+                        var tokenResponse = (TokenResponse)prompt.Result;
+                        if (tokenResponse == null)
+                        {
+                            await turnContext.SendActivityAsync("Couldn't log you in.", cancellationToken: cancellationToken);
+                            //await turnContext.SendActivityAsync($"Here is your token {tokenResponse.Token}", cancellationToken: cancellationToken);
+                        }
+
+                        // /play
+
+                        // Get an artist by Spotify Artist Id
+                        var search = new SearchApi(_http, new AccountsService(tokenResponse.Token));
+                        var results = await search.Search(
+                            text.Replace("/play ", "", true, CultureInfo.InvariantCulture),
+                            SpotifySearchTypes.Playlist
+                            );
+                        
+                        if (results.Playlists.Total == 0)
+                        {
+                            await turnContext.SendActivityAsync($"No playlists found!", cancellationToken: cancellationToken);
+                            break;
+                        }
+
+                        await turnContext.SendActivityAsync(
+                            $"{results.Playlists.Total} playlists found. Playing {results.Playlists.Items[0].Name}", 
+                            cancellationToken: cancellationToken);
+
+                        var player = new PlayerApi(_http, new UserAccountsService(tokenResponse.Token));
+                        await player.PlayContext("", $"spotify:playlist:{results.Playlists.Items[0].Id}"); //TODO: UserId
                     }
 
                     await dc.ContinueDialogAsync(cancellationToken);
