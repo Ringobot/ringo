@@ -18,5 +18,6 @@
   </Rules>
   <Rules AnalyzerId="AsyncUsageAnalyzers" RuleNamespace="AsyncUsageAnalyzers">
     <Rule Id="AvoidAsyncVoid" Action="Warning" />
+    <Rule Id="UseAsyncSuffix" Action="None" />
   </Rules>
 </RuleSet>

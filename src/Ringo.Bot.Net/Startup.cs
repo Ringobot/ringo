@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Bot.Builder;
@@ -16,6 +17,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Ringo.Bot.Net.Services;
+using SpotifyApi.NetCore;
 
 namespace Ringo.Bot.Net
 {
@@ -143,6 +146,11 @@ namespace Ringo.Bot.Net
 
                 return accessors;
             });
+
+            services.AddSingleton<IRingoService, RingoService>();
+            services.AddSingleton<ISearchApi, SearchApi>();
+            services.AddSingleton<IPlayerApi, PlayerApi>();
+            services.AddSingleton<HttpClient, HttpClient>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

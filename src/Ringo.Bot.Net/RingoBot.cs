@@ -12,7 +12,7 @@ using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Choices;
 using Microsoft.Bot.Schema;
-using SpotifyApi.NetCore;
+using Ringo.Bot.Net.Services;
 
 namespace Ringo.Bot.Net
 {
@@ -42,15 +42,14 @@ namespace Ringo.Bot.Net
 
         private readonly RingoBotAccessors _stateAccessors;
         private readonly DialogSet _dialogs;
-
-        private static readonly HttpClient _http = new HttpClient();
+        private readonly IRingoService _ringoService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthenticationBot"/> class.
         /// </summary>
         /// <param name="accessors">A class containing <see cref="IStatePropertyAccessor{T}"/> used to manage state.</param>
         /// <seealso cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-2.1#windows-eventlog-provider"/>
-        public RingoBot(RingoBotAccessors accessors)
+        public RingoBot(RingoBotAccessors accessors, IRingoService ringoService)
         {
             _stateAccessors = accessors ?? throw new ArgumentNullException(nameof(accessors));
             _dialogs = new DialogSet(_stateAccessors.ConversationDialogState);
@@ -59,6 +58,8 @@ namespace Ringo.Bot.Net
             _dialogs.Add(Prompt(ConnectionName));
             _dialogs.Add(new ConfirmPrompt(ConfirmPromptName));
             _dialogs.Add(new WaterfallDialog("authDialog", new WaterfallStep[] { PromptStepAsync, LoginStepAsync, DisplayTokenAsync }));
+
+            _ringoService = ringoService;
         }
 
         /// <summary>
@@ -102,38 +103,25 @@ namespace Ringo.Bot.Net
                         break;
                     }
 
-                    if (text.StartsWith("/play ", true, CultureInfo.InvariantCulture))
-                    {
+                    const string playKeyword = "play";
 
+                    if (text.StartsWith($"{playKeyword} ", true, CultureInfo.InvariantCulture))
+                    {
                         var prompt = await dc.BeginDialogAsync(LoginPromptName, cancellationToken: cancellationToken);
                         var tokenResponse = (TokenResponse)prompt.Result;
                         if (tokenResponse == null)
                         {
                             await turnContext.SendActivityAsync("Couldn't log you in.", cancellationToken: cancellationToken);
-                            //await turnContext.SendActivityAsync($"Here is your token {tokenResponse.Token}", cancellationToken: cancellationToken);
                         }
 
-                        // /play
+                        // Play
+                        await _ringoService.PlayPlaylist(
+                            turnContext,
+                            text.Replace($"{playKeyword} ", string.Empty, true, CultureInfo.InvariantCulture),
+                            tokenResponse.Token,
+                            cancellationToken);
 
-                        // Get an artist by Spotify Artist Id
-                        var search = new SearchApi(_http, new AccountsService(tokenResponse.Token));
-                        var results = await search.Search(
-                            text.Replace("/play ", "", true, CultureInfo.InvariantCulture),
-                            SpotifySearchTypes.Playlist
-                            );
-                        
-                        if (results.Playlists.Total == 0)
-                        {
-                            await turnContext.SendActivityAsync($"No playlists found!", cancellationToken: cancellationToken);
-                            break;
-                        }
-
-                        await turnContext.SendActivityAsync(
-                            $"{results.Playlists.Total} playlists found. Playing {results.Playlists.Items[0].Name}", 
-                            cancellationToken: cancellationToken);
-
-                        var player = new PlayerApi(_http, new UserAccountsService(tokenResponse.Token));
-                        await player.PlayContext("", $"spotify:playlist:{results.Playlists.Items[0].Id}"); //TODO: UserId
+                        break;
                     }
 
                     await dc.ContinueDialogAsync(cancellationToken);
@@ -234,18 +222,18 @@ namespace Ringo.Bot.Net
             // Get the token from the previous step. Note that we could also have gotten the
             // token directly from the prompt itself. There is an example of this in the next method.
             var tokenResponse = (TokenResponse)step.Result;
-            if (tokenResponse != null)
-            {
-                await step.Context.SendActivityAsync("You are now logged in.", cancellationToken: cancellationToken);
-                return await step.PromptAsync(
-                    ConfirmPromptName,
-                    new PromptOptions
-                    {
-                        Prompt = MessageFactory.Text("Would you like to view your token?"),
-                        Choices = new List<Choice> { new Choice("Yes"), new Choice("No") },
-                    },
-                    cancellationToken);
-            }
+            if (tokenResponse != null) return Dialog.EndOfTurn;
+            //{
+            //    await step.Context.SendActivityAsync("You are now logged in.", cancellationToken: cancellationToken);
+            //    return await step.PromptAsync(
+            //        ConfirmPromptName,
+            //        new PromptOptions
+            //        {
+            //            Prompt = MessageFactory.Text("Would you like to view your token?"),
+            //            Choices = new List<Choice> { new Choice("Yes"), new Choice("No") },
+            //        },
+            //        cancellationToken);
+            //}
 
             await step.Context.SendActivityAsync("Login was not successful please try again.", cancellationToken: cancellationToken);
             return Dialog.EndOfTurn;
