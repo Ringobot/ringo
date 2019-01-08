@@ -24,11 +24,11 @@
     <PackageReference Include="Microsoft.Bot.Schema" Version="4.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.1.1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.1-beta.61" PrivateAssets="all" />
-    <!--<PackageReference Include="SpotifyApi.NetCore" Version="2.3.5" />-->
+    <PackageReference Include="SpotifyApi.NetCore" Version="2.3.6" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!--<ItemGroup>
     <ProjectReference Include="..\..\..\SpotifyApiDotNetCore\src\SpotifyApi.NetCore\SpotifyApi.NetCore.csproj" />
-  </ItemGroup>
+  </ItemGroup>-->
 
 </Project>
