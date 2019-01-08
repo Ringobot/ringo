@@ -13,6 +13,7 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Choices;
 using Microsoft.Bot.Schema;
 using Ringo.Bot.Net.Services;
+using Ringo.Bot.Net.State;
 
 namespace Ringo.Bot.Net
 {
@@ -52,12 +53,13 @@ namespace Ringo.Bot.Net
         public RingoBot(RingoBotAccessors accessors, IRingoService ringoService)
         {
             _stateAccessors = accessors ?? throw new ArgumentNullException(nameof(accessors));
-            _dialogs = new DialogSet(_stateAccessors.ConversationDialogState);
+            _dialogs = new DialogSet(accessors.DialogState);
 
             // Add the OAuth prompts and related dialogs into the dialog set
             _dialogs.Add(Prompt(ConnectionName));
             _dialogs.Add(new ConfirmPrompt(ConfirmPromptName));
-            _dialogs.Add(new WaterfallDialog("authDialog", new WaterfallStep[] { PromptStepAsync, LoginStepAsync, DisplayTokenAsync }));
+            _dialogs.Add(new WaterfallDialog("authDialog", new WaterfallStep[] { PromptStepAsync, LoginStepAsync }));
+            //_dialogs.Add(new WaterfallDialog("authDialog", new WaterfallStep[] { PromptStepAsync, LoginStepAsync, DisplayTokenAsync }));
 
             _ringoService = ringoService;
         }
@@ -71,7 +73,7 @@ namespace Ringo.Bot.Net
         /// or threads to receive notice of cancellation.</param>
         /// <returns>A <see cref="Task"/> that represents the work queued to execute.</returns>
         /// <seealso cref="BotStateSet"/>
-        /// <seealso cref="ConversationState"/>
+        /// <seealso cref="ConversationData"/>
         /// <seealso cref="IMiddleware"/>
         public async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -84,6 +86,10 @@ namespace Ringo.Bot.Net
             switch (turnContext.Activity.Type)
             {
                 case ActivityTypes.Message:
+                    var userProfile = await _stateAccessors.UserProfileAccessor.GetAsync(turnContext, () => new UserProfile());
+                    var conversationData = await _stateAccessors.ConversationDataAccessor.GetAsync(turnContext, () => new ConversationData());
+
+                    userProfile.FooBar = DateTime.UtcNow;
 
                     // This bot is not case sensitive.
                     var text = turnContext.Activity.Text.ToLowerInvariant();
@@ -91,6 +97,15 @@ namespace Ringo.Bot.Net
                     {
                         await turnContext.SendActivityAsync(WelcomeText, cancellationToken: cancellationToken);
                         break;
+                    }
+
+                    if (text == "login")
+                    {
+                        if (!turnContext.Responded)
+                        {
+                            // Start the Login process.
+                            await dc.BeginDialogAsync("authDialog", cancellationToken: cancellationToken);
+                        }
                     }
 
                     if (text == "logout")
@@ -114,6 +129,8 @@ namespace Ringo.Bot.Net
                             await turnContext.SendActivityAsync("Couldn't log you in.", cancellationToken: cancellationToken);
                         }
 
+                        conversationData.ConversationUserTokens[turnContext.Activity.From.Name.ToLower()] = tokenResponse;
+
                         // Play
                         await _ringoService.PlayPlaylist(
                             turnContext,
@@ -121,16 +138,48 @@ namespace Ringo.Bot.Net
                             tokenResponse.Token,
                             cancellationToken);
 
+                        //TODO: What a mess :(
+                        await _stateAccessors.UserProfileAccessor.SetAsync(turnContext, userProfile);
+                        await _stateAccessors.UserState.SaveChangesAsync(turnContext);
+                        await _stateAccessors.ConversationDataAccessor.SetAsync(turnContext, conversationData);
+                        await _stateAccessors.ConversationState.SaveChangesAsync(turnContext);
+
                         break;
                     }
 
-                    await dc.ContinueDialogAsync(cancellationToken);
-
-                    if (!turnContext.Responded)
+                    const string joinKeyword = "join";
+                    if (text.StartsWith($"{joinKeyword} ", true, CultureInfo.InvariantCulture))
                     {
-                        // Start the Login process.
-                        await dc.BeginDialogAsync("authDialog", cancellationToken: cancellationToken);
+                        var prompt = await dc.BeginDialogAsync(LoginPromptName, cancellationToken: cancellationToken);
+                        var tokenResponse = (TokenResponse)prompt.Result;
+                        if (tokenResponse == null)
+                        {
+                            await turnContext.SendActivityAsync("Couldn't log you in.", cancellationToken: cancellationToken);
+                        }
+
+                        conversationData.ConversationUserTokens[turnContext.Activity.From.Name] = tokenResponse;
+
+                        string joinUsername = text.Replace($"{joinKeyword} ", string.Empty, true, CultureInfo.InvariantCulture).ToLower();
+
+                        // Join
+                        await _ringoService.JoinPlaylist(
+                            turnContext,
+                            joinUsername,
+                            conversationData,
+                            tokenResponse.Token,
+                            cancellationToken);
+
+                        //TODO: What a mess :(
+                        await _stateAccessors.UserProfileAccessor.SetAsync(turnContext, userProfile);
+                        await _stateAccessors.UserState.SaveChangesAsync(turnContext);
+                        await _stateAccessors.ConversationDataAccessor.SetAsync(turnContext, conversationData);
+                        await _stateAccessors.ConversationState.SaveChangesAsync(turnContext);
+
+                        break;
                     }
+
+
+                    await dc.ContinueDialogAsync(cancellationToken);
 
                     break;
                 case ActivityTypes.Event:

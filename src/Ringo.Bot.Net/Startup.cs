@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Ringo.Bot.Net.Services;
+using Ringo.Bot.Net.State;
 using SpotifyApi.NetCore;
 
 namespace Ringo.Bot.Net
@@ -59,17 +60,17 @@ namespace Ringo.Bot.Net
         /// <seealso cref="https://docs.microsoft.com/en-us/azure/bot-service/bot-service-manage-channels?view=azure-bot-service-4.0"/>
         public void ConfigureServices(IServiceCollection services)
         {
+            // Loads .bot configuration file and adds a singleton that your Bot can access through dependency injection.
+            var secretKey = Configuration.GetSection("botFileSecret")?.Value;
+            var botFilePath = Configuration.GetSection("botFilePath")?.Value;
+            if (!File.Exists(botFilePath))
+            {
+                throw new FileNotFoundException($"The .bot configuration file was not found. botFilePath: {botFilePath}");
+            }
+            var botConfig = BotConfiguration.Load(botFilePath ?? @".\BotConfiguration.bot", secretKey);
+
             services.AddBot<RingoBot>(options =>
             {
-                var secretKey = Configuration.GetSection("botFileSecret")?.Value;
-                var botFilePath = Configuration.GetSection("botFilePath")?.Value;
-                if (!File.Exists(botFilePath))
-                {
-                    throw new FileNotFoundException($"The .bot configuration file was not found. botFilePath: {botFilePath}");
-                }
-
-                // Loads .bot configuration file and adds a singleton that your Bot can access through dependency injection.
-                var botConfig = BotConfiguration.Load(botFilePath ?? @".\BotConfiguration.bot", secretKey);
                 services.AddSingleton(sp => botConfig ?? throw new InvalidOperationException($"The .bot config file could not be loaded. ({botConfig})"));
 
                 // Retrieve current endpoint.
@@ -92,59 +93,30 @@ namespace Ringo.Bot.Net
                     await context.SendActivityAsync("Sorry, it looks like something went wrong.");
                 };
 
-                // The Memory Storage used here is for local bot debugging only. When the bot
-                // is restarted, everything stored in memory will be gone.
-                IStorage dataStore = new MemoryStorage();
-
-                // For production bots use the Azure Blob or
-                // Azure CosmosDB storage providers. For the Azure
-                // based storage providers, add the Microsoft.Bot.Builder.Azure
-                // Nuget package to your solution. That package is found at:
-                // https://www.nuget.org/packages/Microsoft.Bot.Builder.Azure/
-                // Uncomment the following lines to use Azure Blob Storage
-                // //Storage configuration name or ID from the .bot file.
-                // const string StorageConfigurationId = "<STORAGE-NAME-OR-ID-FROM-BOT-FILE>";
-                // var blobConfig = botConfig.FindServiceByNameOrId(StorageConfigurationId);
-                // if (!(blobConfig is BlobStorageService blobStorageConfig))
-                // {
-                //    throw new InvalidOperationException($"The .bot file does not contain an blob storage with name '{StorageConfigurationId}'.");
-                // }
-                // // Default container name.
-                // const string DefaultBotContainer = "<DEFAULT-CONTAINER>";
-                // var storageContainer = string.IsNullOrWhiteSpace(blobStorageConfig.Container) ? DefaultBotContainer : blobStorageConfig.Container;
-                // IStorage dataStore = new Microsoft.Bot.Builder.Azure.AzureBlobStorage(blobStorageConfig.ConnectionString, storageContainer);
-
-                // Create Conversation State object.
-                // The Conversation State object is where we persist anything at the conversation-scope.
-                var conversationState = new ConversationState(dataStore);
-
-                options.State.Add(conversationState);
             });
 
-            // Create and register state accesssors.
-            // Acessors created here are passed into the IBot-derived class on every turn.
+            const string StorageConfigurationId = "ringostorage";
+            var blobConfig = botConfig.FindServiceByNameOrId(StorageConfigurationId);
+            if (!(blobConfig is BlobStorageService blobStorageConfig))
+            {
+                throw new InvalidOperationException($"The .bot file does not contain an blob storage with name '{StorageConfigurationId}'.");
+            }
+
+            IStorage storage = new Microsoft.Bot.Builder.Azure.AzureBlobStorage(blobStorageConfig.ConnectionString, blobStorageConfig.Container);
+
+            ConversationState conversationState = new ConversationState(storage);
+            UserState userState = new UserState(storage);
+            DialogState dialogState = new DialogState();
+
             services.AddSingleton<RingoBotAccessors>(sp =>
             {
-                var options = sp.GetRequiredService<IOptions<BotFrameworkOptions>>().Value;
-                if (options == null)
-                {
-                    throw new InvalidOperationException("BotFrameworkOptions must be configured prior to setting up the state accessors");
-                }
-
-                var conversationState = options.State.OfType<ConversationState>().FirstOrDefault();
-                if (conversationState == null)
-                {
-                    throw new InvalidOperationException("ConversationState must be defined and added before adding conversation-scoped state accessors.");
-                }
-
                 // Create the custom state accessor.
-                // State accessors enable other components to read and write individual properties of state.
-                var accessors = new RingoBotAccessors
+                return new RingoBotAccessors(conversationState, userState)
                 {
-                    ConversationDialogState = conversationState.CreateProperty<DialogState>(RingoBotAccessors.DialogStateName),
+                    ConversationDataAccessor = conversationState.CreateProperty<ConversationData>(RingoBotAccessors.ConversationDataName),
+                    UserProfileAccessor = userState.CreateProperty<UserProfile>(RingoBotAccessors.UserProfileName),
+                    DialogState = conversationState.CreateProperty<DialogState>(RingoBotAccessors.DialogStateName),
                 };
-
-                return accessors;
             });
 
             services.AddSingleton<IRingoService, RingoService>();

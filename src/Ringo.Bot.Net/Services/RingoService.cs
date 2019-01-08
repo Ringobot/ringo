@@ -1,10 +1,9 @@
-﻿using Microsoft.Bot.Builder;
-using SpotifyApi.NetCore;
-using System;
-using System.Globalization;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Bot.Builder;
+using Ringo.Bot.Net.State;
+using SpotifyApi.NetCore;
 
 namespace Ringo.Bot.Net.Services
 {
@@ -51,7 +50,6 @@ namespace Ringo.Bot.Net.Services
                 await turnContext.SendActivityAsync(
                     $"{turnContext.Activity.From.Name} is playing \"{results.Playlists.Items[0].Name}\"",
                     cancellationToken: cancellationToken);
-
             }
             catch (SpotifyApiErrorException ex)
             {
@@ -62,11 +60,56 @@ namespace Ringo.Bot.Net.Services
 
         public async Task JoinPlaylist(
             ITurnContext turnContext,
-            string text,
-            string accessToken,
+            string joinUsername,
+            ConversationData conversationData,
+            string token,
             CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            // is there a token for the playing user?
+            if (!conversationData.ConversationUserTokens.ContainsKey(joinUsername))
+            {
+                await turnContext.SendActivityAsync(
+                    $"Join failed. {joinUsername} has not asked Ringo to play anything.",
+                    cancellationToken: cancellationToken);
+                return;
+            }
+
+            var playingUsertoken = conversationData.ConversationUserTokens[joinUsername];
+
+            try
+            {
+                // is the playing user playing anything?
+                var info = await _player.GetCurrentPlaybackInfo(playingUsertoken.Token);
+
+                if (!info.IsPlaying)
+                {
+                    await turnContext.SendActivityAsync(
+                        $"Join failed. {joinUsername} is no longer playing anything.",
+                        cancellationToken: cancellationToken);
+                    return;
+                }
+
+                // is the playing user playing a playlist?
+                if (info.Context.Type != "playlist")
+                {
+                    await turnContext.SendActivityAsync(
+                        $"Join failed. {joinUsername} is no longer playing a Playlist.",
+                        cancellationToken: cancellationToken);
+                    return;
+                }
+
+                // play from offset
+                await _player.PlayPlaylistOffset(info.Context.Uri, info.Item.Id, accessToken: token, positionMs: info.ProgressMs);
+
+                await turnContext.SendActivityAsync(
+                    $"{turnContext.Activity.From.Name} has joined {joinUsername} playing \"{info.Item.Name}\"",
+                    cancellationToken: cancellationToken);
+            }
+            catch (SpotifyApiErrorException ex)
+            {
+                await turnContext.SendActivityAsync(ex.Message, cancellationToken: cancellationToken);
+                return;
+            }
         }
     }
 }
