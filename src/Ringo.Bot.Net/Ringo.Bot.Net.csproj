@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <CodeAnalysisRuleSet>RingoBot.Net.ruleset</CodeAnalysisRuleSet>
+    <UserSecretsId>3d1ed8fc-e289-42c4-ab87-5b92e7e0c927</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
