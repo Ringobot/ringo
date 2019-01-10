@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28306.52
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ringo.Bot.Net", "Ringo.Bot.Net\Ringo.Bot.Net.csproj", "{02417AAA-9F3A-4F76-9645-E5BCA757059F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpotifyApi.NetCore", "..\..\SpotifyApiDotNetCore\src\SpotifyApi.NetCore\SpotifyApi.NetCore.csproj", "{40378E5F-96B1-4BCB-B4C9-FB6638742166}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpotifyApi.NetCore", "..\..\SpotifyApi.NetCore\src\SpotifyApi.NetCore\SpotifyApi.NetCore.csproj", "{40378E5F-96B1-4BCB-B4C9-FB6638742166}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

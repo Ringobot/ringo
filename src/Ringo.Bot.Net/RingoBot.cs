@@ -27,7 +27,7 @@ namespace Ringo.Bot.Net
     {
         // The connection name here must match the one from
         // your Bot Channels Registration on the settings blade in Azure.
-        private const string ConnectionName = "spotify_connection";
+        private const string ConnectionName = "spotify_connection_2";
 
         private const string LoginPromptName = "loginPrompt";
         private const string ConfirmPromptName = "confirmPrompt";
@@ -114,7 +114,6 @@ namespace Ringo.Bot.Net
                     }
 
                     const string playKeyword = "play";
-
                     if (text.StartsWith($"{playKeyword} ", true, CultureInfo.InvariantCulture))
                     {
                         var prompt = await dc.BeginDialogAsync(LoginPromptName, cancellationToken: cancellationToken);
@@ -266,18 +265,19 @@ namespace Ringo.Bot.Net
             // Get the token from the previous step. Note that we could also have gotten the
             // token directly from the prompt itself. There is an example of this in the next method.
             var tokenResponse = (TokenResponse)step.Result;
-            if (tokenResponse != null) return Dialog.EndOfTurn;
-            //{
-            //    await step.Context.SendActivityAsync("You are now logged in.", cancellationToken: cancellationToken);
-            //    return await step.PromptAsync(
-            //        ConfirmPromptName,
-            //        new PromptOptions
-            //        {
-            //            Prompt = MessageFactory.Text("Would you like to view your token?"),
-            //            Choices = new List<Choice> { new Choice("Yes"), new Choice("No") },
-            //        },
-            //        cancellationToken);
-            //}
+            if (tokenResponse != null)
+            {
+                await step.Context.SendActivityAsync("You are now logged in.", cancellationToken: cancellationToken);
+                return Dialog.EndOfTurn;
+                //return await step.PromptAsync(
+                //    ConfirmPromptName,
+                //    new PromptOptions
+                //    {
+                //        Prompt = MessageFactory.Text("Would you like to view your token?"),
+                //        Choices = new List<Choice> { new Choice("Yes"), new Choice("No") },
+                //    },
+                //    cancellationToken);
+            }
 
             await step.Context.SendActivityAsync("Login was not successful please try again.", cancellationToken: cancellationToken);
             return Dialog.EndOfTurn;
