@@ -206,3 +206,9 @@ How to track auth users: <https://github.com/Microsoft/ApplicationInsights-node.
 ### More Links
 
 Emojipedia: <https://emojipedia.org/people/>
+
+## Logging
+
+<https://stackify.com/net-core-loggerfactory-use-correctly/>
+
+<https://www.blinkingcaret.com/2018/02/14/net-core-console-logging/>

@@ -1,12 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using Ringo.Bot.Net.Services;
 using Ringo.Bot.Net.State;
 
@@ -39,24 +43,26 @@ namespace Ringo.Bot.Net
         private readonly RingoBotAccessors _stateAccessors;
         private readonly DialogSet _dialogs;
         private readonly IRingoService _ringoService;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthenticationBot"/> class.
         /// </summary>
         /// <param name="accessors">A class containing <see cref="IStatePropertyAccessor{T}"/> used to manage state.</param>
         /// <seealso cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-2.1#windows-eventlog-provider"/>
-        public RingoBot(RingoBotAccessors accessors, IRingoService ringoService)
+        public RingoBot(RingoBotAccessors accessors, IRingoService ringoService, ILogger<RingoBot> logger)
         {
             _stateAccessors = accessors ?? throw new ArgumentNullException(nameof(accessors));
             _dialogs = new DialogSet(accessors.DialogState);
 
             // Add the OAuth prompts and related dialogs into the dialog set
-            _dialogs.Add(Prompt(ConnectionName));
+            //_dialogs.Add(Prompt(ConnectionName));
             _dialogs.Add(new ConfirmPrompt(ConfirmPromptName));
             _dialogs.Add(new WaterfallDialog("authDialog", new WaterfallStep[] { PromptStepAsync, LoginStepAsync }));
             //_dialogs.Add(new WaterfallDialog("authDialog", new WaterfallStep[] { PromptStepAsync, LoginStepAsync, DisplayTokenAsync }));
 
             _ringoService = ringoService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -96,11 +102,15 @@ namespace Ringo.Bot.Net
 
                     if (text == "login")
                     {
-                        if (!turnContext.Responded)
-                        {
-                            // Start the Login process.
-                            await dc.BeginDialogAsync("authDialog", cancellationToken: cancellationToken);
-                        }
+                        await SendOAuthCardAsync(turnContext, cancellationToken);
+                        break;
+
+                        //if (!turnContext.Responded)
+                        //{
+                        //    // Start the Login process.
+                        //    //await dc.BeginDialogAsync("authDialog", cancellationToken: cancellationToken);
+                            
+                        //}
                     }
 
                     if (text == "logout")
@@ -116,13 +126,22 @@ namespace Ringo.Bot.Net
                     const string playKeyword = "play";
                     if (text.StartsWith($"{playKeyword} ", true, CultureInfo.InvariantCulture))
                     {
-                        var prompt = await dc.BeginDialogAsync(LoginPromptName, cancellationToken: cancellationToken);
-                        var tokenResponse = (TokenResponse)prompt.Result;
+                        var adapter = (BotFrameworkAdapter)turnContext.Adapter;
+                        var token2 = await adapter.GetUserTokenAsync(turnContext, ConnectionName, null, cancellationToken);
+
+                        //var prompt = await dc.BeginDialogAsync(LoginPromptName, cancellationToken: cancellationToken);
+
+                        //var tokenResponse = await dc.BeginDialogAsync(SendOAuthCardAsync, cancellationToken: cancellationToken);
+
+                        //var tokenResponse = (TokenResponse)prompt.Result;
+                        var tokenResponse = token2;
                         if (tokenResponse == null)
                         {
                             await turnContext.SendActivityAsync("Couldn't log you in.", cancellationToken: cancellationToken);
+                            break;
                         }
 
+                        _logger.LogDebug($"Play: token = {tokenResponse.Token.Substring(0, 4)}");
                         conversationData.ConversationUserTokens[turnContext.Activity.From.Name.ToLower()] = tokenResponse;
 
                         // Play
@@ -149,7 +168,10 @@ namespace Ringo.Bot.Net
                         if (tokenResponse == null)
                         {
                             await turnContext.SendActivityAsync("Couldn't log you in.", cancellationToken: cancellationToken);
+                            break;
                         }
+
+                        _logger.LogDebug($"Join: token = {tokenResponse.Token.Substring(0, 4)}");
 
                         conversationData.ConversationUserTokens[turnContext.Activity.From.Name] = tokenResponse;
 
@@ -172,6 +194,20 @@ namespace Ringo.Bot.Net
                         break;
                     }
 
+                    if (Regex.IsMatch(text, "^[0-9]+$"))
+                    {
+                        // magic number
+                        var adapter = (BotFrameworkAdapter)turnContext.Adapter;
+                        var token2 = await adapter.GetUserTokenAsync(turnContext, ConnectionName, text, cancellationToken);
+                        conversationData.ConversationUserTokens[turnContext.Activity.From.Name] = token2;
+
+                        await _stateAccessors.UserProfileAccessor.SetAsync(turnContext, userProfile);
+                        await _stateAccessors.UserState.SaveChangesAsync(turnContext);
+                        await _stateAccessors.ConversationDataAccessor.SetAsync(turnContext, conversationData);
+                        await _stateAccessors.ConversationState.SaveChangesAsync(turnContext);
+
+                        break;
+                    }
 
                     await dc.ContinueDialogAsync(cancellationToken);
 
@@ -199,6 +235,8 @@ namespace Ringo.Bot.Net
                     }
 
                     break;
+                default:
+                    throw new NotSupportedException($"Activity Type \"{turnContext.Activity.Type}\" is not currently supported.");
             }
         }
 
@@ -222,24 +260,24 @@ namespace Ringo.Bot.Net
             }
         }
 
-        /// <summary>
-        /// Prompts the user to login using the OAuth provider specified by the connection name.
-        /// </summary>
-        /// <param name="connectionName"> The name of your connection. It can be found on Azure in
-        /// your Bot Channels Registration on the settings blade. </param>
-        /// <returns> An <see cref="OAuthPrompt"/> the user may use to log in.</returns>
-        private static OAuthPrompt Prompt(string connectionName)
-        {
-            return new OAuthPrompt(
-                LoginPromptName,
-                new OAuthPromptSettings
-                {
-                    ConnectionName = connectionName,
-                    Text = "Please Sign In",
-                    Title = "Sign In",
-                    Timeout = 300000, // User has 5 minutes to login (1000 * 60 * 5)
-                });
-        }
+        ///// <summary>
+        ///// Prompts the user to login using the OAuth provider specified by the connection name.
+        ///// </summary>
+        ///// <param name="connectionName"> The name of your connection. It can be found on Azure in
+        ///// your Bot Channels Registration on the settings blade. </param>
+        ///// <returns> An <see cref="OAuthPrompt"/> the user may use to log in.</returns>
+        //private static OAuthPrompt Prompt(string connectionName)
+        //{
+        //    return new OAuthPrompt(
+        //        LoginPromptName,
+        //        new OAuthPromptSettings
+        //        {
+        //            ConnectionName = connectionName,
+        //            Text = "Please Sign In",
+        //            Title = "Sign In",
+        //            Timeout = 300000, // User has 5 minutes to login (1000 * 60 * 5)
+        //        });
+        //}
 
         /// <summary>
         /// This <see cref="WaterfallStep"/> prompts the user to log in.
@@ -312,6 +350,87 @@ namespace Ringo.Bot.Net
             }
 
             return Dialog.EndOfTurn;
+        }
+
+        private async Task SendOAuthCardAsync(ITurnContext turnContext, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var message = turnContext.Activity.CreateReply();
+
+            if (message.Attachments == null)
+            {
+                message.Attachments = new List<Attachment>();
+            }
+
+            message.Attachments.Add(new Attachment
+            {
+                ContentType = OAuthCard.ContentType,
+                Content = new OAuthCard
+                {
+                    Text = "Please sign in",
+                    ConnectionName = ConnectionName,
+                    Buttons = new[]
+                    {
+                        new CardAction
+                        {
+                            Title = "Sign In",
+                            Text = "Sign In",
+                            Type = ActionTypes.Signin,
+                        },
+                    },
+                },
+            });
+
+            await turnContext.SendActivityAsync(message, cancellationToken).ConfigureAwait(false);
+        }
+
+        // This can be called when the bot receives an Activity after sending an OAuthCard
+        private async Task<TokenResponse> RecognizeTokenAsync(ITurnContext turnContext, CancellationToken cancellationToken)
+        {
+            var adapter = (BotFrameworkAdapter)turnContext.Adapter;
+
+            if (IsTokenResponseEvent(turnContext))
+            {
+                // The bot received the token directly
+                var tokenResponseObject = turnContext.Activity.Value as JObject;
+                var token = tokenResponseObject?.ToObject<TokenResponse>();
+                return token;
+            }
+            else if (IsTeamsVerificationInvoke(turnContext))
+            {
+                var magicCodeObject = turnContext.Activity.Value as JObject;
+                var magicCode = magicCodeObject.GetValue("state")?.ToString();
+
+                var token = await adapter.GetUserTokenAsync(turnContext, ConnectionName, magicCode, cancellationToken);
+                return token;
+            }
+            else if (turnContext.Activity.Type == ActivityTypes.Message)
+            {
+                // make sure it's a 6-digit code
+                var matched = Regex.IsMatch(turnContext.Activity.Text, "^[0-9]{6}$");
+                if (matched)
+                {
+                    var token = await adapter.GetUserTokenAsync(
+                        turnContext,
+                        ConnectionName,
+                        turnContext.Activity.Text,
+                        cancellationToken);
+                    return token;
+                }
+            }
+
+            return null;
+        }
+
+        private bool IsTokenResponseEvent(ITurnContext turnContext)
+        {
+            var activity = turnContext.Activity;
+            return activity.Type == ActivityTypes.Event && activity.Name == "tokens/response";
+        }
+
+        private bool IsTeamsVerificationInvoke(ITurnContext turnContext)
+        {
+            var activity = turnContext.Activity;
+            return activity.Type == ActivityTypes.Invoke && activity.Name == "signin/verifyState";
         }
     }
 }

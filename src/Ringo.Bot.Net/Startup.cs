@@ -30,8 +30,9 @@ namespace Ringo.Bot.Net
     {
         private ILoggerFactory _loggerFactory;
         private bool _isProduction = false;
+        private readonly ILogger _logger;
 
-        public Startup(IHostingEnvironment env)
+        public Startup(IHostingEnvironment env, ILogger<Startup> logger)
         {
             _isProduction = env.IsProduction();
             var builder = new ConfigurationBuilder()
@@ -41,6 +42,8 @@ namespace Ringo.Bot.Net
                 .AddEnvironmentVariables();
 
             Configuration = builder.Build();
+
+            _logger = logger;
         }
 
         /// <summary>
@@ -68,8 +71,11 @@ namespace Ringo.Bot.Net
                 throw new FileNotFoundException($"The .bot configuration file was not found. botFilePath: {botFilePath}");
             }
             var botConfig = BotConfiguration.Load(botFilePath ?? @".\BotConfiguration.bot", secretKey);
+            
+            // Creates a logger for the application to use.
+           // services.AddSingleton<ILogger>(_logger);
 
-            services.AddBot<RingoBot>(options =>
+            services.AddBot<RingoBot3>(options =>
             {
                 services.AddSingleton(sp => botConfig ?? throw new InvalidOperationException($"The .bot config file could not be loaded. ({botConfig})"));
 
@@ -83,13 +89,10 @@ namespace Ringo.Bot.Net
 
                 options.CredentialProvider = new SimpleCredentialProvider(endpointService.AppId, endpointService.AppPassword);
 
-                // Creates a logger for the application to use.
-                ILogger logger = _loggerFactory.CreateLogger<RingoBot>();
-
                 // Catches any errors that occur during a conversation turn and logs them.
                 options.OnTurnError = async (context, exception) =>
                 {
-                    logger.LogError($"Exception caught : {exception}");
+                    _logger.LogError($"Exception caught : {exception}");
                     await context.SendActivityAsync("Sorry, it looks like something went wrong.");
                 };
 
@@ -128,6 +131,7 @@ namespace Ringo.Bot.Net
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             _loggerFactory = loggerFactory;
+            SpotifyApi.NetCore.Logger.LoggerFactory = loggerFactory;
 
             app.UseDefaultFiles()
                 .UseStaticFiles()
