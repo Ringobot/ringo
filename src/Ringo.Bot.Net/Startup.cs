@@ -126,6 +126,7 @@ namespace Ringo.Bot.Net
             services.AddSingleton<ISearchApi, SearchApi>();
             services.AddSingleton<IPlayerApi, PlayerApi>();
             services.AddSingleton<HttpClient, HttpClient>();
+            //services.AddSingleton<IUserAccountsService, UserAccountsService>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

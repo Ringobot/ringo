@@ -212,3 +212,7 @@ Emojipedia: <https://emojipedia.org/people/>
 <https://stackify.com/net-core-loggerfactory-use-correctly/>
 
 <https://www.blinkingcaret.com/2018/02/14/net-core-console-logging/>
+
+## Bot builder storage (C#)
+
+<https://docs.microsoft.com/en-us/azure/bot-service/bot-builder-howto-v4-storage?view=azure-bot-service-4.0&tabs=csharp>

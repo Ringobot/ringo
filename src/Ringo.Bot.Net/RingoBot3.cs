@@ -9,26 +9,36 @@ using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using Ringo.Bot.Net.Services;
+using Ringo.Bot.Net.State;
 
 namespace Ringo.Bot.Net
 {
     public class RingoBot3 : IBot
     {
+        // feature flags
+        private const bool USE_BOT_BUILDER_AUTH = false;
+
         private const string ConnectionName = "spotify_connection_3";
         private static readonly Regex _magicCodeRegex = new Regex("^[0-9]{6}$");
         private readonly ILogger _logger;
         private readonly IRingoService _ringoService;
+        private readonly RingoBotAccessors _stateAccessors;
 
-        public RingoBot3(ILogger<RingoBot3> logger, IRingoService ringoService)
+        public RingoBot3(ILogger<RingoBot3> logger, IRingoService ringoService, RingoBotAccessors accessors)
         {
             _logger = logger;
             _ringoService = ringoService;
+            _stateAccessors = accessors ?? throw new ArgumentNullException(nameof(accessors));
         }
 
         public async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken = default(CancellationToken))
         {
             Trace.WriteLine($"{turnContext.Activity.Type}:{turnContext.Activity.Text}", "RingoBot3");
             _logger.LogDebug($"{turnContext.Activity.Type}:{turnContext.Activity.Text}");
+
+            // Get State
+            var userProfile = await _stateAccessors.UserProfileAccessor.GetAsync(turnContext, () => new UserProfile());
+            var conversationData = await _stateAccessors.ConversationDataAccessor.GetAsync(turnContext, () => new ConversationData());
 
             switch (turnContext.Activity.Type)
             {
@@ -73,21 +83,41 @@ namespace Ringo.Bot.Net
 
                     if (command == "play")
                     {
-                        var adapter = (BotFrameworkAdapter)turnContext.Adapter;
-                        var token2 = await adapter.GetUserTokenAsync(turnContext, ConnectionName, null, cancellationToken);
+                        TokenResponse token2;
 
-                        if (token2 == null)
+                        if (USE_BOT_BUILDER_AUTH)
                         {
-                            await turnContext.SendActivityAsync("Can't play because I can't find a token. Try `login`.");
+                            var adapter = (BotFrameworkAdapter)turnContext.Adapter;
+                            token2 = await adapter.GetUserTokenAsync(turnContext, ConnectionName, null, cancellationToken);
+
+                            if (token2 == null)
+                            {
+                                await turnContext.SendActivityAsync("Can't play because I can't find a token. Try `login`.");
+                                break;
+                            }
                         }
                         else
                         {
-                            await _ringoService.PlayPlaylist(
+                            token2 = await _ringoService.Authorize(
                                 turnContext,
-                                query,
-                                token2.Token,
+                                FromUserName(turnContext),
+                                conversationData,
                                 cancellationToken);
+
+                            if (token2 == null)
+                            {
+                                await turnContext.SendActivityAsync("Waiting for Spotify Authorization (check your browser)");
+                                break;
+                            }
                         }
+
+                        conversationData.ConversationUserTokens[FromUserName(turnContext)] = token2;
+
+                        await _ringoService.PlayPlaylist(
+                            turnContext,
+                            query,
+                            token2.Token,
+                            cancellationToken);
 
                         break;
                     }
@@ -152,7 +182,16 @@ namespace Ringo.Bot.Net
                     Trace.TraceWarning($"{turnContext.Activity.Type} is not handled", "RingoBot3");
                     break;
             }
+
+            // Commit state
+            await _stateAccessors.UserProfileAccessor.SetAsync(turnContext, userProfile);
+            await _stateAccessors.UserState.SaveChangesAsync(turnContext);
+            await _stateAccessors.ConversationDataAccessor.SetAsync(turnContext, conversationData);
+            await _stateAccessors.ConversationState.SaveChangesAsync(turnContext);
+
         }
+
+        private static string FromUserName(ITurnContext turnContext) => turnContext.Activity.From.Name.ToLower();
 
         private static async Task SendWelcomeMessageAsync(ITurnContext turnContext, CancellationToken cancellationToken)
         {
@@ -194,13 +233,13 @@ namespace Ringo.Bot.Net
                             Text = "Sign In",
                             Type = ActionTypes.Signin,
                         },
-                        new CardAction
-                        {
-                            Title = "Sign in link",
-                            Text = "Try this link if Sign-in button does not work. (Opens in your browser)",
-                            Value = link,
-                            Type = ActionTypes.OpenUrl,
-                        },
+                        //new CardAction
+                        //{
+                        //    Title = "Sign in link",
+                        //    Text = "Try this link if Sign-in button does not work. (Opens in your browser)",
+                        //    Value = link,
+                        //    Type = ActionTypes.OpenUrl,
+                        //},
                     },
                 },
             });
