@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Azure.Documents.Client;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Integration;
@@ -17,11 +18,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Ringo.Bot.Net.Services;
-using Ringo.Bot.Net.State;
+using RingoBotNet.Data;
+using RingoBotNet.Helpers;
+using RingoBotNet.Services;
+using RingoBotNet.State;
 using SpotifyApi.NetCore;
 
-namespace Ringo.Bot.Net
+namespace RingoBotNet
 {
     /// <summary>
     /// The Startup class configures services and the request pipeline.
@@ -42,6 +45,8 @@ namespace Ringo.Bot.Net
                 .AddEnvironmentVariables();
 
             Configuration = builder.Build();
+
+            ConfigHelper.CheckConfig(Configuration);
 
             _logger = logger;
         }
@@ -127,6 +132,24 @@ namespace Ringo.Bot.Net
             services.AddSingleton<IPlayerApi, PlayerApi>();
             services.AddSingleton<HttpClient, HttpClient>();
             //services.AddSingleton<IUserAccountsService, UserAccountsService>();
+
+            services.AddSingleton<IChannelUserData>(
+                (s) => new CosmosChannelUserData(
+                    Configuration,
+                    new DocumentClient(
+                        new Uri(Configuration[ConfigHelper.CosmosDBEndpoint]), 
+                        Configuration[ConfigHelper.CosmosDBPrimaryKey]),
+                    Configuration[ConfigHelper.CosmosDBDatabaseName],
+                    Configuration[ConfigHelper.CosmosDBChannelUserCollectionName]));
+
+            services.AddSingleton<IUserStateData>(
+                (s) => new CosmosUserStateData(
+                    Configuration,
+                    new DocumentClient(
+                        new Uri(Configuration[ConfigHelper.CosmosDBEndpoint]),
+                        Configuration[ConfigHelper.CosmosDBPrimaryKey]),
+                    Configuration[ConfigHelper.CosmosDBDatabaseName],
+                    Configuration[ConfigHelper.CosmosDBUserStateCollectionName]));
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

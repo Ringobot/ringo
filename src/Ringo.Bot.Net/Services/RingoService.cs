@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Configuration;
-using Ringo.Bot.Net.State;
+using RingoBotNet.Data;
+using RingoBotNet.State;
 using SpotifyApi.NetCore;
 
-namespace Ringo.Bot.Net.Services
+namespace RingoBotNet.Services
 {
     public class RingoService : IRingoService
     {
@@ -22,19 +23,25 @@ namespace Ringo.Bot.Net.Services
         private readonly IPlayerApi _player;
         private readonly IUserAccountsService _userAccounts;
         private readonly IConfiguration _config;
+        private readonly IChannelUserData _userData;
+        private readonly IUserStateData _userStateData;
 
         public RingoService(
             HttpClient httpClient,
             ISearchApi search,
             IPlayerApi player,
             //IUserAccountsService userAccounts,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IChannelUserData channelUserData,
+            IUserStateData userStateData)
         {
             _http = httpClient;
             _search = search;
             _player = player;
             //_userAccounts = userAccounts;
             _config = configuration;
+            _userData = channelUserData;
+            _userStateData = userStateData;
         }
 
         public async Task PlayPlaylist(
@@ -131,18 +138,21 @@ namespace Ringo.Bot.Net.Services
 
         public async Task<TokenResponse> Authorize(
             ITurnContext turnContext,
-            string userName,
-            ConversationData conversationData,
             CancellationToken cancellationToken)
         {
-            Dictionary<string, TokenResponse> userTokens = conversationData.ConversationUserTokens;
+            BearerAccessRefreshToken token = await _userData.GetUserAccessToken(
+                turnContext.Activity.ChannelId, 
+                turnContext.Activity.From.Id);
 
             if (
-                userTokens.ContainsKey(userName)
-                && !string.IsNullOrEmpty(userTokens[userName].Expiration)
-                && ToDateTimeFromIso8601(userTokens[userName].Expiration) > DateTime.UtcNow)
+                token != null
+                && token.Expires.HasValue
+                && token.Expires > DateTime.UtcNow)
             {
-                return userTokens[userName];
+                return new TokenResponse(
+                    connectionName: null, 
+                    token: token.AccessToken,
+                    expiration: ToIso8601(DateTime.UtcNow));
             }
 
             // create state token
@@ -152,7 +162,7 @@ namespace Ringo.Bot.Net.Services
             if (!RingoBotStateRegex.IsMatch(state)) throw new InvalidOperationException("Generated state token does not match RingoBotStateRegex");
 
             // save state token
-            conversationData.UserStateTokens[state] = userName;
+            await _userStateData.SaveUserStateToken(turnContext.Activity.ChannelId, turnContext.Activity.From.Id, state);
 
             // get URL
             string url = UserAccountsService.AuthorizeUrl(
@@ -193,5 +203,8 @@ namespace Ringo.Bot.Net.Services
 
         private static DateTime ToDateTimeFromIso8601(string iso8601)
             => DateTime.Parse(iso8601, null, System.Globalization.DateTimeStyles.RoundtripKind);
+
+        private static string ToIso8601(DateTime dateTime)
+            => dateTime.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
     }
 }

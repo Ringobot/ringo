@@ -1,7 +1,7 @@
 //using System.Threading.Tasks;
 //using SpotifyApi.NetCore;
 
-//namespace Ringo.Bot.Net
+//namespace RingoBotNet
 //{
 //    internal class AccountsService : IAccountsService
 //    {

@@ -16,17 +16,17 @@
     {
       "type": "abs",
       "id": "3",
-      "name": "Ringo.Bot.Net-abs"
+      "name": "RingoBotNet-abs"
     },
     {
       "type": "appInsights",
       "id": "4",
-      "name": "Ringo.Bot.Net-insights"
+      "name": "RingoBotNet-insights"
     },
     {
       "type": "blob",
       "id": "5",
-      "name": "Ringo.Bot.Net-blob",
+      "name": "RingoBotNet-blob",
       "container": "botstatestore"
     }
   ]

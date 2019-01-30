@@ -3,9 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
-using Ringo.Bot.Net.State;
+using RingoBotNet.State;
 
-namespace Ringo.Bot.Net.Services
+namespace RingoBotNet.Services
 {
     public interface IRingoService
     {
@@ -15,8 +15,6 @@ namespace Ringo.Bot.Net.Services
 
         Task<TokenResponse> Authorize(
             ITurnContext turnContext,
-            string userName,
-            ConversationData conversationData,
             CancellationToken cancellationToken);
     }
 }

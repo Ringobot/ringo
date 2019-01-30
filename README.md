@@ -216,3 +216,22 @@ Emojipedia: <https://emojipedia.org/people/>
 ## Bot builder storage (C#)
 
 <https://docs.microsoft.com/en-us/azure/bot-service/bot-builder-howto-v4-storage?view=azure-bot-service-4.0&tabs=csharp>
+
+## Cosmos DB
+
+At time of writing there was no Azure Table Storage nuget for .NET Standard. <https://docs.microsoft.com/en-us/azure/cosmos-db/table-storage-how-to-use-dotnet>
+
+Cosmos DB .NET Samples: <https://github.com/Azure/azure-cosmos-dotnet-v2/blob/f374cc601f4cf08d11c88f0c3fa7dcefaf7ecfe8/samples/code-samples/DocumentManagement/Program.cs#L211>
+
+Optimistic concurrency: <https://chapsas.com/understanding-optimistic-concurrency-in-cosmos-db/>
+
+### Cosmos DB .NET Core SDK
+
+<https://docs.microsoft.com/en-us/azure/cosmos-db/sql-api-dotnetcore-get-started#CreateDoc>
+
+### TTL
+
+<https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live>
+
+<https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-time-to-live#set-time-to-live-on-an-item>
+

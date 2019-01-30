@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 
-namespace Ringo.Bot.Net
+namespace RingoBotNet
 {
     /// <summary>
     /// Simple opinionated logger.

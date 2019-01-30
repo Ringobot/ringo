@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Bot.Schema;
 
-namespace Ringo.Bot.Net.State
+namespace RingoBotNet.State
 {
     /// <summary>
     /// Conversation state is available in any turn in a specific conversation, regardless of user (i.e. group conversations).

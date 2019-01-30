@@ -11,10 +11,10 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using Ringo.Bot.Net.Services;
-using Ringo.Bot.Net.State;
+using RingoBotNet.Services;
+using RingoBotNet.State;
 
-namespace Ringo.Bot.Net
+namespace RingoBotNet
 {
     /// <summary>
     /// Represents a bot that processes incoming activities.

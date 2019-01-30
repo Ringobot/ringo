@@ -8,10 +8,10 @@ using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using Ringo.Bot.Net.Services;
-using Ringo.Bot.Net.State;
+using RingoBotNet.Services;
+using RingoBotNet.State;
 
-namespace Ringo.Bot.Net
+namespace RingoBotNet
 {
     public class RingoBot3 : IBot
     {
@@ -22,13 +22,17 @@ namespace Ringo.Bot.Net
         private static readonly Regex _magicCodeRegex = new Regex("^[0-9]{6}$");
         private readonly ILogger _logger;
         private readonly IRingoService _ringoService;
-        private readonly RingoBotAccessors _stateAccessors;
+        //private readonly RingoBotAccessors _stateAccessors;
 
-        public RingoBot3(ILogger<RingoBot3> logger, IRingoService ringoService, RingoBotAccessors accessors)
+        public RingoBot3(
+            ILogger<RingoBot3> logger, 
+            IRingoService ringoService
+            //RingoBotAccessors accessors
+            )
         {
             _logger = logger;
             _ringoService = ringoService;
-            _stateAccessors = accessors ?? throw new ArgumentNullException(nameof(accessors));
+            //_stateAccessors = accessors ?? throw new ArgumentNullException(nameof(accessors));
         }
 
         public async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken = default(CancellationToken))
@@ -36,9 +40,9 @@ namespace Ringo.Bot.Net
             Trace.WriteLine($"{turnContext.Activity.Type}:{turnContext.Activity.Text}", "RingoBot3");
             _logger.LogDebug($"{turnContext.Activity.Type}:{turnContext.Activity.Text}");
 
-            // Get State
-            var userProfile = await _stateAccessors.UserProfileAccessor.GetAsync(turnContext, () => new UserProfile());
-            var conversationData = await _stateAccessors.ConversationDataAccessor.GetAsync(turnContext, () => new ConversationData());
+            //// Get State
+            //var userProfile = await _stateAccessors.UserProfileAccessor.GetAsync(turnContext, () => new UserProfile());
+            //var conversationData = await _stateAccessors.ConversationDataAccessor.GetAsync(turnContext, () => new ConversationData());
 
             switch (turnContext.Activity.Type)
             {
@@ -98,11 +102,7 @@ namespace Ringo.Bot.Net
                         }
                         else
                         {
-                            token2 = await _ringoService.Authorize(
-                                turnContext,
-                                FromUserName(turnContext),
-                                conversationData,
-                                cancellationToken);
+                            token2 = await _ringoService.Authorize(turnContext, cancellationToken);
 
                             if (token2 == null)
                             {
@@ -111,7 +111,7 @@ namespace Ringo.Bot.Net
                             }
                         }
 
-                        conversationData.ConversationUserTokens[FromUserName(turnContext)] = token2;
+                        //conversationData.ConversationUserTokens[FromUserName(turnContext)] = token2;
 
                         await _ringoService.PlayPlaylist(
                             turnContext,
@@ -183,11 +183,11 @@ namespace Ringo.Bot.Net
                     break;
             }
 
-            // Commit state
-            await _stateAccessors.UserProfileAccessor.SetAsync(turnContext, userProfile);
-            await _stateAccessors.UserState.SaveChangesAsync(turnContext);
-            await _stateAccessors.ConversationDataAccessor.SetAsync(turnContext, conversationData);
-            await _stateAccessors.ConversationState.SaveChangesAsync(turnContext);
+            //// Commit state
+            //await _stateAccessors.UserProfileAccessor.SetAsync(turnContext, userProfile);
+            //await _stateAccessors.UserState.SaveChangesAsync(turnContext);
+            //await _stateAccessors.ConversationDataAccessor.SetAsync(turnContext, conversationData);
+            //await _stateAccessors.ConversationState.SaveChangesAsync(turnContext);
 
         }
 

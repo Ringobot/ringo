@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Ringo.Bot.Net
+namespace RingoBotNet
 {
     public class RingoBot2
     {

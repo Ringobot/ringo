@@ -2,7 +2,7 @@
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 
-namespace Ringo.Bot.Net.State
+namespace RingoBotNet.State
 {
     /// <summary>
     /// This is a helper class to support the state accessors for the bot.

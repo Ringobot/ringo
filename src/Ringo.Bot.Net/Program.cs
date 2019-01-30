@@ -5,7 +5,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Ringo.Bot.Net
+namespace RingoBotNet
 {
     public class Program
     {
