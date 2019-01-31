@@ -1,21 +1,22 @@
-﻿using System;
+﻿using Microsoft.Bot.Builder;
+using Microsoft.Bot.Schema;
+using Microsoft.Extensions.Configuration;
+using RingoBotNet.Data;
+using RingoBotNet.Models;
+using RingoBotNet.State;
+using SpotifyApi.NetCore;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Bot.Builder;
-using Microsoft.Bot.Schema;
-using Microsoft.Extensions.Configuration;
-using RingoBotNet.Data;
-using RingoBotNet.State;
-using SpotifyApi.NetCore;
 
 namespace RingoBotNet.Services
 {
     public class RingoService : IRingoService
     {
-        public const string RingoBotStatePrefix = "ringo01";
+        public const string RingoBotStatePrefix = "";
         public static readonly Regex RingoBotStateRegex = new Regex($"^{RingoBotStatePrefix}[a-f0-9]{{32}}$");
 
         private readonly HttpClient _http;
@@ -140,23 +141,24 @@ namespace RingoBotNet.Services
             ITurnContext turnContext,
             CancellationToken cancellationToken)
         {
-            BearerAccessRefreshToken token = await _userData.GetUserAccessToken(
-                turnContext.Activity.ChannelId, 
+            Models.BearerAccessToken token = await _userData.GetUserAccessToken(
+                turnContext.Activity.ChannelId,
                 turnContext.Activity.From.Id);
 
             if (
                 token != null
                 && token.Expires.HasValue
-                && token.Expires > DateTime.UtcNow)
+                && token.Expires > DateTime.UtcNow
+                && token.Validated)
             {
                 return new TokenResponse(
-                    connectionName: null, 
+                    connectionName: null,
                     token: token.AccessToken,
                     expiration: ToIso8601(DateTime.UtcNow));
             }
 
             // create state token
-            string state = $"{RingoBotStatePrefix}{Guid.NewGuid().ToString("N")}";
+            string state = $"{RingoBotStatePrefix}{Guid.NewGuid().ToString("N")}".ToLower();
 
             // validate state token
             if (!RingoBotStateRegex.IsMatch(state)) throw new InvalidOperationException("Generated state token does not match RingoBotStateRegex");
@@ -171,20 +173,14 @@ namespace RingoBotNet.Services
                 _config["SpotifyApiClientId"],
                 _config["SpotifyAuthRedirectUri"]);
 
-            var message = turnContext.Activity;
-
-            if (message.Attachments == null)
-            {
-                message.Attachments = new List<Attachment>();
-            }
-
-            message.Attachments.Add(new Attachment
-            {
-                ContentType = SigninCard.ContentType,
-                Content = new SigninCard
+            var message = MessageFactory.Attachment(
+                new Attachment
                 {
-                    Text = "Authorize Ringo bot to use your Spotify account",
-                    Buttons = new[]
+                    ContentType = HeroCard.ContentType,
+                    Content = new HeroCard
+                    {
+                        Text = "Authorize Ringo bot to use your Spotify account",
+                        Buttons = new[]
                     {
                         new CardAction
                         {
@@ -194,11 +190,35 @@ namespace RingoBotNet.Services
                             Type = ActionTypes.OpenUrl,
                         },
                     },
+                    },
                 },
-            });
+                text: "To play music, Ringo needs to be authorized to use your Spotify Account.");
 
             await turnContext.SendActivityAsync(message, cancellationToken);
             return null;
+        }
+
+        public async Task CreateChannelUserIfNotExists(string channelId, string userId, string username)
+        {
+            await _userData.CreateChannelUserIfNotExists(channelId, userId, username);
+        }
+
+        public async Task ValidateMagicNumber(ITurnContext turnContext, string text, CancellationToken cancellationToken)
+        {
+            string channelUserId = await _userStateData.GetChannelUserIdFromStateToken(text);
+            if (channelUserId == ChannelUser.EncodeId(turnContext.Activity.ChannelId, turnContext.Activity.From.Id))
+            {
+                await turnContext.SendActivityAsync(
+                    $"Magic Number OK. Ringo is authorized to play Spotify. Ready to rock! 😎",
+                    cancellationToken: cancellationToken);
+                await _userData.SetTokenValidated(turnContext.Activity.ChannelId, turnContext.Activity.From.Id);
+            }
+            else
+            {
+                await turnContext.SendActivityAsync(
+                    $"Magic Number is invalid or has expired. Please try again 🤔",
+                    cancellationToken: cancellationToken);
+            }
         }
 
         private static DateTime ToDateTimeFromIso8601(string iso8601)

@@ -1,7 +1,6 @@
 ﻿using Microsoft.Azure.Documents;
 using Microsoft.Extensions.Configuration;
 using RingoBotNet.Models;
-using SpotifyApi.NetCore;
 using System;
 using System.Threading.Tasks;
 
@@ -16,8 +15,8 @@ namespace RingoBotNet.Data
             string collectionName) : base(configuration, documentClient, databaseName, collectionName)
         { }
 
-        public async Task<BearerAccessRefreshToken> GetUserAccessToken(string channelId, string userId)
-            => (await GetChannelUser(channelId, userId))?.BearerAccessRefreshToken;
+        public async Task<BearerAccessToken> GetUserAccessToken(string channelId, string userId)
+            => (await GetChannelUser(channelId, userId))?.SpotifyAccessToken;
 
         private async Task<ChannelUser> GetChannelUser(string channelId, string userId)
         {
@@ -30,12 +29,27 @@ namespace RingoBotNet.Data
             return await Read<ChannelUser>(channelUserId);
         }
 
-        public async Task SaveUserAccessToken(string channelUserId, BearerAccessRefreshToken token)
+        public async Task SaveUserAccessToken(string channelUserId, BearerAccessToken token)
         {
             ChannelUser channelUser = await GetChannelUser(channelUserId);
             if (channelUser == null) throw new InvalidOperationException($"ChannelUser not found. Id = {channelUserId}");
-            channelUser.BearerAccessRefreshToken = token;
+            channelUser.SpotifyAccessToken = token;
             // optimistic concurrency... :\
+            await Replace(channelUser);
+        }
+
+        public async Task CreateChannelUserIfNotExists(string channelId, string userId, string username)
+        {
+            var channelUser = await GetChannelUser(channelId, userId);
+            if (channelUser == null) await Create(new ChannelUser(channelId, userId, username));
+        }
+
+        public async Task SetTokenValidated(string channelId, string userId)
+        {
+            // looking forward to Patch!
+            ChannelUser channelUser = await GetChannelUser(channelId, userId);
+            if (channelUser.SpotifyAccessToken == null) throw new InvalidOperationException("Cannot validate a null SpotifyAccessToken");
+            channelUser.SpotifyAccessToken.Validated = true;
             await Replace(channelUser);
         }
     }

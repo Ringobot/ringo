@@ -16,5 +16,8 @@ namespace RingoBotNet.Services
         Task<TokenResponse> Authorize(
             ITurnContext turnContext,
             CancellationToken cancellationToken);
+
+        Task CreateChannelUserIfNotExists(string channelId, string userId, string username);
+        Task ValidateMagicNumber(ITurnContext turnContext, string text, CancellationToken cancellationToken);
     }
 }

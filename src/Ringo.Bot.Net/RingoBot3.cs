@@ -58,7 +58,7 @@ namespace RingoBotNet
                     string query = text.Remove(0, command.Length);
 
                     // login
-                    if (command == "login")
+                    if (USE_BOT_BUILDER_AUTH && command == "login")
                     {
                         var adapter = (BotFrameworkAdapter)turnContext.Adapter;
                         var token2 = await adapter.GetUserTokenAsync(turnContext, ConnectionName, null, cancellationToken);
@@ -77,7 +77,7 @@ namespace RingoBotNet
                         break;
                     }
 
-                    if (command == "logout")
+                    if (USE_BOT_BUILDER_AUTH && command == "logout")
                     {
                         var adapter = (BotFrameworkAdapter)turnContext.Adapter;
                         await adapter.SignOutUserAsync(turnContext, ConnectionName, cancellationToken: cancellationToken);
@@ -103,12 +103,7 @@ namespace RingoBotNet
                         else
                         {
                             token2 = await _ringoService.Authorize(turnContext, cancellationToken);
-
-                            if (token2 == null)
-                            {
-                                await turnContext.SendActivityAsync("Waiting for Spotify Authorization (check your browser)");
-                                break;
-                            }
+                            if (token2 == null) break; // waiting for auth
                         }
 
                         //conversationData.ConversationUserTokens[FromUserName(turnContext)] = token2;
@@ -123,7 +118,13 @@ namespace RingoBotNet
                     }
 
                     // magic number
-                    if (_magicCodeRegex.IsMatch(text))
+                    if (!USE_BOT_BUILDER_AUTH && RingoService.RingoBotStateRegex.IsMatch(text))
+                    {
+                        await _ringoService.ValidateMagicNumber(turnContext, text, cancellationToken);
+                        break;
+                    }
+
+                    if (USE_BOT_BUILDER_AUTH && _magicCodeRegex.IsMatch(text))
                     {
                         var adapter = (BotFrameworkAdapter)turnContext.Adapter;
                         await turnContext.SendActivityAsync("Checking your magic number...");
@@ -158,6 +159,7 @@ namespace RingoBotNet
                     if (turnContext.Activity.MembersAdded != null)
                     {
                         await SendWelcomeMessageAsync(turnContext, cancellationToken);
+                        await CreateChannelUsers(turnContext, cancellationToken);
                     }
 
                     break;
@@ -189,6 +191,21 @@ namespace RingoBotNet
             //await _stateAccessors.ConversationDataAccessor.SetAsync(turnContext, conversationData);
             //await _stateAccessors.ConversationState.SaveChangesAsync(turnContext);
 
+        }
+
+        private async Task CreateChannelUsers(ITurnContext turnContext, CancellationToken cancellationToken)
+        {
+            foreach (var member in turnContext.Activity.MembersAdded)
+            {
+                if (member.Id != turnContext.Activity.Recipient.Id)
+                {
+                    await _ringoService.CreateChannelUserIfNotExists(
+                        turnContext.Activity.ChannelId,
+                        member.Id,
+                        member.Name
+                        );
+                }
+            }
         }
 
         private static string FromUserName(ITurnContext turnContext) => turnContext.Activity.From.Name.ToLower();

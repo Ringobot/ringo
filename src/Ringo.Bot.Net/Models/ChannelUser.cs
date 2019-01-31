@@ -1,7 +1,5 @@
-﻿using Microsoft.Azure.Documents;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using RingoBotNet.Helpers;
-using SpotifyApi.NetCore;
 using System;
 
 namespace RingoBotNet.Models
@@ -11,17 +9,18 @@ namespace RingoBotNet.Models
         public ChannelUser() { }
 
         public ChannelUser(
-            string channelId, 
-            string userId, 
-            string username, 
-            BearerAccessRefreshToken bearerAccessRefreshToken = null)
+            string channelId,
+            string userId,
+            string username,
+            BearerAccessToken spotifyAccessToken = null)
         {
             Id = EncodeId(channelId, userId);
-            PartitionKey = new PartitionKey(Id);
+            PartitionKey = Id;
             UserId = userId;
             Username = username;
             ChannelId = channelId;
-            BearerAccessRefreshToken = bearerAccessRefreshToken;
+            SpotifyAccessToken = spotifyAccessToken;
+            CreatedDate = DateTime.UtcNow;
         }
 
         /// <summary>
@@ -39,7 +38,10 @@ namespace RingoBotNet.Models
         /// </summary>
         public string ChannelId { get; set; }
 
-        public BearerAccessRefreshToken BearerAccessRefreshToken { get; set; }
+        public BearerAccessToken SpotifyAccessToken { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public DateTime? CreatedDate { get; set; }
 
         public static string EncodeId(string channelId, string userId)
         {
@@ -55,5 +57,21 @@ namespace RingoBotNet.Models
             if (Id != EncodeId(ChannelId, UserId))
                 throw new InvariantException("Id must be a hash of ChannelId and UserId. See `EncodeId`.");
         }
+    }
+
+    public class BearerAccessToken
+    {
+        public string RefreshToken { get; set; }
+
+        public string AccessToken { get; set; }
+
+        public string Scope { get; set; }
+
+        public DateTime? Expires { get; set; }
+
+        /// <summary>
+        /// True when a User has validated the Token using a Magic Number (for example).
+        /// </summary>
+        public bool Validated { get; set; }
     }
 }

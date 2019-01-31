@@ -33,7 +33,7 @@ namespace RingoBotNet.Data
             return await _client.CreateDocumentAsync(
                 _collectionUri, 
                 document, 
-                options: new RequestOptions { PartitionKey = document.PartitionKey },
+                options: new RequestOptions { PartitionKey = new PartitionKey(document.PartitionKey) },
                 disableAutomaticIdGeneration: true) as T;
         }
 
@@ -44,7 +44,7 @@ namespace RingoBotNet.Data
             await _client.UpsertDocumentAsync(
                 _collectionUri, 
                 document, 
-                options: new RequestOptions { PartitionKey = document.PartitionKey }, 
+                options: new RequestOptions { PartitionKey = new PartitionKey(document.PartitionKey) }, 
                 disableAutomaticIdGeneration: true);
         }
 
@@ -53,9 +53,9 @@ namespace RingoBotNet.Data
             document.EnforceInvariants();
             // last write wins
             await _client.ReplaceDocumentAsync(
-                _collectionUri,
+                UriFactory.CreateDocumentUri(_databaseName, _collectionName, document.Id),
                 document,
-                options: new RequestOptions { PartitionKey = document.PartitionKey });
+                options: new RequestOptions { PartitionKey = new PartitionKey(document.PartitionKey) });
         }
 
         /// <summary>
@@ -67,9 +67,26 @@ namespace RingoBotNet.Data
         /// <returns>The document as T</returns>
         protected async Task<T> Read<T>(string id, string partitionKey = null) where T:class
         {
-            return await _client.ReadDocumentAsync<T>(
-                           UriFactory.CreateDocumentUri(_databaseName, _collectionName, id),
-                           options: new RequestOptions { PartitionKey = new PartitionKey(partitionKey ?? id) }) as T;
+            try
+            {
+                DocumentResponse<T> documentResponse = await _client.ReadDocumentAsync<T>(
+                               UriFactory.CreateDocumentUri(_databaseName, _collectionName, id),
+                               options: new RequestOptions { PartitionKey = new PartitionKey(partitionKey ?? id) });
+                return documentResponse.Document;
+            }
+            catch (DocumentClientException ex)
+            {
+                if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    Logger.Error(ex.Message, ex, nameof(CosmosData));
+                    Logger.Information(
+                        $"Document not found. Returning null. id = \"{id}\" partition key = \"{partitionKey}\".", 
+                        nameof(CosmosData));
+                    return null;
+                }
+
+                throw;
+            }
         }
     }
 }

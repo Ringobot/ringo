@@ -11,7 +11,7 @@ namespace RingoBotNet.Models
         [JsonProperty(PropertyName = "id")]
         public string Id { get; set; }
 
-        public PartitionKey PartitionKey { get; set; }
+        public string PartitionKey { get; set; }
 
         public virtual void EnforceInvariants()
         {

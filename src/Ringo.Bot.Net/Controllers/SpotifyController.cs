@@ -50,18 +50,37 @@ namespace RingoBotNet.Controllers
             // get the userId from state
             string channelUserId = await _userStateData.GetChannelUserIdFromStateToken(state);
 
+            if (channelUserId == null)
+            {
+                return new ContentResult
+                {
+                    ContentType = "text/html",
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Content = $"<html><body><p>This authorization request has expired or is invalid. Please try again.</p></body></html>"
+                };
+            }
+
             // Use the code to request a token
             BearerAccessRefreshToken token = await _userAccounts.RequestAccessRefreshToken(code);
 
-            await _userData.SaveUserAccessToken(channelUserId, token);
+            await _userData.SaveUserAccessToken(channelUserId, MapToBearerAccessToken(token));
 
             // return an HTML result with the state token to authorise the bot
             return new ContentResult
             {
                 ContentType = "text/html",
                 StatusCode = (int)HttpStatusCode.OK,
-                Content = $"<html><body><p>Copy this code into the chat window:<br/> <text>{state}</text></p></body></html>"
+                Content = $"<html><body style='font-family:Consolas'><p>Copy this code into the chat window:<br/><input style='width:300px' value='{state}'/></p></body></html>"
             };
         }
+
+        private Models.BearerAccessToken MapToBearerAccessToken(BearerAccessRefreshToken token) =>
+            new Models.BearerAccessToken
+            {
+                AccessToken = token.AccessToken,
+                Expires = token.Expires,
+                Scope = token.Scope,
+                RefreshToken = token.RefreshToken
+            };
     }
 }

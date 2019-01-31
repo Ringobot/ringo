@@ -11,6 +11,7 @@ namespace RingoBotNet.Models
         {
             ChannelUserId = channelUserId;
             Id = State = state;
+            PartitionKey = Id;
             CreatedDate = DateTime.UtcNow;
         }
 
@@ -18,6 +19,7 @@ namespace RingoBotNet.Models
         {
             ChannelUserId = ChannelUser.EncodeId(channelId, userId);
             Id = State = state;
+            PartitionKey = Id;
             CreatedDate = DateTime.UtcNow;
         }
 

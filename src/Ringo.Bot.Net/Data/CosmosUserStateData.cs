@@ -28,14 +28,13 @@ namespace RingoBotNet.Data
 
         public async Task<string> GetChannelUserIdFromStateToken(string state)
         {
-            UserState userState = await _client.ReadDocumentAsync<UserState>(
-                UriFactory.CreateDocumentUri(_databaseName, _collectionName, state));
+            UserState userState = await Read<UserState>(state);
 
             // if no document, or state token is stale, return null
             if (userState == null || userState.CreatedDate < DateTime.UtcNow.AddMinutes(-30)) return null;
 
             // returns the entity Id
-            return userState.Id;
+            return userState.ChannelUserId;
         }
 
         /// <summary>

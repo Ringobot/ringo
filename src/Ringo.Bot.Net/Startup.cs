@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
@@ -76,9 +77,11 @@ namespace RingoBotNet
                 throw new FileNotFoundException($"The .bot configuration file was not found. botFilePath: {botFilePath}");
             }
             var botConfig = BotConfiguration.Load(botFilePath ?? @".\BotConfiguration.bot", secretKey);
-            
+
             // Creates a logger for the application to use.
-           // services.AddSingleton<ILogger>(_logger);
+            // services.AddSingleton<ILogger>(_logger);
+
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddBot<RingoBot3>(options =>
             {
@@ -131,7 +134,7 @@ namespace RingoBotNet
             services.AddSingleton<ISearchApi, SearchApi>();
             services.AddSingleton<IPlayerApi, PlayerApi>();
             services.AddSingleton<HttpClient, HttpClient>();
-            //services.AddSingleton<IUserAccountsService, UserAccountsService>();
+            services.AddSingleton<IUserAccountsService, UserAccountsService>();
 
             services.AddSingleton<IChannelUserData>(
                 (s) => new CosmosChannelUserData(
@@ -157,7 +160,10 @@ namespace RingoBotNet
             _loggerFactory = loggerFactory;
             SpotifyApi.NetCore.Logger.LoggerFactory = loggerFactory;
 
-            app.UseDefaultFiles()
+            if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
+
+            app.UseMvc()
+                .UseDefaultFiles()
                 .UseStaticFiles()
                 .UseBotFramework();
         }

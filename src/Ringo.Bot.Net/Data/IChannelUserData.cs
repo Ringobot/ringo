@@ -1,12 +1,16 @@
-﻿using System.Threading.Tasks;
-using SpotifyApi.NetCore;
+﻿using RingoBotNet.Models;
+using System.Threading.Tasks;
 
 namespace RingoBotNet.Data
 {
     public interface IChannelUserData
     {
-        Task SaveUserAccessToken(string channelUserId, BearerAccessRefreshToken token);
+        Task SaveUserAccessToken(string channelUserId, BearerAccessToken token);
 
-        Task<BearerAccessRefreshToken> GetUserAccessToken(string channelId, string userId);
+        Task<BearerAccessToken> GetUserAccessToken(string channelId, string userId);
+
+        Task CreateChannelUserIfNotExists(string channelId, string userId, string username);
+
+        Task SetTokenValidated(string channelId, string userId);
     }
 }
