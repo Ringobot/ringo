@@ -1,12 +1,13 @@
 ﻿using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using RingoBotNet.Data;
 using RingoBotNet.Models;
-using RingoBotNet.State;
 using SpotifyApi.NetCore;
+using SpotifyApi.NetCore.Helpers;
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -18,31 +19,38 @@ namespace RingoBotNet.Services
     {
         public const string RingoBotStatePrefix = "";
         public static readonly Regex RingoBotStateRegex = new Regex($"^{RingoBotStatePrefix}[a-f0-9]{{32}}$");
+        private static readonly Regex NonWordRegex = new Regex("\\W");
+        private static readonly Regex SpotifyPlaylistUrlRegex = new Regex("playlist\\/[a-zA-Z0-9]+");
 
         private readonly HttpClient _http;
-        private readonly ISearchApi _search;
+        private readonly IPlaylistsApi _playlists;
         private readonly IPlayerApi _player;
         private readonly IUserAccountsService _userAccounts;
         private readonly IConfiguration _config;
         private readonly IChannelUserData _userData;
         private readonly IUserStateData _userStateData;
+        //private readonly IStationHashcodeData _stationHashcodeData;
+        private readonly ILogger _logger;
 
         public RingoService(
             HttpClient httpClient,
-            ISearchApi search,
+            IPlaylistsApi playlists,
             IPlayerApi player,
-            //IUserAccountsService userAccounts,
+            IUserAccountsService userAccounts,
             IConfiguration configuration,
             IChannelUserData channelUserData,
-            IUserStateData userStateData)
+            IUserStateData userStateData,
+            ILogger<RingoService> logger
+            )
         {
             _http = httpClient;
-            _search = search;
+            _playlists = playlists;
             _player = player;
-            //_userAccounts = userAccounts;
+            _userAccounts = userAccounts;
             _config = configuration;
             _userData = channelUserData;
             _userStateData = userStateData;
+            _logger = logger;
         }
 
         public async Task PlayPlaylist(
@@ -51,65 +59,135 @@ namespace RingoBotNet.Services
             string accessToken,
             CancellationToken cancellationToken)
         {
-            // search for the Playlist
-            var results = await _search.Search(
-                searchText,
-                SpotifySearchTypes.Playlist,
-                accessToken: accessToken);
+            //TODO Model.Playlist
+            (string id, string name) playlist = (null, null);
+            string uriOrId = null;
 
-            // if none found, return
-            if (results.Playlists.Total == 0)
+            if (SpotifyUriHelper.SpotifyUserPlaylistUriRegEx.IsMatch(searchText) 
+                || SpotifyUriHelper.SpotifyUriRegEx.IsMatch(searchText))
             {
-                await turnContext.SendActivityAsync($"No playlists found!", cancellationToken: cancellationToken);
-                return;
+                // spotify:user:daniellarsennz:playlist:3dzMCDJTULeZ7IgbWvotSB
+                // spotify:playlist:3dzMCDJTULeZ7IgbWvotSB
+                uriOrId = searchText;
+            }
+            else if (SpotifyPlaylistUrlRegex.IsMatch(searchText))
+            {
+                // https://open.spotify.com/user/daniellarsennz/playlist/3dzMCDJTULeZ7IgbWvotSB?si=bm-3giiVS76AW5yXplr-pQ
+                MatchCollection matchesUri = SpotifyPlaylistUrlRegex.Matches(searchText);
+                if (matchesUri.Any()) uriOrId = matchesUri[0].Value.Split('/').Last();
             }
 
-            // Play the first playlist found
-            await turnContext.SendActivityAsync(
-                $"{results.Playlists.Total.ToString("N0")} playlists found.",
-                cancellationToken: cancellationToken);
+            if (uriOrId == null)
+            {
+                // search for the Playlist
+                var results = await _playlists.SearchPlaylists(
+                    searchText,
+                    accessToken: accessToken);
+
+                // if none found, return
+                if (results.Total > 0)
+                {
+                    playlist = (results.Items[0].Id, results.Items[0].Name);
+
+                    await turnContext.SendActivityAsync(
+                        $"{results.Total.ToString("N0")} playlists found.",
+                        cancellationToken: cancellationToken);
+                }
+            }
+            else
+            {
+                var playlistSimple = await _playlists.GetPlaylist(uriOrId);
+                if (playlistSimple != null) playlist = (playlistSimple.Id, playlistSimple.Name);
+            }
 
             try
             {
-                await _player.PlayPlaylist(results.Playlists.Items[0].Id, accessToken);
+                if (playlist.id == null)
+                {
+                    await turnContext.SendActivityAsync($"No playlists found!", cancellationToken: cancellationToken);
+                    return;
+                }
+
+                await _player.PlayPlaylist(playlist.id, accessToken);
                 await turnContext.SendActivityAsync(
-                    $"{turnContext.Activity.From.Name} is playing \"{results.Playlists.Items[0].Name}\"",
+                    $"{turnContext.Activity.From.Name} is playing \"{playlist.name}\"",
                     cancellationToken: cancellationToken);
             }
             catch (SpotifyApiErrorException ex)
             {
-                await turnContext.SendActivityAsync(ex.Message, cancellationToken: cancellationToken);
+                _logger.LogError(ex.Message);
+                await turnContext.SendActivityAsync($"{ex.Message} 🤔 Try opening Spotify on your device and playing a track for a few seconds. Then try typing `play {searchText}` again", cancellationToken: cancellationToken);
                 return;
             }
+
+            // generate hashcode
+            string hashcode = $"#{NonWordRegex.Replace(playlist.name, string.Empty)}";
+
+            // save the hashcode
+            //hashcode = _stationHashcodeData.CreateStationHashcode(ChannelUserId(turnContext), hashcode);
+
+            // save station
+            //var station = await _userData.CreateStation(
+            //    turnContext.Activity.ChannelId,
+            //    turnContext.Activity.From.Id,
+            //    turnContext.Activity.From.Name,
+            //    hashcode,
+            //    results.Playlists.Items[0]);
+
+            //TODO: user station.Hashcode
+            //await turnContext.SendActivityAsync(
+            //    $"Tell your friends to type `join {hashcode}` into Ringobot to join the party! 🥳",
+            //    cancellationToken: cancellationToken);
+
+            await turnContext.SendActivityAsync(
+                $"Tell your friends to type `join @{turnContext.Activity.From.Name}` into Ringobot to join the party! 🎉",
+                cancellationToken: cancellationToken);
         }
 
         public async Task JoinPlaylist(
             ITurnContext turnContext,
-            string joinUsername,
-            ConversationData conversationData,
+            string query,
             string token,
             CancellationToken cancellationToken)
         {
-            // is there a token for the playing user?
-            if (!conversationData.ConversationUserTokens.ContainsKey(joinUsername))
+            // user mentioned?
+            Mention mention = null;
+
+            if (turnContext.Activity.Entities != null)
+            {
+                mention = turnContext.Activity.Entities.FirstOrDefault(e => e.Type == "mention").GetAs<Mention>();
+            }
+
+            if (mention == null || mention.Mentioned == null)
             {
                 await turnContext.SendActivityAsync(
-                    $"Join failed. {joinUsername} has not asked Ringo to play anything.",
+                    $"I did not understand 🤔 Try mentioning another user, e.g. `join @username`",
                     cancellationToken: cancellationToken);
                 return;
             }
 
-            var playingUsertoken = conversationData.ConversationUserTokens[joinUsername];
+            //is there a token for the playing user?
+            Models.BearerAccessToken mentionedToken = await _userData.GetUserAccessToken(
+                turnContext.Activity.ChannelId,
+                mention.Mentioned.Id);
+
+            if (mentionedToken == null)
+            {
+                await turnContext.SendActivityAsync(
+                    $"Join failed. @{mention.Mentioned.Name} has not asked Ringo to play anything 🤨 They can type `play (playlist)` to get started.",
+                    cancellationToken: cancellationToken);
+                return;
+            }
 
             try
             {
                 // is the playing user playing anything?
-                var info = await _player.GetCurrentPlaybackInfo(playingUsertoken.Token);
+                var info = await _player.GetCurrentPlaybackInfo(mentionedToken.AccessToken);
 
                 if (!info.IsPlaying)
                 {
                     await turnContext.SendActivityAsync(
-                        $"Join failed. {joinUsername} is no longer playing anything.",
+                        $"Join failed. @{mention.Mentioned.Name} is no longer playing anything.",
                         cancellationToken: cancellationToken);
                     return;
                 }
@@ -118,7 +196,7 @@ namespace RingoBotNet.Services
                 if (info.Context.Type != "playlist")
                 {
                     await turnContext.SendActivityAsync(
-                        $"Join failed. {joinUsername} is no longer playing a Playlist.",
+                        $"Join failed. @{mention.Mentioned.Name} is no longer playing a Playlist.",
                         cancellationToken: cancellationToken);
                     return;
                 }
@@ -127,7 +205,7 @@ namespace RingoBotNet.Services
                 await _player.PlayPlaylistOffset(info.Context.Uri, info.Item.Id, accessToken: token, positionMs: info.ProgressMs);
 
                 await turnContext.SendActivityAsync(
-                    $"{turnContext.Activity.From.Name} has joined {joinUsername} playing \"{info.Item.Name}\"",
+                    $"@{turnContext.Activity.From.Name} has joined @{mention.Mentioned.Name} playing \"{info.Item.Name}\"! Tell your friends to type `join @{turnContext.Activity.From.Name}` into Ringobot to join the party! 🎉",
                     cancellationToken: cancellationToken);
             }
             catch (SpotifyApiErrorException ex)
@@ -145,23 +223,53 @@ namespace RingoBotNet.Services
                 turnContext.Activity.ChannelId,
                 turnContext.Activity.From.Id);
 
+            // token had not expired and has been validated - return the token
             if (
                 token != null
-                && token.Expires.HasValue
-                && token.Expires > DateTime.UtcNow
+                && !token.AccessTokenExpired
                 && token.Validated)
             {
-                return new TokenResponse(
-                    connectionName: null,
-                    token: token.AccessToken,
-                    expiration: ToIso8601(DateTime.UtcNow));
+                return MapToTokenResponse(token);
             }
+
+            // token has been validated, but has expired - refresh the token and return it
+            if (
+                token != null
+                && token.AccessTokenExpired
+                && token.Validated)
+            {
+                _logger.LogInformation($"Refreshing access token for channelUserId {ChannelUserId(turnContext)}");
+                var bearer = await _userAccounts.RefreshUserAccessToken(token.RefreshToken);
+
+                // map to BearerAccessToken
+                token.AccessToken = bearer.AccessToken;
+                token.Expires = bearer.Expires;
+
+                if (token.Scope != bearer.Scope)
+                {
+                    token.Scope = bearer.Scope;
+                    _logger.LogWarning($"token Scope has changed when being refreshed. channelID = {turnContext.Activity.ChannelId}, userId = {turnContext.Activity.From.Id}");
+                }
+
+                // save token
+                await _userData.SaveUserAccessToken(ChannelUserId(turnContext), token);
+
+                return MapToTokenResponse(token);
+            }
+
+            _logger.LogInformation($"Requesting Spotify Authorization for channelUserId {ChannelUserId(turnContext)}");
+
+            await CreateChannelUserIfNotExists(
+                turnContext.Activity.ChannelId,
+                turnContext.Activity.From.Id,
+                turnContext.Activity.From.Name);
 
             // create state token
             string state = $"{RingoBotStatePrefix}{Guid.NewGuid().ToString("N")}".ToLower();
 
             // validate state token
-            if (!RingoBotStateRegex.IsMatch(state)) throw new InvalidOperationException("Generated state token does not match RingoBotStateRegex");
+            if (!RingoBotStateRegex.IsMatch(state))
+                throw new InvalidOperationException("Generated state token does not match RingoBotStateRegex");
 
             // save state token
             await _userStateData.SaveUserStateToken(turnContext.Activity.ChannelId, turnContext.Activity.From.Id, state);
@@ -198,12 +306,12 @@ namespace RingoBotNet.Services
             return null;
         }
 
-        public async Task CreateChannelUserIfNotExists(string channelId, string userId, string username)
+        public async Task<ChannelUser> CreateChannelUserIfNotExists(string channelId, string userId, string username)
         {
-            await _userData.CreateChannelUserIfNotExists(channelId, userId, username);
+            return await _userData.CreateChannelUserIfNotExists(channelId, userId, username);
         }
 
-        public async Task ValidateMagicNumber(ITurnContext turnContext, string text, CancellationToken cancellationToken)
+        public async Task<TokenResponse> ValidateMagicNumber(ITurnContext turnContext, string text, CancellationToken cancellationToken)
         {
             string channelUserId = await _userStateData.GetChannelUserIdFromStateToken(text);
             if (channelUserId == ChannelUser.EncodeId(turnContext.Activity.ChannelId, turnContext.Activity.From.Id))
@@ -212,19 +320,31 @@ namespace RingoBotNet.Services
                     $"Magic Number OK. Ringo is authorized to play Spotify. Ready to rock! 😎",
                     cancellationToken: cancellationToken);
                 await _userData.SetTokenValidated(turnContext.Activity.ChannelId, turnContext.Activity.From.Id);
+                return MapToTokenResponse(await _userData.GetUserAccessToken(
+                    turnContext.Activity.ChannelId,
+                    turnContext.Activity.From.Id));
             }
-            else
-            {
-                await turnContext.SendActivityAsync(
-                    $"Magic Number is invalid or has expired. Please try again 🤔",
-                    cancellationToken: cancellationToken);
-            }
+
+            _logger.LogWarning($"Invalid Magic Number \"{text}\" for channelUserId {ChannelUserId(turnContext)}");
+            await turnContext.SendActivityAsync(
+                $"Magic Number is invalid or has expired. Please try again 🤔",
+                cancellationToken: cancellationToken);
+            return null;
         }
+
+        private static string ChannelUserId(ITurnContext context)
+            => ChannelUser.EncodeId(context.Activity.ChannelId, context.Activity.From.Id);
 
         private static DateTime ToDateTimeFromIso8601(string iso8601)
             => DateTime.Parse(iso8601, null, System.Globalization.DateTimeStyles.RoundtripKind);
 
-        private static string ToIso8601(DateTime dateTime)
-            => dateTime.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
+        private static string ToIso8601(DateTime? dateTime)
+            => dateTime.HasValue ? dateTime.Value.ToString("s", System.Globalization.CultureInfo.InvariantCulture) : null;
+
+        private static TokenResponse MapToTokenResponse(Models.BearerAccessToken token)
+            => new TokenResponse(
+                    connectionName: null,
+                    token: token.AccessToken,
+                    expiration: ToIso8601(token.Expires));
     }
 }

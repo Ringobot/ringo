@@ -54,5 +54,16 @@ namespace RingoBotNet.Data
         /// <returns>The created UserState document</returns>
         public async Task<UserState> SaveUserStateToken(string channelId, string userId, string state)
             => await Create(new UserState(channelId, userId, state));
+
+        public Task<Station> CreateStation(
+            string channelId,
+            string userId,
+            string username,
+            string hashcode,
+            PlaylistSimplified playlistSimplified)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

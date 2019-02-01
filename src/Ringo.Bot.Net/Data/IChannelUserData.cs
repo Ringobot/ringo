@@ -9,8 +9,15 @@ namespace RingoBotNet.Data
 
         Task<BearerAccessToken> GetUserAccessToken(string channelId, string userId);
 
-        Task CreateChannelUserIfNotExists(string channelId, string userId, string username);
+        Task<ChannelUser> CreateChannelUserIfNotExists(string channelId, string userId, string username);
 
         Task SetTokenValidated(string channelId, string userId);
+
+        Task<Station> CreateStation(
+            string channelId,
+            string userId,
+            string username,
+            string hashcode,
+            SpotifyApi.NetCore.PlaylistSimplified playlistSimplified);
     }
 }

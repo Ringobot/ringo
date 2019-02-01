@@ -131,10 +131,11 @@ namespace RingoBotNet
             });
 
             services.AddSingleton<IRingoService, RingoService>();
-            services.AddSingleton<ISearchApi, SearchApi>();
+            services.AddSingleton<IPlaylistsApi, PlaylistsApi>();
             services.AddSingleton<IPlayerApi, PlayerApi>();
             services.AddSingleton<HttpClient, HttpClient>();
             services.AddSingleton<IUserAccountsService, UserAccountsService>();
+            services.AddSingleton<IAccountsService, AccountsService>();
 
             services.AddSingleton<IChannelUserData>(
                 (s) => new CosmosChannelUserData(

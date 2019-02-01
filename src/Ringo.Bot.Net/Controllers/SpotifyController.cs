@@ -45,6 +45,7 @@ namespace RingoBotNet.Controllers
             if (error != null) throw new SpotifyApiErrorException(error);
 
             // validate state
+            if (string.IsNullOrEmpty(state)) throw new ArgumentException("Invalid State Argument", nameof(state));
             if (!RingoService.RingoBotStateRegex.IsMatch(state)) throw new ArgumentException("Invalid State Argument", nameof(state));
 
             // get the userId from state

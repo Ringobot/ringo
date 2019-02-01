@@ -7,6 +7,6 @@ namespace RingoBotNet.State
     /// </summary>
     public class UserProfile
     {
-        public DateTime FooBar { get; set; }
+        public (string command, string query) ResumeAfterAuthorizationWith { get; set; }
     }
 }

@@ -225,6 +225,8 @@ Cosmos DB .NET Samples: <https://github.com/Azure/azure-cosmos-dotnet-v2/blob/f3
 
 Optimistic concurrency: <https://chapsas.com/understanding-optimistic-concurrency-in-cosmos-db/>
 
+Read Azure DocumentDB document that might not exist: <https://stackoverflow.com/a/35488563/610731>
+
 ### Cosmos DB .NET Core SDK
 
 <https://docs.microsoft.com/en-us/azure/cosmos-db/sql-api-dotnetcore-get-started#CreateDoc>

@@ -38,10 +38,11 @@ namespace RingoBotNet.Data
             await Replace(channelUser);
         }
 
-        public async Task CreateChannelUserIfNotExists(string channelId, string userId, string username)
+        public async Task<ChannelUser> CreateChannelUserIfNotExists(string channelId, string userId, string username)
         {
             var channelUser = await GetChannelUser(channelId, userId);
-            if (channelUser == null) await Create(new ChannelUser(channelId, userId, username));
+            if (channelUser == null) return await Create(new ChannelUser(channelId, userId, username));
+            return channelUser;
         }
 
         public async Task SetTokenValidated(string channelId, string userId)
@@ -51,6 +52,17 @@ namespace RingoBotNet.Data
             if (channelUser.SpotifyAccessToken == null) throw new InvalidOperationException("Cannot validate a null SpotifyAccessToken");
             channelUser.SpotifyAccessToken.Validated = true;
             await Replace(channelUser);
+        }
+
+        public async Task<Station> CreateStation(
+            string channelId,
+            string userId,
+            string username,
+            string hashcode,
+            SpotifyApi.NetCore.PlaylistSimplified playlistSimplified)
+        {
+            //TODO
+            return null;
         }
     }
 }

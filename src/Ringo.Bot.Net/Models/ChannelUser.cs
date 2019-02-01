@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using RingoBotNet.Helpers;
 using System;
+using System.Linq;
 
 namespace RingoBotNet.Models
 {
@@ -40,6 +41,11 @@ namespace RingoBotNet.Models
 
         public BearerAccessToken SpotifyAccessToken { get; set; }
 
+        public Station[] Stations { get; set; }
+
+        [JsonIgnore]
+        public Station CurrentStation { get => Stations.FirstOrDefault(s => s.IsActive); }
+
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public DateTime? CreatedDate { get; set; }
 
@@ -73,5 +79,8 @@ namespace RingoBotNet.Models
         /// True when a User has validated the Token using a Magic Number (for example).
         /// </summary>
         public bool Validated { get; set; }
+
+        [JsonIgnore]
+        public bool AccessTokenExpired { get => Expires.HasValue && Expires.Value < DateTime.UtcNow; }
     }
 }
