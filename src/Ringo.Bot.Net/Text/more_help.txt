@@ -1,0 +1,24 @@
+﻿**Start a station**
+
+```play (search term)            // Start playing the first playlist found by the search term, e.g.
+
+play Michael Jackson
+
+play (Spotify Playlist URI)   // Start playing a Spotify Playlist by its URI. Example:
+
+play spotify:user:daniellarsennz:playlist:3dzMCDJTULeZ7IgbWvotSB
+
+play (Spotify Playlist Link)  // Start playing a Spotify Playlist by its Link.```
+
+
+**Join a station**
+
+```join (@username)              // Start playing the Playlist that @username is playing, e.g.
+
+join @alice```
+
+**Other commands**
+
+```help                          // Read help message on how to use Ringo bot
+
+more help                     // Read this message```

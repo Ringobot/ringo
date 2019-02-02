@@ -7,6 +7,7 @@ using RingoBotNet.Models;
 using SpotifyApi.NetCore;
 using SpotifyApi.NetCore.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -61,20 +62,31 @@ namespace RingoBotNet.Services
         {
             //TODO Model.Playlist
             (string id, string name) playlist = (null, null);
+
             string uriOrId = null;
 
-            if (SpotifyUriHelper.SpotifyUserPlaylistUriRegEx.IsMatch(searchText) 
-                || SpotifyUriHelper.SpotifyUriRegEx.IsMatch(searchText))
+            if (uriOrId == null)
             {
-                // spotify:user:daniellarsennz:playlist:3dzMCDJTULeZ7IgbWvotSB
-                // spotify:playlist:3dzMCDJTULeZ7IgbWvotSB
-                uriOrId = searchText;
+                // spotify:user:daniellarsennz:playlist:5JOGypafQPEx0GkXyLb948
+                MatchCollection matchesUserUri = SpotifyUriHelper.SpotifyUserPlaylistUriRegEx.Matches(searchText);
+                if (matchesUserUri.Any()) uriOrId = matchesUserUri[0].Value;
             }
-            else if (SpotifyPlaylistUrlRegex.IsMatch(searchText))
+
+            if (uriOrId == null)
+            {
+                // spotify:playlist:5JOGypafQPEx0GkXyLb948
+                MatchCollection matchesUri = SpotifyUriHelper.SpotifyUriRegEx.Matches(searchText);
+                if (matchesUri.Any() && SpotifyUriHelper.SpotifyUriType(matchesUri[0].Value) == "playlist")
+                {
+                    uriOrId = matchesUri[0].Value;
+                }
+            }
+
+            if (uriOrId == null)
             {
                 // https://open.spotify.com/user/daniellarsennz/playlist/3dzMCDJTULeZ7IgbWvotSB?si=bm-3giiVS76AW5yXplr-pQ
-                MatchCollection matchesUri = SpotifyPlaylistUrlRegex.Matches(searchText);
-                if (matchesUri.Any()) uriOrId = matchesUri[0].Value.Split('/').Last();
+                MatchCollection matchesPlaylistUri = SpotifyPlaylistUrlRegex.Matches(searchText);
+                if (matchesPlaylistUri.Any()) uriOrId = matchesPlaylistUri[0].Value.Split('/').Last();
             }
 
             if (uriOrId == null)
@@ -140,7 +152,7 @@ namespace RingoBotNet.Services
             //    cancellationToken: cancellationToken);
 
             await turnContext.SendActivityAsync(
-                $"Tell your friends to type `join @{turnContext.Activity.From.Name}` into Ringobot to join the party! 🎉",
+                $"Tell your friends to type `\"{RingoHandleIfGroupChat(turnContext)}join @{turnContext.Activity.From.Name}\"` into Ringobot to join the party! 🎉",
                 cancellationToken: cancellationToken);
         }
 
@@ -155,13 +167,14 @@ namespace RingoBotNet.Services
 
             if (turnContext.Activity.Entities != null)
             {
-                mention = turnContext.Activity.Entities.FirstOrDefault(e => e.Type == "mention").GetAs<Mention>();
+                var mentions = turnContext.Activity.Entities.Where(e => e.Type == "mention").Select(e=> e.GetAs<Mention>());
+                mention = mentions.Where(m => m.Mentioned.Id != turnContext.Activity.Recipient.Id).FirstOrDefault();
             }
 
             if (mention == null || mention.Mentioned == null)
             {
                 await turnContext.SendActivityAsync(
-                    $"I did not understand 🤔 Try mentioning another user, e.g. `join @username`",
+                    $"I did not understand 🤔 Try mentioning another user, e.g. `\"{RingoHandleIfGroupChat(turnContext)}join @username\"`",
                     cancellationToken: cancellationToken);
                 return;
             }
@@ -174,7 +187,7 @@ namespace RingoBotNet.Services
             if (mentionedToken == null)
             {
                 await turnContext.SendActivityAsync(
-                    $"Join failed. @{mention.Mentioned.Name} has not asked Ringo to play anything 🤨 They can type `play (playlist)` to get started.",
+                    $"Join failed. @{mention.Mentioned.Name} has not asked Ringo to play anything 🤨 Type `\"{RingoHandleIfGroupChat(turnContext)}play (playlist name)\"` to get started.",
                     cancellationToken: cancellationToken);
                 return;
             }
@@ -187,7 +200,7 @@ namespace RingoBotNet.Services
                 if (!info.IsPlaying)
                 {
                     await turnContext.SendActivityAsync(
-                        $"Join failed. @{mention.Mentioned.Name} is no longer playing anything.",
+                        $"Join failed. @{mention.Mentioned.Name} is no longer playing anything. Type `\"{RingoHandleIfGroupChat(turnContext)}play (playlist name)\"` to get started.",
                         cancellationToken: cancellationToken);
                     return;
                 }
@@ -204,8 +217,9 @@ namespace RingoBotNet.Services
                 // play from offset
                 await _player.PlayPlaylistOffset(info.Context.Uri, info.Item.Id, accessToken: token, positionMs: info.ProgressMs);
 
+                // TODO: info.Item.Name is current Item name, not Playlist name
                 await turnContext.SendActivityAsync(
-                    $"@{turnContext.Activity.From.Name} has joined @{mention.Mentioned.Name} playing \"{info.Item.Name}\"! Tell your friends to type `join @{turnContext.Activity.From.Name}` into Ringobot to join the party! 🎉",
+                    $"@{turnContext.Activity.From.Name} has joined @{mention.Mentioned.Name} playing \"{info.Item.Name}\"! Tell your friends to type `\"{RingoHandleIfGroupChat(turnContext)}join @{turnContext.Activity.From.Name}\"` into Ringobot to join the party! 🎉",
                     cancellationToken: cancellationToken);
             }
             catch (SpotifyApiErrorException ex)
@@ -331,6 +345,9 @@ namespace RingoBotNet.Services
                 cancellationToken: cancellationToken);
             return null;
         }
+
+        private static string RingoHandleIfGroupChat(ITurnContext turnContext) 
+            => (RingoBot3.IsGroup(turnContext) ? "@ringo " : string.Empty);
 
         private static string ChannelUserId(ITurnContext context)
             => ChannelUser.EncodeId(context.Activity.ChannelId, context.Activity.From.Id);

@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -24,22 +28,22 @@ namespace RingoBotNet
         private readonly ILogger _logger;
         private readonly IRingoService _ringoService;
         private readonly RingoBotAccessors _stateAccessors;
+        private readonly string _contentRoot;
 
         public RingoBot3(
             ILogger<RingoBot3> logger, 
             IRingoService ringoService,
-            RingoBotAccessors accessors
-            )
+            RingoBotAccessors accessors,
+            IConfiguration configuration)
         {
             _logger = logger;
             _ringoService = ringoService;
             _stateAccessors = accessors ?? throw new ArgumentNullException(nameof(accessors));
+            _contentRoot = configuration.GetValue<string>(WebHostDefaults.ContentRootKey);
         }
 
         public async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken = default(CancellationToken))
         {
-            _logger.LogDebug($"{turnContext.Activity.Type}:{turnContext.Activity.Text}");
-
             //// Get State
             var userProfile = await _stateAccessors.UserProfileAccessor.GetAsync(turnContext, () => new UserProfile());
             var conversationData = await _stateAccessors.ConversationDataAccessor.GetAsync(turnContext, () => new ConversationData());
@@ -47,6 +51,15 @@ namespace RingoBotNet
             switch (turnContext.Activity.Type)
             {
                 case ActivityTypes.Message:
+                    if (NotListening(turnContext))
+                    {
+                        _logger.LogDebug("Not listening. In a group chat and not mentioned.");
+                        break;
+                    }
+
+                    _logger.LogDebug($"{turnContext.Activity.Type}:{turnContext.Activity.Text}");
+                    _logger.LogDebug($"\"Activity\":{JsonConvert.SerializeObject(turnContext.Activity)}");
+
                     if (string.IsNullOrEmpty(turnContext.Activity.Text))
                     {
                         _logger.LogDebug("turnContext.Activity.Text is null or empty. Doing nothing.");
@@ -54,10 +67,16 @@ namespace RingoBotNet
                     }
 
                     string text = turnContext.Activity.Text.Trim();
+                    // remove the mention
+                    if (IsGroup(turnContext) && IsMentioned(turnContext))
+                    {
+                        text = text.Replace($"@{turnContext.Activity.Recipient.Name} ", string.Empty);
+                    }
+
                     string command = text.Split(' ')[0].ToLower();
                     string query = text.Remove(0, command.Length).Trim();
 
-                    _logger.LogDebug($"\"Activity\":{JsonConvert.SerializeObject(turnContext.Activity)}");
+                    _logger.LogDebug($"Parsed \"{turnContext.Activity.Text}\" as text = \"{text}\", command = \"{command}\", query = \"{query}\"");
 
                     // login
                     if (USE_BOT_BUILDER_AUTH && command == "login")
@@ -98,7 +117,7 @@ namespace RingoBotNet
 
                             if (token2 == null)
                             {
-                                await turnContext.SendActivityAsync("Can't play because I can't find a token. Try `login`.");
+                                await turnContext.SendActivityAsync("Can't play because I can't find a token. Try `\"login\"`.");
                                 break;
                             }
                         }
@@ -191,10 +210,25 @@ namespace RingoBotNet
                         break;
                     }
 
+                    if (command == "help")
+                    {
+                        
+                        await turnContext.SendActivityAsync(
+                            await File.ReadAllTextAsync($"{_contentRoot}/Text/help.txt", cancellationToken));
+                        break;
+                    }
+
+                    if (command == "more")
+                    {
+                        await turnContext.SendActivityAsync(
+                            await File.ReadAllTextAsync($"{_contentRoot}/Text/more_help.txt", cancellationToken));
+                        break;
+                    }
+
                     // any other text
                     if (text.Length > 0)
                     {
-                        await turnContext.SendActivityAsync($"You wrote \"{turnContext.Activity.Text}\" but I did not understand 🤔");
+                        await turnContext.SendActivityAsync($"You wrote \"{turnContext.Activity.Text}\" but I did not understand 🤔 try `\"help\"`.");
                         break;
                     }
 
@@ -241,6 +275,26 @@ namespace RingoBotNet
 
         }
 
+        private static bool NotListening(ITurnContext turnContext)
+        {
+            // if in a group and the bot is not mentioned, ignore this dialog
+            return (IsGroup(turnContext) && !IsMentioned(turnContext));
+        }
+
+        internal static bool IsGroup(ITurnContext turnContext)
+        {
+            return turnContext.Activity.Conversation != null 
+                && turnContext.Activity.Conversation.IsGroup.HasValue 
+                && turnContext.Activity.Conversation.IsGroup.Value;
+        }
+
+        private static bool IsMentioned(ITurnContext turnContext)
+        {
+            if (turnContext.Activity.Entities == null) return false;
+            var mentions = turnContext.Activity.Entities.Where(e => e.Type == "mention").Select(e=>e.GetAs<Mention>());
+            return mentions.Any(m => m.Mentioned.Id == turnContext.Activity.Recipient.Id);
+        }
+
         private async Task CreateChannelUsers(ITurnContext turnContext, CancellationToken cancellationToken)
         {
             foreach (var member in turnContext.Activity.MembersAdded)
@@ -265,7 +319,7 @@ namespace RingoBotNet
                 if (member.Id != turnContext.Activity.Recipient.Id)
                 {
                     await turnContext.SendActivityAsync(
-                        $"Hi {member.Name}, I'm Ringo! Try `play (playlist name)` to begin.",
+                        $"Hi {member.Name}, I'm Ringo! Try `\"play (playlist name)\"` to begin. Or type `\"help\"`.",
                         cancellationToken: cancellationToken);
                 }
             }

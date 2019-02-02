@@ -1,0 +1,25 @@
+﻿Ringo is a bot you use to listen to music with friends, no matter where they are on the planet. You and your friends will each need a Spotify Premium account, and the Spotify App open and active (used recently).
+
+**Quick start**
+
+```play (Playlist name)          // Start playing a Playlist.
+
+join (@username)              // Start playing the Playlist that (@username) is playing.```
+
+**Getting started**
+
+To get started, ask Ringo to play a playlist. For example:
+
+```play Michael Jackson
+
+@ringo play Michael Jackson     // If you are in a group channel, you will need to @ringo```
+
+The first time you play, Ringo will ask you to Authorize Spotify. Follow the instructions carefully until Spotify starts playing the playlist. Next, message a friend to join you so that they can listen too! They ask Ringo bot to join in by typing:
+
+```join @your_username
+
+@ringo join @your_username      // If you are in a group channel, you will need to @ringo```
+
+Once they have authorized Spotify, their Spotify app will start playing music in perfect sync with you!
+
+Type **more help** for more commands and tricks.

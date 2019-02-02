@@ -161,6 +161,8 @@ Spotify Developer: <https://developer.spotify.com/web-api/console/get-search-ite
 
 Authorisation guide: <https://beta.developer.spotify.com/documentation/general/guides/authorization-guide/#authorization-code-flow>
 
+Spotify URIs and IDs: <https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids>
+
 ### Typescript
 
 Downlevel Async Functions: <https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-1.html>

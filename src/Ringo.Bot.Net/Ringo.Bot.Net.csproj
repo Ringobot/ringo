@@ -9,7 +9,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Text\help.txt" />
+    <None Remove="Text\more_help.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="BotConfiguration.bot">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Text\help.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Text\more_help.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
