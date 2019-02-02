@@ -197,7 +197,7 @@ namespace RingoBotNet.Services
                 // is the playing user playing anything?
                 var info = await _player.GetCurrentPlaybackInfo(mentionedToken.AccessToken);
 
-                if (!info.IsPlaying)
+                if (info == null || !info.IsPlaying)
                 {
                     await turnContext.SendActivityAsync(
                         $"Join failed. @{mention.Mentioned.Name} is no longer playing anything. Type `\"{RingoHandleIfGroupChat(turnContext)}play (playlist name)\"` to get started.",
