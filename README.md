@@ -161,6 +161,8 @@ Spotify Developer: <https://developer.spotify.com/web-api/console/get-search-ite
 
 Authorisation guide: <https://beta.developer.spotify.com/documentation/general/guides/authorization-guide/#authorization-code-flow>
 
+Spotify URIs and IDs: <https://developer.spotify.com/documentation/web-api/#spotify-uris-and-ids>
+
 ### Typescript
 
 Downlevel Async Functions: <https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-1.html>
@@ -206,3 +208,34 @@ How to track auth users: <https://github.com/Microsoft/ApplicationInsights-node.
 ### More Links
 
 Emojipedia: <https://emojipedia.org/people/>
+
+## Logging
+
+<https://stackify.com/net-core-loggerfactory-use-correctly/>
+
+<https://www.blinkingcaret.com/2018/02/14/net-core-console-logging/>
+
+## Bot builder storage (C#)
+
+<https://docs.microsoft.com/en-us/azure/bot-service/bot-builder-howto-v4-storage?view=azure-bot-service-4.0&tabs=csharp>
+
+## Cosmos DB
+
+At time of writing there was no Azure Table Storage nuget for .NET Standard. <https://docs.microsoft.com/en-us/azure/cosmos-db/table-storage-how-to-use-dotnet>
+
+Cosmos DB .NET Samples: <https://github.com/Azure/azure-cosmos-dotnet-v2/blob/f374cc601f4cf08d11c88f0c3fa7dcefaf7ecfe8/samples/code-samples/DocumentManagement/Program.cs#L211>
+
+Optimistic concurrency: <https://chapsas.com/understanding-optimistic-concurrency-in-cosmos-db/>
+
+Read Azure DocumentDB document that might not exist: <https://stackoverflow.com/a/35488563/610731>
+
+### Cosmos DB .NET Core SDK
+
+<https://docs.microsoft.com/en-us/azure/cosmos-db/sql-api-dotnetcore-get-started#CreateDoc>
+
+### TTL
+
+<https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live>
+
+<https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-time-to-live#set-time-to-live-on-an-item>
+

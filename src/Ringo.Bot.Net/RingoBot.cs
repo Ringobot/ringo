@@ -1,0 +1,436 @@
+﻿//// Copyright (c) Microsoft Corporation. All rights reserved.
+//// Licensed under the MIT License.
+//using System;
+//using System.Collections.Generic;
+//using System.Globalization;
+//using System.Text.RegularExpressions;
+//using System.Threading;
+//using System.Threading.Tasks;
+//using Microsoft.Bot.Builder;
+//using Microsoft.Bot.Builder.Dialogs;
+//using Microsoft.Bot.Schema;
+//using Microsoft.Extensions.Logging;
+//using Newtonsoft.Json.Linq;
+//using RingoBotNet.Services;
+//using RingoBotNet.State;
+
+//namespace RingoBotNet
+//{
+//    /// <summary>
+//    /// Represents a bot that processes incoming activities.
+//    /// For each user interaction, an instance of this class is created and the OnTurnAsync method is called.
+//    /// This is a Transient lifetime service.  Transient lifetime services are created
+//    /// each time they're requested. For each Activity received, a new instance of this
+//    /// class is created. Objects that are expensive to construct, or have a lifetime
+//    /// beyond the single turn, should be carefully managed.
+//    /// For example, the <see cref="MemoryStorage"/> object and associated
+//    /// <see cref="IStatePropertyAccessor{T}"/> object are created with a singleton lifetime.
+//    /// </summary>
+//    /// <seealso cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.1"/>
+//    public class RingoBot : IBot
+//    {
+//        // The connection name here must match the one from
+//        // your Bot Channels Registration on the settings blade in Azure.
+//        private const string ConnectionName = "spotify_connection_2";
+
+//        private const string LoginPromptName = "loginPrompt";
+//        private const string ConfirmPromptName = "confirmPrompt";
+
+//        private const string WelcomeText = @"This bot will introduce you to Authentication.
+//                                        Type anything to get logged in. Type 'logout' to sign-out.
+//                                        Type 'help' to view this message again";
+
+//        private readonly RingoBotAccessors _stateAccessors;
+//        private readonly DialogSet _dialogs;
+//        private readonly IRingoService _ringoService;
+//        private readonly ILogger _logger;
+
+//        /// <summary>
+//        /// Initializes a new instance of the <see cref="AuthenticationBot"/> class.
+//        /// </summary>
+//        /// <param name="accessors">A class containing <see cref="IStatePropertyAccessor{T}"/> used to manage state.</param>
+//        /// <seealso cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-2.1#windows-eventlog-provider"/>
+//        public RingoBot(RingoBotAccessors accessors, IRingoService ringoService, ILogger<RingoBot> logger)
+//        {
+//            _stateAccessors = accessors ?? throw new ArgumentNullException(nameof(accessors));
+//            _dialogs = new DialogSet(accessors.DialogState);
+
+//            // Add the OAuth prompts and related dialogs into the dialog set
+//            //_dialogs.Add(Prompt(ConnectionName));
+//            _dialogs.Add(new ConfirmPrompt(ConfirmPromptName));
+//            _dialogs.Add(new WaterfallDialog("authDialog", new WaterfallStep[] { PromptStepAsync, LoginStepAsync }));
+//            //_dialogs.Add(new WaterfallDialog("authDialog", new WaterfallStep[] { PromptStepAsync, LoginStepAsync, DisplayTokenAsync }));
+
+//            _ringoService = ringoService;
+//            _logger = logger;
+//        }
+
+//        /// <summary>
+//        /// Every conversation turn for our Echo Bot will call this method.
+//        /// </summary>
+//        /// <param name="turnContext">A <see cref="ITurnContext"/> containing all the data needed
+//        /// for processing this conversation turn. </param>
+//        /// <param name="cancellationToken">(Optional) A <see cref="CancellationToken"/> that can be used by other objects
+//        /// or threads to receive notice of cancellation.</param>
+//        /// <returns>A <see cref="Task"/> that represents the work queued to execute.</returns>
+//        /// <seealso cref="BotStateSet"/>
+//        /// <seealso cref="ConversationData"/>
+//        /// <seealso cref="IMiddleware"/>
+//        public async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken = default(CancellationToken))
+//        {
+//            var dc = await _dialogs.CreateContextAsync(turnContext, cancellationToken);
+//            if (turnContext == null)
+//            {
+//                throw new ArgumentNullException(nameof(turnContext));
+//            }
+
+//            switch (turnContext.Activity.Type)
+//            {
+//                case ActivityTypes.Message:
+//                    var userProfile = await _stateAccessors.UserProfileAccessor.GetAsync(turnContext, () => new UserProfile());
+//                    var conversationData = await _stateAccessors.ConversationDataAccessor.GetAsync(turnContext, () => new ConversationData());
+
+//                    userProfile.FooBar = DateTime.UtcNow;
+
+//                    // This bot is not case sensitive.
+//                    var text = turnContext.Activity.Text.ToLowerInvariant();
+//                    if (text == "help")
+//                    {
+//                        await turnContext.SendActivityAsync(WelcomeText, cancellationToken: cancellationToken);
+//                        break;
+//                    }
+
+//                    if (text == "login")
+//                    {
+//                        await SendOAuthCardAsync(turnContext, cancellationToken);
+//                        break;
+
+//                        //if (!turnContext.Responded)
+//                        //{
+//                        //    // Start the Login process.
+//                        //    //await dc.BeginDialogAsync("authDialog", cancellationToken: cancellationToken);
+                            
+//                        //}
+//                    }
+
+//                    if (text == "logout")
+//                    {
+//                        // The bot adapter encapsulates the authentication processes.
+//                        var botAdapter = (BotFrameworkAdapter)turnContext.Adapter;
+//                        await botAdapter.SignOutUserAsync(turnContext, ConnectionName, cancellationToken: cancellationToken);
+//                        await turnContext.SendActivityAsync("You have been signed out.", cancellationToken: cancellationToken);
+//                        await turnContext.SendActivityAsync(WelcomeText, cancellationToken: cancellationToken);
+//                        break;
+//                    }
+
+//                    const string playKeyword = "play";
+//                    if (text.StartsWith($"{playKeyword} ", true, CultureInfo.InvariantCulture))
+//                    {
+//                        var adapter = (BotFrameworkAdapter)turnContext.Adapter;
+//                        var token2 = await adapter.GetUserTokenAsync(turnContext, ConnectionName, null, cancellationToken);
+
+//                        //var prompt = await dc.BeginDialogAsync(LoginPromptName, cancellationToken: cancellationToken);
+
+//                        //var tokenResponse = await dc.BeginDialogAsync(SendOAuthCardAsync, cancellationToken: cancellationToken);
+
+//                        //var tokenResponse = (TokenResponse)prompt.Result;
+//                        var tokenResponse = token2;
+//                        if (tokenResponse == null)
+//                        {
+//                            await turnContext.SendActivityAsync("Couldn't log you in.", cancellationToken: cancellationToken);
+//                            break;
+//                        }
+
+//                        _logger.LogDebug($"Play: token = {tokenResponse.Token.Substring(0, 4)}");
+//                        conversationData.ConversationUserTokens[turnContext.Activity.From.Name.ToLower()] = tokenResponse;
+
+//                        // Play
+//                        await _ringoService.PlayPlaylist(
+//                            turnContext,
+//                            text.Replace($"{playKeyword} ", string.Empty, true, CultureInfo.InvariantCulture),
+//                            tokenResponse.Token,
+//                            cancellationToken);
+
+//                        //TODO: What a mess :(
+//                        await _stateAccessors.UserProfileAccessor.SetAsync(turnContext, userProfile);
+//                        await _stateAccessors.UserState.SaveChangesAsync(turnContext);
+//                        await _stateAccessors.ConversationDataAccessor.SetAsync(turnContext, conversationData);
+//                        await _stateAccessors.ConversationState.SaveChangesAsync(turnContext);
+
+//                        break;
+//                    }
+
+//                    const string joinKeyword = "join";
+//                    if (text.StartsWith($"{joinKeyword} ", true, CultureInfo.InvariantCulture))
+//                    {
+//                        var prompt = await dc.BeginDialogAsync(LoginPromptName, cancellationToken: cancellationToken);
+//                        var tokenResponse = (TokenResponse)prompt.Result;
+//                        if (tokenResponse == null)
+//                        {
+//                            await turnContext.SendActivityAsync("Couldn't log you in.", cancellationToken: cancellationToken);
+//                            break;
+//                        }
+
+//                        _logger.LogDebug($"Join: token = {tokenResponse.Token.Substring(0, 4)}");
+
+//                        conversationData.ConversationUserTokens[turnContext.Activity.From.Name] = tokenResponse;
+
+//                        string joinUsername = text.Replace($"{joinKeyword} ", string.Empty, true, CultureInfo.InvariantCulture).ToLower();
+
+//                        // Join
+//                        //await _ringoService.JoinPlaylist(
+//                        //    turnContext,
+//                        //    joinUsername,
+//                        //    conversationData,
+//                        //    tokenResponse.Token,
+//                        //    cancellationToken);
+
+//                        //TODO: What a mess :(
+//                        await _stateAccessors.UserProfileAccessor.SetAsync(turnContext, userProfile);
+//                        await _stateAccessors.UserState.SaveChangesAsync(turnContext);
+//                        await _stateAccessors.ConversationDataAccessor.SetAsync(turnContext, conversationData);
+//                        await _stateAccessors.ConversationState.SaveChangesAsync(turnContext);
+
+//                        break;
+//                    }
+
+//                    if (Regex.IsMatch(text, "^[0-9]+$"))
+//                    {
+//                        // magic number
+//                        var adapter = (BotFrameworkAdapter)turnContext.Adapter;
+//                        var token2 = await adapter.GetUserTokenAsync(turnContext, ConnectionName, text, cancellationToken);
+//                        conversationData.ConversationUserTokens[turnContext.Activity.From.Name] = token2;
+
+//                        await _stateAccessors.UserProfileAccessor.SetAsync(turnContext, userProfile);
+//                        await _stateAccessors.UserState.SaveChangesAsync(turnContext);
+//                        await _stateAccessors.ConversationDataAccessor.SetAsync(turnContext, conversationData);
+//                        await _stateAccessors.ConversationState.SaveChangesAsync(turnContext);
+
+//                        break;
+//                    }
+
+//                    await dc.ContinueDialogAsync(cancellationToken);
+
+//                    break;
+//                case ActivityTypes.Event:
+//                case ActivityTypes.Invoke:
+//                    // This handles the MS Teams Invoke Activity sent when magic code is not used.
+//                    // See: https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/authentication/auth-oauth-card#getting-started-with-oauthcard-in-teams
+//                    // The Teams manifest schema is found here: https://docs.microsoft.com/en-us/microsoftteams/platform/resources/schema/manifest-schema
+//                    // It also handles the Event Activity sent from the emulator when the magic code is not used.
+//                    // See: https://blog.botframework.com/2018/08/28/testing-authentication-to-your-bot-using-the-bot-framework-emulator/
+//                    dc = await _dialogs.CreateContextAsync(turnContext, cancellationToken);
+//                    await dc.ContinueDialogAsync(cancellationToken);
+//                    if (!turnContext.Responded)
+//                    {
+//                        await dc.BeginDialogAsync("authDialog", cancellationToken: cancellationToken);
+//                    }
+
+//                    break;
+//                case ActivityTypes.ConversationUpdate:
+//                    // Send a welcome & help message to the user.
+//                    if (turnContext.Activity.MembersAdded != null)
+//                    {
+//                        await SendWelcomeMessageAsync(turnContext, cancellationToken);
+//                    }
+
+//                    break;
+//                default:
+//                    throw new NotSupportedException($"Activity Type \"{turnContext.Activity.Type}\" is not currently supported.");
+//            }
+//        }
+
+//        /// <summary>
+//        /// Greet new users as they are added to the conversation.
+//        /// </summary>
+//        /// <param name="turnContext">Provides the <see cref="ITurnContext"/> for the turn of the bot.</param>
+//        /// <param name="cancellationToken" >(Optional) A <see cref="CancellationToken"/> that can be used by other objects
+//        /// or threads to receive notice of cancellation.</param>
+//        /// <returns>A <see cref="Task"/> representing the operation result of the Turn operation.</returns>
+//        private static async Task SendWelcomeMessageAsync(ITurnContext turnContext, CancellationToken cancellationToken)
+//        {
+//            foreach (var member in turnContext.Activity.MembersAdded)
+//            {
+//                if (member.Id != turnContext.Activity.Recipient.Id)
+//                {
+//                    await turnContext.SendActivityAsync(
+//                        $"Hi {member.Name}, I'm Ringo!. {WelcomeText}",
+//                        cancellationToken: cancellationToken);
+//                }
+//            }
+//        }
+
+//        ///// <summary>
+//        ///// Prompts the user to login using the OAuth provider specified by the connection name.
+//        ///// </summary>
+//        ///// <param name="connectionName"> The name of your connection. It can be found on Azure in
+//        ///// your Bot Channels Registration on the settings blade. </param>
+//        ///// <returns> An <see cref="OAuthPrompt"/> the user may use to log in.</returns>
+//        //private static OAuthPrompt Prompt(string connectionName)
+//        //{
+//        //    return new OAuthPrompt(
+//        //        LoginPromptName,
+//        //        new OAuthPromptSettings
+//        //        {
+//        //            ConnectionName = connectionName,
+//        //            Text = "Please Sign In",
+//        //            Title = "Sign In",
+//        //            Timeout = 300000, // User has 5 minutes to login (1000 * 60 * 5)
+//        //        });
+//        //}
+
+//        /// <summary>
+//        /// This <see cref="WaterfallStep"/> prompts the user to log in.
+//        /// </summary>
+//        /// <param name="step">A <see cref="WaterfallStepContext"/> provides context for the current waterfall step.</param>
+//        /// <param name="cancellationToken" >(Optional) A <see cref="CancellationToken"/> that can be used by other objects
+//        /// or threads to receive notice of cancellation.</param>
+//        /// <returns>A <see cref="Task"/> representing the operation result of the operation.</returns>
+//        private static async Task<DialogTurnResult> PromptStepAsync(WaterfallStepContext step, CancellationToken cancellationToken)
+//        {
+//            return await step.BeginDialogAsync(LoginPromptName, cancellationToken: cancellationToken);
+//        }
+
+//        /// <summary>
+//        /// In this step we check that a token was received and prompt the user as needed.
+//        /// </summary>
+//        /// <param name="step">A <see cref="WaterfallStepContext"/> provides context for the current waterfall step.</param>
+//        /// <param name="cancellationToken" >(Optional) A <see cref="CancellationToken"/> that can be used by other objects
+//        /// or threads to receive notice of cancellation.</param>
+//        /// <returns>A <see cref="Task"/> representing the operation result of the operation.</returns>
+//        private static async Task<DialogTurnResult> LoginStepAsync(WaterfallStepContext step, CancellationToken cancellationToken)
+//        {
+//            // Get the token from the previous step. Note that we could also have gotten the
+//            // token directly from the prompt itself. There is an example of this in the next method.
+//            var tokenResponse = (TokenResponse)step.Result;
+//            if (tokenResponse != null)
+//            {
+//                await step.Context.SendActivityAsync("You are now logged in.", cancellationToken: cancellationToken);
+//                return Dialog.EndOfTurn;
+//                //return await step.PromptAsync(
+//                //    ConfirmPromptName,
+//                //    new PromptOptions
+//                //    {
+//                //        Prompt = MessageFactory.Text("Would you like to view your token?"),
+//                //        Choices = new List<Choice> { new Choice("Yes"), new Choice("No") },
+//                //    },
+//                //    cancellationToken);
+//            }
+
+//            await step.Context.SendActivityAsync("Login was not successful please try again.", cancellationToken: cancellationToken);
+//            return Dialog.EndOfTurn;
+//        }
+
+//        /// <summary>
+//        /// Fetch the token and display it for the user if they asked to see it.
+//        /// </summary>
+//        /// <param name="step">A <see cref="WaterfallStepContext"/> provides context for the current waterfall step.</param>
+//        /// <param name="cancellationToken" >(Optional) A <see cref="CancellationToken"/> that can be used by other objects
+//        /// or threads to receive notice of cancellation.</param>
+//        /// <returns>A <see cref="Task"/> representing the operation result of the operation.</returns>
+//        private static async Task<DialogTurnResult> DisplayTokenAsync(WaterfallStepContext step, CancellationToken cancellationToken)
+//        {
+//            var result = (bool)step.Result;
+//            if (result)
+//            {
+//                // Call the prompt again because we need the token. The reasons for this are:
+//                // 1. If the user is already logged in we do not need to store the token locally in the bot and worry
+//                // about refreshing it. We can always just call the prompt again to get the token.
+//                // 2. We never know how long it will take a user to respond. By the time the
+//                // user responds the token may have expired. The user would then be prompted to login again.
+//                //
+//                // There is no reason to store the token locally in the bot because we can always just call
+//                // the OAuth prompt to get the token or get a new token if needed.
+//                var prompt = await step.BeginDialogAsync(LoginPromptName, cancellationToken: cancellationToken);
+//                var tokenResponse = (TokenResponse)prompt.Result;
+//                if (tokenResponse != null)
+//                {
+//                    await step.Context.SendActivityAsync($"Here is your token {tokenResponse.Token}", cancellationToken: cancellationToken);
+//                }
+//            }
+
+//            return Dialog.EndOfTurn;
+//        }
+
+//        private async Task SendOAuthCardAsync(ITurnContext turnContext, CancellationToken cancellationToken = default(CancellationToken))
+//        {
+//            var message = turnContext.Activity.CreateReply();
+
+//            if (message.Attachments == null)
+//            {
+//                message.Attachments = new List<Attachment>();
+//            }
+
+//            message.Attachments.Add(new Attachment
+//            {
+//                ContentType = OAuthCard.ContentType,
+//                Content = new OAuthCard
+//                {
+//                    Text = "Please sign in",
+//                    ConnectionName = ConnectionName,
+//                    Buttons = new[]
+//                    {
+//                        new CardAction
+//                        {
+//                            Title = "Sign In",
+//                            Text = "Sign In",
+//                            Type = ActionTypes.Signin,
+//                        },
+//                    },
+//                },
+//            });
+
+//            await turnContext.SendActivityAsync(message, cancellationToken).ConfigureAwait(false);
+//        }
+
+//        // This can be called when the bot receives an Activity after sending an OAuthCard
+//        private async Task<TokenResponse> RecognizeTokenAsync(ITurnContext turnContext, CancellationToken cancellationToken)
+//        {
+//            var adapter = (BotFrameworkAdapter)turnContext.Adapter;
+
+//            if (IsTokenResponseEvent(turnContext))
+//            {
+//                // The bot received the token directly
+//                var tokenResponseObject = turnContext.Activity.Value as JObject;
+//                var token = tokenResponseObject?.ToObject<TokenResponse>();
+//                return token;
+//            }
+//            else if (IsTeamsVerificationInvoke(turnContext))
+//            {
+//                var magicCodeObject = turnContext.Activity.Value as JObject;
+//                var magicCode = magicCodeObject.GetValue("state")?.ToString();
+
+//                var token = await adapter.GetUserTokenAsync(turnContext, ConnectionName, magicCode, cancellationToken);
+//                return token;
+//            }
+//            else if (turnContext.Activity.Type == ActivityTypes.Message)
+//            {
+//                // make sure it's a 6-digit code
+//                var matched = Regex.IsMatch(turnContext.Activity.Text, "^[0-9]{6}$");
+//                if (matched)
+//                {
+//                    var token = await adapter.GetUserTokenAsync(
+//                        turnContext,
+//                        ConnectionName,
+//                        turnContext.Activity.Text,
+//                        cancellationToken);
+//                    return token;
+//                }
+//            }
+
+//            return null;
+//        }
+
+//        private bool IsTokenResponseEvent(ITurnContext turnContext)
+//        {
+//            var activity = turnContext.Activity;
+//            return activity.Type == ActivityTypes.Event && activity.Name == "tokens/response";
+//        }
+
+//        private bool IsTeamsVerificationInvoke(ITurnContext turnContext)
+//        {
+//            var activity = turnContext.Activity;
+//            return activity.Type == ActivityTypes.Invoke && activity.Name == "signin/verifyState";
+//        }
+//    }
+//}
