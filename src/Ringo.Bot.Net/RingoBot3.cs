@@ -165,6 +165,32 @@ namespace RingoBotNet
                         break;
                     }
 
+                    // authorize
+                    if (command == "authorize")
+                    {
+                        if (IsGroup(turnContext))
+                        {
+                            await turnContext.SendActivityAsync(
+                                $"Ringo cannot authorize you in Group Chat. DM (direct message) @ringo instead.", 
+                                cancellationToken: cancellationToken);
+                            break;
+                        }
+
+                        var token2 = await _ringoService.Authorize(turnContext, cancellationToken);
+
+                        if (token2 == null)
+                        {
+                            // clear resume after auth
+                            userProfile.ResumeAfterAuthorizationWith = (null, null);
+                            break;
+                        }
+
+                        await turnContext.SendActivityAsync(
+                                            $"Ringo is authorized to play Spotify. Ready to rock! 😎",
+                                            cancellationToken: cancellationToken);
+                        break;
+                    }
+
                     // magic number
                     if (!USE_BOT_BUILDER_AUTH && RingoService.RingoBotStateRegex.IsMatch(text))
                     {

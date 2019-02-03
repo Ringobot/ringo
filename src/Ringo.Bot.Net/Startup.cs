@@ -95,7 +95,9 @@ namespace RingoBotNet
                     throw new InvalidOperationException($"The .bot file does not contain an endpoint with name '{environment}'.");
                 }
 
-                options.CredentialProvider = new SimpleCredentialProvider(endpointService.AppId, endpointService.AppPassword);
+                options.CredentialProvider = new SimpleCredentialProvider(
+                    endpointService.AppId ?? Configuration[ConfigHelper.BotServiceEndpointAppId], 
+                    endpointService.AppPassword ?? Configuration[ConfigHelper.BotServiceEndpointAppPassword]);
 
                 // Catches any errors that occur during a conversation turn and logs them.
                 options.OnTurnError = async (context, exception) =>
@@ -106,20 +108,15 @@ namespace RingoBotNet
 
             });
 
-            const string StorageConfigurationId = "ringostorage";
-            var blobConfig = botConfig.FindServiceByNameOrId(StorageConfigurationId);
-            if (!(blobConfig is BlobStorageService blobStorageConfig))
-            {
-                throw new InvalidOperationException($"The .bot file does not contain an blob storage with name '{StorageConfigurationId}'.");
-            }
-
-            IStorage storage = new Microsoft.Bot.Builder.Azure.AzureBlobStorage(blobStorageConfig.ConnectionString, blobStorageConfig.Container);
+            IStorage storage = new Microsoft.Bot.Builder.Azure.AzureBlobStorage(
+                Configuration[ConfigHelper.StorageConnectionString], 
+                Configuration[ConfigHelper.StorageStateContainer]);
 
             ConversationState conversationState = new ConversationState(storage);
             UserState userState = new UserState(storage);
             DialogState dialogState = new DialogState();
 
-            services.AddSingleton<RingoBotAccessors>(sp =>
+            services.AddSingleton(sp =>
             {
                 // Create the custom state accessor.
                 return new RingoBotAccessors(conversationState, userState)

@@ -180,14 +180,14 @@ namespace RingoBotNet.Services
             }
 
             //is there a token for the playing user?
-            Models.BearerAccessToken mentionedToken = await _userData.GetUserAccessToken(
+            TokenResponse mentionedToken = await GetAccessToken(
                 turnContext.Activity.ChannelId,
                 mention.Mentioned.Id);
 
             if (mentionedToken == null)
             {
                 await turnContext.SendActivityAsync(
-                    $"Join failed. @{mention.Mentioned.Name} has not asked Ringo to play anything 🤨 Type `\"{RingoHandleIfGroupChat(turnContext)}play (playlist name)\"` to get started.",
+                    $"@{mention.Mentioned.Name} has not asked Ringo to play anything 🤨 Type `\"{RingoHandleIfGroupChat(turnContext)}play (playlist name)\"` to get started.",
                     cancellationToken: cancellationToken);
                 return;
             }
@@ -195,12 +195,12 @@ namespace RingoBotNet.Services
             try
             {
                 // is the playing user playing anything?
-                var info = await _player.GetCurrentPlaybackInfo(mentionedToken.AccessToken);
+                var info = await _player.GetCurrentPlaybackInfo(mentionedToken.Token);
 
                 if (info == null || !info.IsPlaying)
                 {
                     await turnContext.SendActivityAsync(
-                        $"Join failed. @{mention.Mentioned.Name} is no longer playing anything. Type `\"{RingoHandleIfGroupChat(turnContext)}play (playlist name)\"` to get started.",
+                        $"@{mention.Mentioned.Name} is no longer playing anything. Type `\"{RingoHandleIfGroupChat(turnContext)}play (playlist name)\"` to get started.",
                         cancellationToken: cancellationToken);
                     return;
                 }
@@ -209,7 +209,7 @@ namespace RingoBotNet.Services
                 if (info.Context.Type != "playlist")
                 {
                     await turnContext.SendActivityAsync(
-                        $"Join failed. @{mention.Mentioned.Name} is no longer playing a Playlist.",
+                        $"@{mention.Mentioned.Name} is no longer playing a Playlist.",
                         cancellationToken: cancellationToken);
                     return;
                 }
@@ -219,7 +219,7 @@ namespace RingoBotNet.Services
 
                 // TODO: info.Item.Name is current Item name, not Playlist name
                 await turnContext.SendActivityAsync(
-                    $"@{turnContext.Activity.From.Name} has joined @{mention.Mentioned.Name} playing \"{info.Item.Name}\"! Tell your friends to type `\"{RingoHandleIfGroupChat(turnContext)}join @{turnContext.Activity.From.Name}\"` into Ringobot to join the party! 🎉",
+                    $"@{turnContext.Activity.From.Name} has joined @{mention.Mentioned.Name} playing \"{info.Item.Name}\"! Tell your friends to type `\"{RingoHandleIfGroupChat(turnContext)}join @{mention.Mentioned.Name}\"` into Ringobot to join the party! 🎉",
                     cancellationToken: cancellationToken);
             }
             catch (SpotifyApiErrorException ex)
@@ -233,42 +233,16 @@ namespace RingoBotNet.Services
             ITurnContext turnContext,
             CancellationToken cancellationToken)
         {
-            Models.BearerAccessToken token = await _userData.GetUserAccessToken(
-                turnContext.Activity.ChannelId,
-                turnContext.Activity.From.Id);
+            TokenResponse token = await GetAccessToken(turnContext.Activity.ChannelId, turnContext.Activity.From.Id);
+            if (token != null) return token;
 
-            // token had not expired and has been validated - return the token
-            if (
-                token != null
-                && !token.AccessTokenExpired
-                && token.Validated)
+            // User is not authorized by Spotify
+            if (RingoBot3.IsGroup(turnContext))
             {
-                return MapToTokenResponse(token);
-            }
-
-            // token has been validated, but has expired - refresh the token and return it
-            if (
-                token != null
-                && token.AccessTokenExpired
-                && token.Validated)
-            {
-                _logger.LogInformation($"Refreshing access token for channelUserId {ChannelUserId(turnContext)}");
-                var bearer = await _userAccounts.RefreshUserAccessToken(token.RefreshToken);
-
-                // map to BearerAccessToken
-                token.AccessToken = bearer.AccessToken;
-                token.Expires = bearer.Expires;
-
-                if (token.Scope != bearer.Scope)
-                {
-                    token.Scope = bearer.Scope;
-                    _logger.LogWarning($"token Scope has changed when being refreshed. channelID = {turnContext.Activity.ChannelId}, userId = {turnContext.Activity.From.Id}");
-                }
-
-                // save token
-                await _userData.SaveUserAccessToken(ChannelUserId(turnContext), token);
-
-                return MapToTokenResponse(token);
+                // Don't start authorisation dance in Group chat
+                await turnContext.SendActivityAsync(
+                    $"Before you play or join with Ringo you need to authorize Spotify. DM (direct message) the word `\"authorize\"` to @ringo to continue.",
+                    cancellationToken: cancellationToken);
             }
 
             _logger.LogInformation($"Requesting Spotify Authorization for channelUserId {ChannelUserId(turnContext)}");
@@ -346,11 +320,60 @@ namespace RingoBotNet.Services
             return null;
         }
 
+        /// <summary>
+        /// Gets a current Bearer Token for the Spotify service, refreshing if neccessary
+        /// </summary>
+        private async Task<TokenResponse> GetAccessToken(string channelId, string userId)
+        {
+            string channelUserId = ChannelUserId(channelId, userId);
+
+            Models.BearerAccessToken token = await _userData.GetUserAccessToken(channelId, userId);
+
+            // token had not expired and has been validated - return the token
+            if (
+                token != null
+                && !token.AccessTokenExpired
+                && token.Validated)
+            {
+                return MapToTokenResponse(token);
+            }
+
+            // token has been validated, but has expired - refresh the token and return it
+            if (
+                token != null
+                && token.AccessTokenExpired
+                && token.Validated)
+            {
+                _logger.LogInformation($"Refreshing access token for channelUserId {channelUserId}");
+                var bearer = await _userAccounts.RefreshUserAccessToken(token.RefreshToken);
+
+                // map to BearerAccessToken
+                token.AccessToken = bearer.AccessToken;
+                token.Expires = bearer.Expires;
+
+                if (token.Scope != bearer.Scope)
+                {
+                    token.Scope = bearer.Scope;
+                    _logger.LogWarning($"token Scope has changed when being refreshed. channelID = {channelId}, userId = {userId}");
+                }
+
+                // save token
+                await _userData.SaveUserAccessToken(channelUserId, token);
+
+                return MapToTokenResponse(token);
+            }
+
+            return null;
+        }
+
         private static string RingoHandleIfGroupChat(ITurnContext turnContext) 
             => (RingoBot3.IsGroup(turnContext) ? "@ringo " : string.Empty);
 
         private static string ChannelUserId(ITurnContext context)
-            => ChannelUser.EncodeId(context.Activity.ChannelId, context.Activity.From.Id);
+            => ChannelUserId(context.Activity.ChannelId, context.Activity.From.Id);
+
+        private static string ChannelUserId(string channelId, string userId)
+            => ChannelUser.EncodeId(channelId, userId);
 
         private static DateTime ToDateTimeFromIso8601(string iso8601)
             => DateTime.Parse(iso8601, null, System.Globalization.DateTimeStyles.RoundtripKind);

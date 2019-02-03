@@ -9,11 +9,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="BotConfiguration.local.bot" />
     <None Remove="Text\help.txt" />
     <None Remove="Text\more_help.txt" />
   </ItemGroup>
 
   <ItemGroup>
+    <!--<Content Include="BotConfiguration.local.bot">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>-->
     <Content Include="BotConfiguration.bot">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
