@@ -1,7 +1,9 @@
 ﻿using Microsoft.Azure.Documents;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using RingoBotNet.Models;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RingoBotNet.Data
@@ -10,9 +12,11 @@ namespace RingoBotNet.Data
     {
         public CosmosChannelUserData(
             IConfiguration configuration,
+            ILogger<CosmosChannelUserData> logger,
             IDocumentClient documentClient,
             string databaseName,
-            string collectionName) : base(configuration, documentClient, databaseName, collectionName)
+            string collectionName) 
+            : base(configuration, logger, documentClient, databaseName, collectionName)
         { }
 
         public async Task<BearerAccessToken> GetUserAccessToken(string channelId, string userId)
@@ -63,6 +67,19 @@ namespace RingoBotNet.Data
         {
             //TODO
             return null;
+        }
+
+        /// <summary>
+        /// Resets Authorization by setting the SpotifyAccessToken to null.
+        /// </summary>
+        public async Task ResetAuthorization(string channelUserId, CancellationToken cancellationToken)
+        {
+            // looking forward to Patch!
+            ChannelUser channelUser = await GetChannelUser(channelUserId);
+            if (channelUser.SpotifyAccessToken == null) return;
+            channelUser.SpotifyAccessToken = null;
+            await Replace(channelUser);
+            _logger.LogInformation($"Reset channelUser.SpotifyAccessToken = null for channelUserId = \"{channelUserId}\"");
         }
     }
 }

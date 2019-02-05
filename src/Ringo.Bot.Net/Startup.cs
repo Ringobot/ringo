@@ -133,10 +133,13 @@ namespace RingoBotNet
             services.AddSingleton<HttpClient, HttpClient>();
             services.AddSingleton<IUserAccountsService, UserAccountsService>();
             services.AddSingleton<IAccountsService, AccountsService>();
+            services.AddSingleton<IAuthService, AuthService>();
+            services.AddSingleton<IRingoBotCommands, RingoBotCommands>();
 
             services.AddSingleton<IChannelUserData>(
                 (s) => new CosmosChannelUserData(
                     Configuration,
+                    _loggerFactory.CreateLogger<CosmosChannelUserData>(),
                     new DocumentClient(
                         new Uri(Configuration[ConfigHelper.CosmosDBEndpoint]), 
                         Configuration[ConfigHelper.CosmosDBPrimaryKey]),
@@ -146,6 +149,7 @@ namespace RingoBotNet
             services.AddSingleton<IUserStateData>(
                 (s) => new CosmosUserStateData(
                     Configuration,
+                    _loggerFactory.CreateLogger<CosmosUserStateData>(),
                     new DocumentClient(
                         new Uri(Configuration[ConfigHelper.CosmosDBEndpoint]),
                         Configuration[ConfigHelper.CosmosDBPrimaryKey]),

@@ -11,6 +11,8 @@
 
 #### dan/sync
 
+1. Just `join` or `listen`
+1. Try sideloading teams
 1. Christian algorithm
 1. sync
 1. Mobile friendly magic number page: https://blog.teamtreehouse.com/create-an-absolute-basic-mobile-css-responsive-navigation-menu

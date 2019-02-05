@@ -46,7 +46,7 @@ namespace RingoBotNet.Controllers
 
             // validate state
             if (string.IsNullOrEmpty(state)) throw new ArgumentException("Invalid State Argument", nameof(state));
-            if (!RingoService.RingoBotStateRegex.IsMatch(state)) throw new ArgumentException("Invalid State Argument", nameof(state));
+            if (!AuthService.RingoBotStateRegex.IsMatch(state)) throw new ArgumentException("Invalid State Argument", nameof(state));
 
             // get the userId from state
             string channelUserId = await _userStateData.GetChannelUserIdFromStateToken(state);

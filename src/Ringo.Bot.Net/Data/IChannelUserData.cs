@@ -1,4 +1,5 @@
 ﻿using RingoBotNet.Models;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RingoBotNet.Data
@@ -19,5 +20,7 @@ namespace RingoBotNet.Data
             string username,
             string hashcode,
             SpotifyApi.NetCore.PlaylistSimplified playlistSimplified);
+
+        Task ResetAuthorization(string channelUserId, CancellationToken cancellationToken);
     }
 }

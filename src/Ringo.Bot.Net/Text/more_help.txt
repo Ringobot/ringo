@@ -19,6 +19,10 @@ join @alice```
 
 **Other commands**
 
-```help                          // Read help message on how to use Ringo bot
+```authorize                     // Authorize Ringo bot to use your Spotify account
+
+authorize reset               // Deletes your Spotify authorization token. You should also login to Spotify to de-authorize the Ringo bot app
+
+help                          // Read help message on how to use Ringo bot
 
 more help                     // Read this message```
