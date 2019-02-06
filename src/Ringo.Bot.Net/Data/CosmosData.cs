@@ -1,6 +1,7 @@
 ﻿using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using RingoBotNet.Models;
 using System;
 using System.Threading.Tasks;
@@ -14,13 +15,17 @@ namespace RingoBotNet.Data
         protected readonly string _databaseName;
         protected readonly string _collectionName;
         protected readonly Uri _collectionUri;
+        protected readonly ILogger _logger;
 
-        public CosmosData(IConfiguration configuration,
+        public CosmosData(
+            IConfiguration configuration,
+            ILogger logger,
             IDocumentClient documentClient,
             string databaseName,
             string collectionName)
         {
             _config = configuration;
+            _logger = logger;
             _client = documentClient;
             _databaseName = databaseName;
             _collectionName = collectionName;

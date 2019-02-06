@@ -9,6 +9,10 @@ namespace RingoBotNet.Helpers
         public const string CosmosDBDatabaseName = "CosmosDBDatabaseName";
         public const string CosmosDBChannelUserCollectionName = "CosmosDBChannelUserCollectionName";
         public const string CosmosDBUserStateCollectionName = "CosmosDBUserStateCollectionName";
+        public const string StorageConnectionString = "StorageConnectionString";
+        public const string StorageStateContainer = "StorageStateContainer";
+        public const string BotServiceEndpointAppId = "BotServiceEndpointAppId";
+        public const string BotServiceEndpointAppPassword = "BotServiceEndpointAppPassword";
 
         public static void CheckConfig(IConfiguration configuration)
         {
@@ -22,6 +26,10 @@ namespace RingoBotNet.Helpers
                 throw new ConfigurationMissingException($"App Setting \"{CosmosDBChannelUserCollectionName}\" is required.");
             if (string.IsNullOrEmpty(configuration[CosmosDBUserStateCollectionName]))
                 throw new ConfigurationMissingException($"App Setting \"{CosmosDBUserStateCollectionName}\" is required.");
+            if (string.IsNullOrEmpty(configuration[StorageConnectionString]))
+                throw new ConfigurationMissingException($"App Setting \"{StorageConnectionString}\" is required.");
+            if (string.IsNullOrEmpty(configuration[StorageStateContainer]))
+                throw new ConfigurationMissingException($"App Setting \"{StorageStateContainer}\" is required.");
         }
     }
 }

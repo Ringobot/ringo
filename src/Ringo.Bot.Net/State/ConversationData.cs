@@ -14,7 +14,7 @@ namespace RingoBotNet.State
             ConversationUserTokens = new Dictionary<string, TokenResponse>();
             UserStateTokens = new Dictionary<string, string>();
         }
-
+            
         public Dictionary<string, TokenResponse> ConversationUserTokens { get; set; }
 
         public Dictionary<string, string> UserStateTokens { get; set; }

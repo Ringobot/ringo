@@ -46,7 +46,7 @@ namespace RingoBotNet.Controllers
 
             // validate state
             if (string.IsNullOrEmpty(state)) throw new ArgumentException("Invalid State Argument", nameof(state));
-            if (!RingoService.RingoBotStateRegex.IsMatch(state)) throw new ArgumentException("Invalid State Argument", nameof(state));
+            if (!AuthService.RingoBotStateRegex.IsMatch(state)) throw new ArgumentException("Invalid State Argument", nameof(state));
 
             // get the userId from state
             string channelUserId = await _userStateData.GetChannelUserIdFromStateToken(state);
@@ -71,7 +71,7 @@ namespace RingoBotNet.Controllers
             {
                 ContentType = "text/html",
                 StatusCode = (int)HttpStatusCode.OK,
-                Content = $"<html><body style='font-family:Consolas'><p>Copy this code into the chat window:<br/><input style='width:300px' value='{state}'/></p></body></html>"
+                Content = $"<html><body style='font-family:Consolas'><p>Copy this code into the chat window:<br/><input style='width:300px' value='{RingoBotCommands.AuthCommand} {state}'/></p></body></html>"
             };
         }
 

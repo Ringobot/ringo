@@ -1,6 +1,7 @@
 ﻿using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using RingoBotNet.Models;
 using SpotifyApi.NetCore;
 using System;
@@ -12,10 +13,11 @@ namespace RingoBotNet.Data
     {
         public CosmosUserStateData(
             IConfiguration configuration,
+            ILogger<CosmosUserStateData> logger,
             IDocumentClient documentClient,
             string databaseName,
             string collectionName) 
-            : base(configuration, documentClient, databaseName, collectionName)
+            : base(configuration, logger, documentClient, databaseName, collectionName)
         { }
 
         internal async Task Init()

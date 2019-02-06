@@ -1,20 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RingoBotNet.Helpers;
 using RingoBotNet.Services;
 using RingoBotNet.State;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RingoBotNet
 {
@@ -29,17 +28,20 @@ namespace RingoBotNet
         private readonly IRingoService _ringoService;
         private readonly RingoBotAccessors _stateAccessors;
         private readonly string _contentRoot;
+        private readonly IRingoBotCommands _commands;
 
         public RingoBot3(
-            ILogger<RingoBot3> logger, 
+            ILogger<RingoBot3> logger,
             IRingoService ringoService,
             RingoBotAccessors accessors,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IRingoBotCommands ringoBotCommands)
         {
             _logger = logger;
             _ringoService = ringoService;
             _stateAccessors = accessors ?? throw new ArgumentNullException(nameof(accessors));
             _contentRoot = configuration.GetValue<string>(WebHostDefaults.ContentRootKey);
+            _commands = ringoBotCommands;
         }
 
         public async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken = default(CancellationToken))
@@ -51,7 +53,7 @@ namespace RingoBotNet
             switch (turnContext.Activity.Type)
             {
                 case ActivityTypes.Message:
-                    if (NotListening(turnContext))
+                    if (BotHelper.NotListening(turnContext))
                     {
                         _logger.LogDebug("Not listening. In a group chat and not mentioned.");
                         break;
@@ -68,7 +70,7 @@ namespace RingoBotNet
 
                     string text = turnContext.Activity.Text.Trim();
                     // remove the mention
-                    if (IsGroup(turnContext) && IsMentioned(turnContext))
+                    if (BotHelper.IsGroup(turnContext) && BotHelper.IsMentioned(turnContext))
                     {
                         text = text.Replace($"@{turnContext.Activity.Recipient.Name} ", string.Empty);
                     }
@@ -106,88 +108,24 @@ namespace RingoBotNet
                         break;
                     }
 
-                    if (command == "play")
+                    // PLAY
+                    if (command == RingoBotCommands.PlayCommand)
                     {
-                        TokenResponse token2;
-
-                        if (USE_BOT_BUILDER_AUTH)
-                        {
-                            var adapter = (BotFrameworkAdapter)turnContext.Adapter;
-                            token2 = await adapter.GetUserTokenAsync(turnContext, ConnectionName, null, cancellationToken);
-
-                            if (token2 == null)
-                            {
-                                await turnContext.SendActivityAsync("Can't play because I can't find a token. Try `\"login\"`.");
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            token2 = await _ringoService.Authorize(turnContext, cancellationToken);
-
-                            if (token2 == null)
-                            {
-                                // resume after auth
-                                userProfile.ResumeAfterAuthorizationWith = (command, query);
-                                break; 
-                            }
-                        }
-
-                        //conversationData.ConversationUserTokens[FromUserName(turnContext)] = token2;
-
-                        await _ringoService.PlayPlaylist(
-                            turnContext,
-                            query,
-                            token2.Token,
-                            cancellationToken);
-
+                        await _commands.Play(turnContext, userProfile, query, cancellationToken);
                         break;
                     }
 
-                    if (command == "join" && !USE_BOT_BUILDER_AUTH)
+                    // JOIN
+                    if (command == RingoBotCommands.JoinCommand && !USE_BOT_BUILDER_AUTH)
                     {
-                        var token2 = await _ringoService.Authorize(turnContext, cancellationToken);
-
-                        if (token2 == null)
-                        {
-                            // resume after auth
-                            userProfile.ResumeAfterAuthorizationWith = (command, query);
-                            break;
-                        }
-
-                        // Join
-                        await _ringoService.JoinPlaylist(
-                            turnContext,
-                            query,
-                            token2.Token,
-                            cancellationToken);
-
+                        await _commands.Join(turnContext, userProfile, query, cancellationToken);
                         break;
                     }
 
-                    // magic number
-                    if (!USE_BOT_BUILDER_AUTH && RingoService.RingoBotStateRegex.IsMatch(text))
+                    // AUTH
+                    if (command == RingoBotCommands.AuthCommand || command == RingoBotCommands.AuthCommandAlias)
                     {
-                        var token2 = await _ringoService.ValidateMagicNumber(turnContext, text, cancellationToken);
-
-                        //TODO: needs improvement 🤔
-                        if (userProfile.ResumeAfterAuthorizationWith.command == "play")
-                        {
-                            await _ringoService.PlayPlaylist(
-                                turnContext,
-                                userProfile.ResumeAfterAuthorizationWith.query,
-                                token2.Token,
-                                cancellationToken);
-                        }
-                        else if (userProfile.ResumeAfterAuthorizationWith.command == "join")
-                        {
-                            await _ringoService.JoinPlaylist(
-                                turnContext,
-                                userProfile.ResumeAfterAuthorizationWith.query,
-                                token2.Token,
-                                cancellationToken);
-                        }
-
+                        await _commands.Auth(turnContext, userProfile, query, cancellationToken);
                         break;
                     }
 
@@ -203,7 +141,7 @@ namespace RingoBotNet
                         }
                         else
                         {
-                            Trace.WriteLine($"Token = {token2.Token.Substring(0, 5)}...", "RingoBot3");
+                            _logger.LogDebug($"Token = {token2.Token.Substring(0, 5)}...");
                             await turnContext.SendActivityAsync($"Logged in with Token {token2.Token.Substring(0, 5)} 👌");
                         }
 
@@ -212,7 +150,7 @@ namespace RingoBotNet
 
                     if (command == "help")
                     {
-                        
+
                         await turnContext.SendActivityAsync(
                             await File.ReadAllTextAsync($"{_contentRoot}/Text/help.txt", cancellationToken));
                         break;
@@ -233,7 +171,7 @@ namespace RingoBotNet
                     }
 
                     // do nothing
-                    Trace.WriteLine("Doing nothing", "RingoBot3");
+                    _logger.LogDebug("Doing nothing");
 
                     break;
 
@@ -256,14 +194,14 @@ namespace RingoBotNet
                     }
                     else
                     {
-                        Trace.WriteLine($"Token = {token.Token.Substring(0, 5)}...", "RingoBot3");
+                        _logger.LogDebug($"Token = {token.Token.Substring(0, 5)}...");
                         await turnContext.SendActivityAsync($"Logged in with Token {token.Token.Substring(0, 5)} 👌");
                     }
 
                     break;
 
                 default:
-                    Trace.TraceWarning($"{turnContext.Activity.Type} is not handled", "RingoBot3");
+                    _logger.LogWarning($"{turnContext.Activity.Type} is not handled", "RingoBot3");
                     break;
             }
 
@@ -273,26 +211,6 @@ namespace RingoBotNet
             await _stateAccessors.ConversationDataAccessor.SetAsync(turnContext, conversationData);
             await _stateAccessors.ConversationState.SaveChangesAsync(turnContext);
 
-        }
-
-        private static bool NotListening(ITurnContext turnContext)
-        {
-            // if in a group and the bot is not mentioned, ignore this dialog
-            return (IsGroup(turnContext) && !IsMentioned(turnContext));
-        }
-
-        internal static bool IsGroup(ITurnContext turnContext)
-        {
-            return turnContext.Activity.Conversation != null 
-                && turnContext.Activity.Conversation.IsGroup.HasValue 
-                && turnContext.Activity.Conversation.IsGroup.Value;
-        }
-
-        private static bool IsMentioned(ITurnContext turnContext)
-        {
-            if (turnContext.Activity.Entities == null) return false;
-            var mentions = turnContext.Activity.Entities.Where(e => e.Type == "mention").Select(e=>e.GetAs<Mention>());
-            return mentions.Any(m => m.Mentioned.Id == turnContext.Activity.Recipient.Id);
         }
 
         private async Task CreateChannelUsers(ITurnContext turnContext, CancellationToken cancellationToken)
