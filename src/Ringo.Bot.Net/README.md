@@ -16,6 +16,39 @@
 1. Just `join` or `listen`
 1. If no active device, click button to start player
 
+Station hash tags
+
+    # These could all refer to the same station
+
+    channelId.lower()/team_id/@username.lower()
+    slack/TA0VBN61L/@daniel
+
+    channelId.lowr()/team_id/#conversation.name.replace(\W).lower()/SlackMessage.event.channel
+    slack/TA0VBN61L/#testing3/CFX3U3TCJ
+
+    channelId.lower()/team_id/#hashtag.lower()
+    slack/TA0VBN61L/#heatwave
+
+    # StationUri
+    {
+        id: (base64(uri)),
+        pk: (hash(uri)),
+        uri: uri,
+        channelUserId: channelUserId,
+        stationId: stationId,
+        hashtag: (hashtag)
+    }
+
+    # ChannelUser.Station
+    {
+        id: (guid),
+        playlist: [playlist],
+        created: (utc),
+        modified: (utc),
+        isActive: (bool),
+        listenerCount: (int)
+    }
+
 #### dan/dm-auth
 1. DM auth
 
