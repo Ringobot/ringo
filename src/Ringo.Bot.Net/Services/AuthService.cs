@@ -3,6 +3,7 @@ using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RingoBotNet.Data;
+using RingoBotNet.Helpers;
 using RingoBotNet.Models;
 using SpotifyApi.NetCore;
 using SpotifyApi.NetCore.Helpers;
@@ -51,12 +52,13 @@ namespace RingoBotNet.Services
             if (token != null) return token;
 
             // User is not authorized by Spotify
-            if (RingoBot3.IsGroup(turnContext))
+            if (BotHelper.IsGroup(turnContext))
             {
                 // Don't start authorisation dance in Group chat
                 await turnContext.SendActivityAsync(
-                    $"Before you play or join with Ringo you need to authorize Spotify. DM (direct message) the word `\"authorize\"` to @ringo to continue.",
+                    $"Before you play or join with Ringo you need to authorize Spotify. DM (direct message) the word `\"{RingoBotCommands.AuthCommand}\"` to @ringo to continue.",
                     cancellationToken: cancellationToken);
+                return null;
             }
 
             _logger.LogInformation($"Requesting Spotify Authorization for channelUserId {ChannelUserId(turnContext)}");

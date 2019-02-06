@@ -3,6 +3,7 @@ using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RingoBotNet.Data;
+using RingoBotNet.Helpers;
 using RingoBotNet.Models;
 using SpotifyApi.NetCore;
 using SpotifyApi.NetCore.Helpers;
@@ -200,6 +201,6 @@ namespace RingoBotNet.Services
         }
 
         internal static string RingoHandleIfGroupChat(ITurnContext turnContext) 
-            => (RingoBot3.IsGroup(turnContext) ? "@ringo " : string.Empty);
+            => (BotHelper.IsGroup(turnContext) ? "@ringo " : string.Empty);
     }
 }

@@ -5,13 +5,22 @@
 #### dan/auth-bugs
 
 1. ~~BUG: Expired token on join bug~~
-1. ~~Don't authorize in the clear!~~
+1. ~~Don't authorize in the clear! - still not fixed, Play will start auth flow in group chat :|~~
 1. ~~BUG: Wrong user name in join message: `@abrahamlarsen has joined @daniel playing "No Other"! Tell your friends to type "join @abrahamlarsen" into Ringobot to join the party!`~~
-1. `authorize reset`
+1. ~~`authorize reset`~~
+1. ~~`auth` alias~~
+1. ~~`auth (magic number)`~~
+
+#### dan/easy-join
+
+1. Just `join` or `listen`
+1. If no active device, click button to start player
+
+#### dan/dm-auth
+1. DM auth
 
 #### dan/sync
 
-1. Just `join` or `listen`
 1. Try sideloading teams
 1. Christian algorithm
 1. sync
