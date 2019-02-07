@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using RingoBotNet.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace RingoBotNet.Models
@@ -41,7 +42,7 @@ namespace RingoBotNet.Models
 
         public BearerAccessToken SpotifyAccessToken { get; set; }
 
-        public Station[] Stations { get; set; }
+        public IEnumerable<Station> Stations { get; set; }
 
         [JsonIgnore]
         public Station CurrentStation { get => Stations.FirstOrDefault(s => s.IsActive); }

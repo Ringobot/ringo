@@ -3,6 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RingoBotNet.Models;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -58,15 +60,17 @@ namespace RingoBotNet.Data
             await Replace(channelUser);
         }
 
-        public async Task<Station> CreateStation(
-            string channelId,
-            string userId,
-            string username,
-            string hashcode,
-            SpotifyApi.NetCore.PlaylistSimplified playlistSimplified)
+        public async Task<Station> CreateStation(string channelUserId, Playlist playlist, string hashtag = null)
         {
-            //TODO
-            return null;
+            var station = new Station(playlist, hashtag);
+            var channelUser = await GetChannelUser(channelUserId);
+
+            if (channelUser.Stations == null) channelUser.Stations = new[] { station };
+            else channelUser.Stations.Concat(new[] { station });
+
+            await Replace(channelUser);
+            _logger.LogInformation($"Added Station Id = \"{station.Id} to Channel User Id = \"{channelUserId}\"");
+            return station;
         }
 
         /// <summary>

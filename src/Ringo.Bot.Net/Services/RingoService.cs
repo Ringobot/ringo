@@ -19,7 +19,6 @@ namespace RingoBotNet.Services
 {
     public class RingoService : IRingoService
     {
-        private static readonly Regex NonWordRegex = new Regex("\\W");
         private static readonly Regex SpotifyPlaylistUrlRegex = new Regex("playlist\\/[a-zA-Z0-9]+");
 
         private readonly HttpClient _http;
@@ -54,7 +53,7 @@ namespace RingoBotNet.Services
             CancellationToken cancellationToken)
         {
             //TODO Model.Playlist
-            (string id, string name) playlist = (null, null);
+            Models.Playlist playlist = null;
 
             string uriOrId = null;
 
@@ -89,10 +88,9 @@ namespace RingoBotNet.Services
                     searchText,
                     accessToken: accessToken);
 
-                // if none found, return
                 if (results.Total > 0)
                 {
-                    playlist = (results.Items[0].Id, results.Items[0].Name);
+                    playlist = MapToPlaylist(results.Items[0]);
 
                     await turnContext.SendActivityAsync(
                         $"{results.Total.ToString("N0")} playlists found.",
@@ -102,21 +100,18 @@ namespace RingoBotNet.Services
             else
             {
                 var playlistSimple = await _playlists.GetPlaylist(uriOrId);
-                if (playlistSimple != null) playlist = (playlistSimple.Id, playlistSimple.Name);
+                if (playlistSimple != null) playlist = MapToPlaylist(playlistSimple);
             }
 
             try
             {
-                if (playlist.id == null)
+                if (playlist.Id == null)
                 {
                     await turnContext.SendActivityAsync($"No playlists found!", cancellationToken: cancellationToken);
                     return;
                 }
 
-                await _player.PlayPlaylist(playlist.id, accessToken);
-                await turnContext.SendActivityAsync(
-                    $"{turnContext.Activity.From.Name} is playing \"{playlist.name}\"",
-                    cancellationToken: cancellationToken);
+                await _player.PlayPlaylist(playlist.Id, accessToken);
             }
             catch (SpotifyApiErrorException ex)
             {
@@ -125,28 +120,34 @@ namespace RingoBotNet.Services
                 return;
             }
 
-            // generate hashcode
-            string hashcode = $"#{NonWordRegex.Replace(playlist.name, string.Empty)}";
-
-            // save the hashcode
-            //hashcode = _stationHashcodeData.CreateStationHashcode(ChannelUserId(turnContext), hashcode);
-
             // save station
-            //var station = await _userData.CreateStation(
-            //    turnContext.Activity.ChannelId,
-            //    turnContext.Activity.From.Id,
-            //    turnContext.Activity.From.Name,
-            //    hashcode,
-            //    results.Playlists.Items[0]);
+            var station = await _userData.CreateStation(
+                RingoBotHelper.ChannelUserId(turnContext),
+                playlist);
 
-            //TODO: user station.Hashcode
             //await turnContext.SendActivityAsync(
             //    $"Tell your friends to type `join {hashcode}` into Ringobot to join the party! 🥳",
             //    cancellationToken: cancellationToken);
 
-            await turnContext.SendActivityAsync(
-                $"Tell your friends to type `\"{RingoHandleIfGroupChat(turnContext)}join @{turnContext.Activity.From.Name}\"` into Ringobot to join the party! 🎉",
-                cancellationToken: cancellationToken);
+            if (BotHelper.IsGroup(turnContext))
+            {
+                await turnContext.SendActivityAsync(
+                        $"{turnContext.Activity.From.Name} is playing \"{station.Name}\" #{station.Hashtag}. Type `\"join\"` to join the party! 🎉",
+                        cancellationToken: cancellationToken);
+            }
+            else
+            {
+                await turnContext.SendActivityAsync(
+                    $"Now playing \"{station.Name}\" #{station.Hashtag}. Friends can type `\"join\"` to join the party! 🎉",
+                    cancellationToken: cancellationToken);
+            }
+
+            // TODO: save station URIs
+        }
+
+        private Models.Playlist MapToPlaylist(PlaylistSimplified playlistSimplified)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task JoinPlaylist(

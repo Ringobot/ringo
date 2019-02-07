@@ -11,6 +11,7 @@ using RingoBotNet.State;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -109,21 +110,21 @@ namespace RingoBotNet
                     }
 
                     // PLAY
-                    if (command == RingoBotCommands.PlayCommand)
+                    if (RingoBotCommands.PlayCommand.Contains(command))
                     {
                         await _commands.Play(turnContext, userProfile, query, cancellationToken);
                         break;
                     }
 
                     // JOIN
-                    if (command == RingoBotCommands.JoinCommand && !USE_BOT_BUILDER_AUTH)
+                    if (RingoBotCommands.JoinCommand.Contains(command) && !USE_BOT_BUILDER_AUTH)
                     {
                         await _commands.Join(turnContext, userProfile, query, cancellationToken);
                         break;
                     }
 
                     // AUTH
-                    if (command == RingoBotCommands.AuthCommand || command == RingoBotCommands.AuthCommandAlias)
+                    if (RingoBotCommands.AuthCommand.Contains(command))
                     {
                         await _commands.Auth(turnContext, userProfile, query, cancellationToken);
                         break;

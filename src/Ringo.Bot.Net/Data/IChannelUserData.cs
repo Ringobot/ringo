@@ -14,12 +14,7 @@ namespace RingoBotNet.Data
 
         Task SetTokenValidated(string channelId, string userId);
 
-        Task<Station> CreateStation(
-            string channelId,
-            string userId,
-            string username,
-            string hashcode,
-            SpotifyApi.NetCore.PlaylistSimplified playlistSimplified);
+        Task<Station> CreateStation(string channelUserId, Playlist playlist, string hashtag = null);
 
         Task ResetAuthorization(string channelUserId, CancellationToken cancellationToken);
     }

@@ -13,12 +13,22 @@
 
 #### dan/easy-join
 
+1. `play` / `start` creates station
+1. `start` starts up at whatever playlist/album the user is currently playing
 1. Just `join` or `listen`
 1. If no active device, click button to start player
+1. `@abrahamlarsen is no longer playing. Would you like to play Steve Spacek?` OR just play whatever
+   played last
+1. `play album`
+1. `start` alias for `play`
+1. `start #MerryChristmas`
+1. join any other user to sync
 
 Station hash tags
 
     # These could all refer to the same station
+    # Stations are global to a realm
+    # Realms are Slack/Team, Teams/Team, Twitter, Skype/User
 
     channelId.lower()/team_id/@username.lower()
     slack/TA0VBN61L/@daniel
@@ -28,6 +38,10 @@ Station hash tags
 
     channelId.lower()/team_id/#hashtag.lower()
     slack/TA0VBN61L/#heatwave
+
+    channelId.lower()/team_id/#playlist_name.replace(\W).lower()
+    slack/TA0VBN61L/#heatwave2019
+
 
     # StationUri
     {
@@ -50,14 +64,19 @@ Station hash tags
     }
 
 #### dan/dm-auth
+
 1. DM auth
+
+Sending a slack DM: <https://github.com/Microsoft/BotBuilder/issues/2923> <https://stackoverflow.com/questions/44353520/is-there-a-way-to-start-formflow-dialog-on-conversationupdate-event>
 
 #### dan/sync
 
 1. Try sideloading teams
 1. Christian algorithm
 1. sync
-1. Mobile friendly magic number page: https://blog.teamtreehouse.com/create-an-absolute-basic-mobile-css-responsive-navigation-menu
+1. Mobile friendly magic number page: https://blog.teamtreehouse.com/create-an-absolute-basic-mobile-css-responsive-navigation-menu.
+   Click to copy. 
+1. Auth via Spotify App?
 1. Should be able to join anyone - Ringo figures out which station
 1. "You and n other listeners"
 1. Play an Album
@@ -65,7 +84,6 @@ Station hash tags
 1. Show Album hero artwork
 1. Application insights
 1. Azure Devops Staging pipeline
-1. Auth via Spotify App?
 1. Launch app to make active?
 
 ### Submit to Slack marketplace
@@ -91,3 +109,7 @@ Station hash tags
 1. Skype features
 
 ### Submit to Skype marketplace
+
+### Future
+
+1. Sync playlists

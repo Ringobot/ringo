@@ -3,6 +3,8 @@ using Microsoft.Bot.Schema;
 using RingoBotNet.Helpers;
 using RingoBotNet.Services;
 using RingoBotNet.State;
+using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,10 +12,9 @@ namespace RingoBotNet
 {
     public class RingoBotCommands : IRingoBotCommands
     {
-        internal const string AuthCommand = "auth";
-        internal const string AuthCommandAlias = "authorize";
-        internal const string JoinCommand = "join";
-        internal const string PlayCommand = "play";
+        internal static string[] AuthCommand = new[] { "auth", "authorize" };
+        internal static string[] JoinCommand = new[] { "join" };
+        internal static string[] PlayCommand = new[] { "start", "play" };
 
         private readonly IAuthService _authService;
         private readonly IRingoService _ringoService;
@@ -50,7 +51,7 @@ namespace RingoBotNet
             {
                 var token = await _authService.ValidateMagicNumber(turnContext, query, cancellationToken);
 
-                if (userProfile.ResumeAfterAuthorizationWith.command == PlayCommand)
+                if (PlayCommand.Contains(userProfile.ResumeAfterAuthorizationWith.command))
                 {
                     await Play(
                         turnContext,
@@ -59,7 +60,7 @@ namespace RingoBotNet
                         cancellationToken,
                         token: token);
                 }
-                else if (userProfile.ResumeAfterAuthorizationWith.command == JoinCommand)
+                else if (JoinCommand.Contains(userProfile.ResumeAfterAuthorizationWith.command))
                 {
                     await Join(
                         turnContext,
@@ -122,7 +123,7 @@ namespace RingoBotNet
             if (token == null)
             {
                 // resume after auth
-                userProfile.ResumeAfterAuthorizationWith = (JoinCommand, query);
+                userProfile.ResumeAfterAuthorizationWith = (JoinCommand[0], query);
                 return;
             }
 
@@ -149,9 +150,28 @@ namespace RingoBotNet
             if (token == null)
             {
                 // resume after auth
-                userProfile.ResumeAfterAuthorizationWith = (PlayCommand, query);
+                userProfile.ResumeAfterAuthorizationWith = (PlayCommand[0], query);
                 return;
             }
+
+            if (string.IsNullOrEmpty(query)) return;
+            //{
+            //    await _ringoService.Start(
+            //        turnContext,
+            //        token.Token,
+            //        cancellationToken);
+            //      return;
+            //}
+
+            //if (query.StartsWith("album ", StringComparison.InvariantCultureIgnoreCase))
+            //{
+            //    XXX replace album text...
+            //    await _ringoService.PlayAlbum(
+            //        turnContext,
+            //        query.Substring(X,X),
+            //        token.Token,
+            //        cancellationToken);
+            //}
 
             await _ringoService.PlayPlaylist(
                 turnContext,

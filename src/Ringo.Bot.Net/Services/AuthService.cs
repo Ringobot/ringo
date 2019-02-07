@@ -61,7 +61,7 @@ namespace RingoBotNet.Services
                 return null;
             }
 
-            _logger.LogInformation($"Requesting Spotify Authorization for channelUserId {ChannelUserId(turnContext)}");
+            _logger.LogInformation($"Requesting Spotify Authorization for channelUserId {RingoBotHelper.ChannelUserId(turnContext)}");
 
             await _userData.CreateChannelUserIfNotExists(
                 turnContext.Activity.ChannelId,
@@ -127,7 +127,7 @@ namespace RingoBotNet.Services
                     turnContext.Activity.From.Id));
             }
 
-            _logger.LogWarning($"Invalid Magic Number \"{text}\" for channelUserId {ChannelUserId(turnContext)}");
+            _logger.LogWarning($"Invalid Magic Number \"{text}\" for channelUserId {RingoBotHelper.ChannelUserId(turnContext)}");
             await turnContext.SendActivityAsync(
                 $"Magic Number is invalid or has expired. Please try again 🤔",
                 cancellationToken: cancellationToken);
@@ -136,7 +136,7 @@ namespace RingoBotNet.Services
 
         public async Task ResetAuthorization(ITurnContext turnContext, CancellationToken cancellationToken)
         {
-            await _userData.ResetAuthorization(ChannelUserId(turnContext), cancellationToken);
+            await _userData.ResetAuthorization(RingoBotHelper.ChannelUserId(turnContext), cancellationToken);
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace RingoBotNet.Services
         /// </summary>
         public async Task<TokenResponse> GetAccessToken(string channelId, string userId)
         {
-            string channelUserId = ChannelUserId(channelId, userId);
+            string channelUserId = RingoBotHelper.ChannelUserId(channelId, userId);
 
             Models.BearerAccessToken token = await _userData.GetUserAccessToken(channelId, userId);
 
@@ -197,11 +197,5 @@ namespace RingoBotNet.Services
 
         private static string ToIso8601(DateTime? dateTime)
             => dateTime.HasValue ? dateTime.Value.ToString("s", System.Globalization.CultureInfo.InvariantCulture) : null;
-
-        private static string ChannelUserId(ITurnContext context)
-            => ChannelUserId(context.Activity.ChannelId, context.Activity.From.Id);
-
-        private static string ChannelUserId(string channelId, string userId)
-            => ChannelUser.EncodeId(channelId, userId);
     }
 }
