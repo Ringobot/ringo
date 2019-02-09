@@ -14,8 +14,8 @@
 #### dan/easy-join
 
 1. `play` / `start` creates station
-1. `start` starts up at whatever playlist/album the user is currently playing
 1. Just `join` or `listen`
+1. `start` starts up at whatever playlist/album the user is currently playing
 1. If no active device, click button to start player
 1. `@abrahamlarsen is no longer playing. Would you like to play Steve Spacek?` OR just play whatever
    played last
@@ -113,3 +113,7 @@ Sending a slack DM: <https://github.com/Microsoft/BotBuilder/issues/2923> <https
 ### Future
 
 1. Sync playlists
+
+### SpotifyApi.NetCore
+
+1. Move models to `Models` namespace to avoid ambiguous collisions with client Models

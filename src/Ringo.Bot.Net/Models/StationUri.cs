@@ -5,7 +5,7 @@ namespace RingoBotNet.Models
 {
     public class StationUri : CosmosDocument
     {
-        public StationUri(string uri, string channelUserId, string stationId, string hashtag)
+        public StationUri(string uri, string channelUserId, string stationId, string hashtag = null)
         {
             Id = CryptoHelper.Base64Encode(uri);
             PartitionKey = CryptoHelper.Sha256(uri);
@@ -29,7 +29,6 @@ namespace RingoBotNet.Models
             if (string.IsNullOrEmpty(ChannelUserId)) throw new InvariantNullException(nameof(ChannelUserId));
             if (string.IsNullOrEmpty(Uri)) throw new InvariantNullException(nameof(Uri));
             if (string.IsNullOrEmpty(StationId)) throw new InvariantNullException(nameof(StationId));
-            if (string.IsNullOrEmpty(Hashtag)) throw new InvariantNullException(nameof(Hashtag));
         }
     }
 }

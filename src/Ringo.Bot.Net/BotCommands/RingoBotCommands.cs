@@ -173,11 +173,45 @@ namespace RingoBotNet
             //        cancellationToken);
             //}
 
-            await _ringoService.PlayPlaylist(
+            string search = null;
+            string hashtag = null;
+
+            if (query.Contains('#'))
+            {
+                search = query.Substring(0, query.IndexOf('#'));
+                hashtag = query.Substring(query.IndexOf('#') + 1);
+            }
+            else
+            {
+                search = query;
+            }
+
+            var playlist = await _ringoService.PlayPlaylist(
                 turnContext,
                 query,
                 token.Token,
                 cancellationToken);
+
+            if (playlist == null) return;
+
+            var station = await _ringoService.CreateStation(turnContext, playlist, cancellationToken, hashtag);
+
+            //await turnContext.SendActivityAsync(
+            //    $"Tell your friends to type `join {hashcode}` into Ringobot to join the party! 🥳",
+            //    cancellationToken: cancellationToken);
+
+            if (BotHelper.IsGroup(turnContext))
+            {
+                await turnContext.SendActivityAsync(
+                        $"{turnContext.Activity.From.Name} is playing \"{station.Name}\" #{station.Hashtag}. Type `\"join\"` to join the party! 🎉",
+                        cancellationToken: cancellationToken);
+            }
+            else
+            {
+                await turnContext.SendActivityAsync(
+                    $"Now playing \"{station.Name}\" #{station.Hashtag}. Friends can type `\"join\"` to join the party! 🎉",
+                    cancellationToken: cancellationToken);
+            }
         }
     }
 }

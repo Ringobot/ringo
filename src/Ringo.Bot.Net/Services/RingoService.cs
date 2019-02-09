@@ -28,6 +28,7 @@ namespace RingoBotNet.Services
         private readonly IChannelUserData _userData;
         //private readonly IStationHashcodeData _stationHashcodeData;
         private readonly ILogger _logger;
+        private IStationData _stationData;
 
         public RingoService(
             HttpClient httpClient,
@@ -46,7 +47,7 @@ namespace RingoBotNet.Services
             _logger = logger;
         }
 
-        public async Task PlayPlaylist(
+        public async Task<Models.Playlist> PlayPlaylist(
             ITurnContext turnContext,
             string searchText,
             string accessToken,
@@ -103,52 +104,112 @@ namespace RingoBotNet.Services
                 if (playlistSimple != null) playlist = MapToPlaylist(playlistSimple);
             }
 
+            if (playlist == null)
+            {
+                await turnContext.SendActivityAsync($"No playlists found!", cancellationToken: cancellationToken);
+                return null;
+            }
+
             try
             {
-                if (playlist.Id == null)
-                {
-                    await turnContext.SendActivityAsync($"No playlists found!", cancellationToken: cancellationToken);
-                    return;
-                }
-
                 await _player.PlayPlaylist(playlist.Id, accessToken);
             }
             catch (SpotifyApiErrorException ex)
             {
                 _logger.LogError(ex.Message);
                 await turnContext.SendActivityAsync($"{ex.Message} 🤔 Try opening Spotify on your device and playing a track for a few seconds. Then try typing `play {searchText}` again", cancellationToken: cancellationToken);
-                return;
+                return null;
             }
 
+            return playlist;
+        }
+
+        public async Task<Station> CreateStation(
+            ITurnContext turnContext,
+            Models.Playlist playlist,
+            CancellationToken cancellationToken,
+            string hashtag = null)
+        {
             // save station
             var station = await _userData.CreateStation(
                 RingoBotHelper.ChannelUserId(turnContext),
-                playlist);
+                playlist, hashtag);
 
-            //await turnContext.SendActivityAsync(
-            //    $"Tell your friends to type `join {hashcode}` into Ringobot to join the party! 🥳",
-            //    cancellationToken: cancellationToken);
+            string channelUserId = RingoBotHelper.ChannelUserId(turnContext);
+            ConversationInfo info = GetNormalizedConversationInfo(turnContext);
 
-            if (BotHelper.IsGroup(turnContext))
+            //channelId.lower() / team_id / @username.lower()
+            //slack/TA0VBN61L/@daniel
+            await _stationData.SaveStationUri(station.Id, channelUserId, 
+                $"{TeamChannelPart(info)}/@{info.FromName.ToLower()}");
+
+            //channelId.lowr() / team_id /#conversation.name.replace(\W).lower()/SlackMessage.event.channel
+            //slack/TA0VBN61L/#testing3/CFX3U3TCJ
+            await _stationData.SaveStationUri(station.Id, channelUserId,
+                $"{TeamChannelPart(info)}/#{ToHashtag(info.ConversationName).ToLower()}/{info.ConversationId}",
+                ToHashtag(info.ConversationName));
+
+            //channelId.lower() / team_id /#playlist_name.replace(\W).lower()
+            //slack/TA0VBN61L/#heatwave2019
+            await _stationData.SaveStationUri(station.Id, channelUserId,
+                $"{TeamChannelPart(info)}/#{ToHashtag(playlist.Name).ToLower()}/{info.ConversationId}",
+                ToHashtag(playlist.Name));
+
+            if (!string.IsNullOrEmpty(hashtag))
             {
-                await turnContext.SendActivityAsync(
-                        $"{turnContext.Activity.From.Name} is playing \"{station.Name}\" #{station.Hashtag}. Type `\"join\"` to join the party! 🎉",
-                        cancellationToken: cancellationToken);
-            }
-            else
-            {
-                await turnContext.SendActivityAsync(
-                    $"Now playing \"{station.Name}\" #{station.Hashtag}. Friends can type `\"join\"` to join the party! 🎉",
-                    cancellationToken: cancellationToken);
+                //channelId.lower() / team_id /#hashtag.lower()
+                //slack/TA0VBN61L/#heatwave
+                await _stationData.SaveStationUri(station.Id, channelUserId,
+                    $"{TeamChannelPart(info)}/#{ToHashtag(hashtag).ToLower()}",
+                    ToHashtag(hashtag));
             }
 
-            // TODO: save station URIs
+            return station;
         }
 
-        private Models.Playlist MapToPlaylist(PlaylistSimplified playlistSimplified)
+        private string TeamChannelPart(ConversationInfo info) => $"{info.ChannelId}/{info.ChannelTeamId}";
+
+        private static string ToHashtag(string name) => RingoBotHelper.NonWordRegex.Replace(name, string.Empty);
+
+        private ConversationInfo GetNormalizedConversationInfo(ITurnContext turnContext)
         {
-            throw new NotImplementedException();
+            var activity = turnContext.Activity;
+
+            var info = new ConversationInfo
+            {
+                ChannelId = activity.ChannelId.ToLower(),
+                FromId = activity.From.Id,
+                FromName = activity.From.Name,
+                RecipientId = activity.Recipient.Id,
+                RecipientName = activity.Recipient.Name,
+                ConversationId = activity.Conversation?.Id,
+                ConversationName = activity.Conversation?.Name,
+                IsGroup = activity.Conversation?.IsGroup ?? false
+            };
+
+            // channel specific overrides
+            switch (info.ChannelId)
+            {
+                case "slack":
+                    string[] ids = activity.Conversation.Id.Split(':');
+
+                    if (ids.Length < 2) throw new InvalidOperationException("Expecting Conversation Id like BBBBBBBBB:TTTTTTTTTT:CCCCCCCCCC");
+
+                    info.ChannelTeamId = ids[1];
+                    if (ids.Length > 2) info.ConversationId = ids[2];
+
+                    break;
+            }
+
+            return info;
         }
+
+    private Models.Playlist MapToPlaylist(PlaylistSimplified playlistSimplified) => new Models.Playlist
+        {
+            Id = playlistSimplified.Id,
+            Name = playlistSimplified.Name,
+            Uri = playlistSimplified.Uri
+        };
 
         public async Task JoinPlaylist(
             ITurnContext turnContext,

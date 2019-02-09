@@ -8,7 +8,13 @@ namespace RingoBotNet.Services
 {
     public interface IRingoService
     {
-        Task PlayPlaylist(ITurnContext turnContext, string searchText, string accessToken, CancellationToken cancellationToken);
+        Task<Station> CreateStation(
+            ITurnContext turnContext, 
+            Playlist playlist, 
+            CancellationToken cancellationToken, 
+            string hashtag = null);
+
+        Task<Playlist> PlayPlaylist(ITurnContext turnContext, string searchText, string accessToken, CancellationToken cancellationToken);
 
         Task JoinPlaylist(
             ITurnContext turnContext, 
