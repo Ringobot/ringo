@@ -14,7 +14,7 @@ namespace RingoBotNet
     public class RingoBotCommands : IRingoBotCommands
     {
         internal static string[] AuthCommand = new[] { "auth", "authorize" };
-        internal static string[] JoinCommand = new[] { "join" };
+        internal static string[] JoinCommand = new[] { "join", "listen" };
         internal static string[] PlayCommand = new[] { "start", "play" };
 
         private readonly IAuthService _authService;
