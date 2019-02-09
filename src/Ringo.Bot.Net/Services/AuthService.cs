@@ -6,10 +6,7 @@ using RingoBotNet.Data;
 using RingoBotNet.Helpers;
 using RingoBotNet.Models;
 using SpotifyApi.NetCore;
-using SpotifyApi.NetCore.Helpers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -111,8 +108,8 @@ namespace RingoBotNet.Services
         }
 
         public async Task<TokenResponse> ValidateMagicNumber(
-            ITurnContext turnContext, 
-            string text, 
+            ITurnContext turnContext,
+            string text,
             CancellationToken cancellationToken)
         {
             string channelUserId = await _userStateData.GetChannelUserIdFromStateToken(text);
@@ -143,10 +140,11 @@ namespace RingoBotNet.Services
         /// Gets a current Bearer Token for the Spotify service, refreshing if neccessary
         /// </summary>
         public async Task<TokenResponse> GetAccessToken(string channelId, string userId)
-        {
-            string channelUserId = RingoBotHelper.ChannelUserId(channelId, userId);
+            => await GetAccessToken(RingoBotHelper.ChannelUserId(channelId, userId));
 
-            Models.BearerAccessToken token = await _userData.GetUserAccessToken(channelId, userId);
+        public async Task<TokenResponse> GetAccessToken(string channelUserId)
+        {
+            Models.BearerAccessToken token = await _userData.GetUserAccessToken(channelUserId);
 
             // token had not expired and has been validated - return the token
             if (
@@ -173,7 +171,7 @@ namespace RingoBotNet.Services
                 if (token.Scope != bearer.Scope)
                 {
                     token.Scope = bearer.Scope;
-                    _logger.LogWarning($"token Scope has changed when being refreshed. channelID = {channelId}, userId = {userId}");
+                    _logger.LogWarning($"token Scope has changed when being refreshed. channeUserlID = {channelUserId}");
                 }
 
                 // save token

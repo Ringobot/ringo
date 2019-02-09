@@ -17,13 +17,14 @@ namespace RingoBotNet.Services
         Task<Playlist> PlayPlaylist(ITurnContext turnContext, string searchText, string accessToken, CancellationToken cancellationToken);
 
         Task JoinPlaylist(
-            ITurnContext turnContext, 
-            string query, 
+            ITurnContext turnContext,
+            string query,
             string token,
-            ChannelAccount mentioned,
-            string mentionedToken, 
+            Station station,
+            string stationToken,
             CancellationToken cancellationToken);
 
         Task<ChannelUser> CreateChannelUserIfNotExists(string channelId, string userId, string username);
+        Task<Station> FindStation(ITurnContext turnContext, string query, CancellationToken cancellationToken);
     }
 }

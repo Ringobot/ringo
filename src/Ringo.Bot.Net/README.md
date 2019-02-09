@@ -15,6 +15,7 @@
 
 1. `play` / `start` creates station
 1. Just `join` or `listen`
+1. Play buttons in place of "Would you like to play X"
 1. `start` starts up at whatever playlist/album the user is currently playing
 1. If no active device, click button to start player
 1. `@abrahamlarsen is no longer playing. Would you like to play Steve Spacek?` OR just play whatever

@@ -5,10 +5,11 @@ namespace RingoBotNet.Models
 {
     public class Station
     {
-        public Station(Playlist playlist, string hashtag = null)
+        public Station(string channelUserId, Playlist playlist, string hashtag = null)
         {
             Id = Guid.NewGuid().ToString("N");
             Name = playlist.Name;
+            ChannelUserId = channelUserId;
             Hashtag = hashtag ?? RingoBotHelper.NonWordRegex.Replace(playlist.Name, string.Empty);
             Playlist = playlist;
             CreatedDate = ModifiedDate = DateTime.UtcNow;
@@ -19,6 +20,8 @@ namespace RingoBotNet.Models
         public string Id { get; set; }
 
         public string Name { get; set; }
+
+        public string ChannelUserId { get; internal set; }
 
         public string Hashtag { get; set; }
 

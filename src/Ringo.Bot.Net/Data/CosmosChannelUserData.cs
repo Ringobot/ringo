@@ -24,6 +24,9 @@ namespace RingoBotNet.Data
         public async Task<BearerAccessToken> GetUserAccessToken(string channelId, string userId)
             => (await GetChannelUser(channelId, userId))?.SpotifyAccessToken;
 
+        public async Task<BearerAccessToken> GetUserAccessToken(string channelUserId)
+            => (await GetChannelUser(channelUserId))?.SpotifyAccessToken;
+
         private async Task<ChannelUser> GetChannelUser(string channelId, string userId)
         {
             string id = ChannelUser.EncodeId(channelId, userId);
@@ -62,7 +65,7 @@ namespace RingoBotNet.Data
 
         public async Task<Station> CreateStation(string channelUserId, Playlist playlist, string hashtag = null)
         {
-            var station = new Station(playlist, hashtag);
+            var station = new Station(channelUserId, playlist, hashtag);
             var channelUser = await GetChannelUser(channelUserId);
 
             if (channelUser.Stations == null) channelUser.Stations = new[] { station };
@@ -85,5 +88,8 @@ namespace RingoBotNet.Data
             await Replace(channelUser);
             _logger.LogInformation($"Reset channelUser.SpotifyAccessToken = null for channelUserId = \"{channelUserId}\"");
         }
+
+        public async Task<Station> GetStation(string channelUserId, string stationId) 
+            => (await GetChannelUser(channelUserId))?.Stations.FirstOrDefault(s => s.Id == stationId);
     }
 }

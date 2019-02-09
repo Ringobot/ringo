@@ -1,6 +1,7 @@
 ﻿using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 using RingoBotNet.Helpers;
+using RingoBotNet.Models;
 using RingoBotNet.Services;
 using RingoBotNet.State;
 using System;
@@ -93,29 +94,29 @@ namespace RingoBotNet
             UserProfile userProfile,
             string query,
             CancellationToken cancellationToken,
-            TokenResponse token = null
-            )
+            TokenResponse token = null)
         {
-            // get mentioned user and their token
-            ChannelAccount mentioned = BotHelper.GetFirstMentioned(turnContext);
+            // Find a station
+            ConversationInfo info = RingoBotHelper.NormalizedConversationInfo(turnContext);
+            Station station = await _ringoService.FindStation(turnContext, query, cancellationToken);
 
-            if (mentioned == null)
+            if (station == null && string.IsNullOrEmpty(query))
             {
                 await turnContext.SendActivityAsync(
-                    $"I did not understand 🤔 Try mentioning another user, e.g. `\"{RingoService.RingoHandleIfGroupChat(turnContext)}join @username\"`",
+                    "No stations playing. Would you like to start one? Type `\"play (playlist name)\"`",
                     cancellationToken: cancellationToken);
                 return;
             }
 
-            TokenResponse mentionedToken = await _authService.GetAccessToken(turnContext.Activity.ChannelId, mentioned.Id);
-
-            if (mentionedToken == null)
+            if (station == null)
             {
                 await turnContext.SendActivityAsync(
-                    $"Join failed. @{mentioned.Name} has not asked Ringo to play anything 🤨 Type `\"{RingoService.RingoHandleIfGroupChat(turnContext)}play (playlist name)\"` to get started.",
+                    $"Could not find station \"{query}\" 🤔",
                     cancellationToken: cancellationToken);
                 return;
             }
+
+            TokenResponse stationToken = await _authService.GetAccessToken(station.ChannelUserId);
 
             // get user and their token
             token = token ?? await _authService.Authorize(turnContext, cancellationToken);
@@ -132,8 +133,8 @@ namespace RingoBotNet
                 turnContext,
                 query,
                 token.Token,
-                mentioned,
-                mentionedToken.Token,
+                station,
+                stationToken.Token,
                 cancellationToken);
         }
 

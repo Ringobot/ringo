@@ -10,6 +10,8 @@ namespace RingoBotNet.Data
 
         Task<BearerAccessToken> GetUserAccessToken(string channelId, string userId);
 
+        Task<BearerAccessToken> GetUserAccessToken(string channelUserId);
+
         Task<ChannelUser> CreateChannelUserIfNotExists(string channelId, string userId, string username);
 
         Task SetTokenValidated(string channelId, string userId);
@@ -17,5 +19,6 @@ namespace RingoBotNet.Data
         Task<Station> CreateStation(string channelUserId, Playlist playlist, string hashtag = null);
 
         Task ResetAuthorization(string channelUserId, CancellationToken cancellationToken);
+        Task<Station> GetStation(string channelUserId, string stationId);
     }
 }
