@@ -3,12 +3,19 @@ using System;
 
 namespace RingoBotNet.Models
 {
-    public class StationUri : CosmosDocument
+    public class StationUri : TableEntity
     {
+        public StationUri() { }
+
         public StationUri(string uri, string channelUserId, string stationId, string hashtag = null)
         {
-            Id = CryptoHelper.Base64Encode(uri);
-            PartitionKey = CryptoHelper.Sha256(uri);
+            if (string.IsNullOrEmpty(uri)) throw new ArgumentNullException(nameof(uri));
+            if (string.IsNullOrEmpty(channelUserId)) throw new ArgumentNullException(nameof(channelUserId));
+            if (string.IsNullOrEmpty(stationId)) throw new ArgumentNullException(nameof(stationId));
+
+            var keys = RowKeyPartitionKey(uri);
+            RowKey = keys.RowKey;
+            PartitionKey = keys.PartitionKey;
             Uri = uri;
             ChannelUserId = channelUserId;
             StationId = stationId;
@@ -29,6 +36,12 @@ namespace RingoBotNet.Models
             if (string.IsNullOrEmpty(ChannelUserId)) throw new InvariantNullException(nameof(ChannelUserId));
             if (string.IsNullOrEmpty(Uri)) throw new InvariantNullException(nameof(Uri));
             if (string.IsNullOrEmpty(StationId)) throw new InvariantNullException(nameof(StationId));
+        }
+
+        public static (string RowKey, string PartitionKey) RowKeyPartitionKey(string uri)
+        {
+            string key = CryptoHelper.Sha256(uri);
+            return (key, key);
         }
     }
 }

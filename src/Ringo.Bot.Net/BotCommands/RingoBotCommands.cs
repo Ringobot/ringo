@@ -97,7 +97,6 @@ namespace RingoBotNet
             TokenResponse token = null)
         {
             // Find a station
-            ConversationInfo info = RingoBotHelper.NormalizedConversationInfo(turnContext);
             Station station = await _ringoService.FindStation(turnContext, query, cancellationToken);
 
             if (station == null && string.IsNullOrEmpty(query))
@@ -143,8 +142,7 @@ namespace RingoBotNet
             UserProfile userProfile,
             string query,
             CancellationToken cancellationToken,
-            TokenResponse token = null
-            )
+            TokenResponse token = null)
         {
             token = token ?? await _authService.Authorize(turnContext, cancellationToken);
 
@@ -155,43 +153,69 @@ namespace RingoBotNet
                 return;
             }
 
-            if (string.IsNullOrEmpty(query)) return;
-            //{
-            //    await _ringoService.Start(
-            //        turnContext,
-            //        token.Token,
-            //        cancellationToken);
-            //      return;
-            //}
-
-            //if (query.StartsWith("album ", StringComparison.InvariantCultureIgnoreCase))
-            //{
-            //    XXX replace album text...
-            //    await _ringoService.PlayAlbum(
-            //        turnContext,
-            //        query.Substring(X,X),
-            //        token.Token,
-            //        cancellationToken);
-            //}
-
-            string search = null;
+            Playlist playlist = null;
             string hashtag = null;
 
-            if (query.Contains('#'))
+            if (string.IsNullOrEmpty(query))
             {
-                search = query.Substring(0, query.IndexOf('#'));
-                hashtag = query.Substring(query.IndexOf('#') + 1);
+                // no query so start / resume station
+                SpotifyApi.NetCore.CurrentPlaybackContext nowPlaying = await _ringoService.GetUserNowPlaying(token.Token);
+
+                if (nowPlaying == null)
+                {
+                    // user is not playing a playlist
+                    await turnContext.SendActivityAsync(
+                        "You are not currently playing a Spotify Playlist.",
+                        cancellationToken: cancellationToken);
+
+                    // TODO: What would you like to play?
+                    return;
+                }
+
+                // Get the playlist that is playing
+                playlist = await _ringoService.GetPlaylist(token.Token, nowPlaying.Context.Uri);
             }
             else
             {
-                search = query;
-            }
+                // playlist query
+                string search = null;
 
-            var playlist = await _ringoService.PlayPlaylist(
-                turnContext,
-                query,
-                token.Token,
-                cancellationToken);
+                //if (query.StartsWith("album ", StringComparison.InvariantCultureIgnoreCase))
+                //{
+                //    //XXX replace album text...
+                //    string album = query.Substring(6).Trim();
+
+                //    if (album.Length == 0)
+                //    {
+                //        await turnContext.SendActivityAsync(
+                //            "I did not understand. Try `\" \"`",
+                //            cancellationToken: cancellationToken);
+
+                //    }
+
+                //    await _ringoService.PlayAlbum(
+                //        turnContext,
+                //        query.Substring(X, X),
+                //        token.Token,
+                //        cancellationToken);
+                //}
+
+                if (query.Contains('#'))
+                {
+                    search = query.Substring(0, query.IndexOf('#'));
+                    hashtag = query.Substring(query.IndexOf('#') + 1);
+                }
+                else
+                {
+                    search = query;
+                }
+
+                playlist = await _ringoService.PlayPlaylist(
+                    turnContext,
+                    query,
+                    token.Token,
+                    cancellationToken);
+            }
 
             if (playlist == null) return;
 

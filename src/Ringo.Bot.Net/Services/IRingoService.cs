@@ -25,6 +25,11 @@ namespace RingoBotNet.Services
             CancellationToken cancellationToken);
 
         Task<ChannelUser> CreateChannelUserIfNotExists(string channelId, string userId, string username);
+
         Task<Station> FindStation(ITurnContext turnContext, string query, CancellationToken cancellationToken);
+
+        Task<SpotifyApi.NetCore.CurrentPlaybackContext> GetUserNowPlaying(string token);
+
+        Task<Playlist> GetPlaylist(string token, string uri);
     }
 }

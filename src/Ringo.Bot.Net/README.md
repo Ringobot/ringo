@@ -22,8 +22,9 @@
    played last ✅
 1. `play album`
 1. `start` alias for `play` ✅
-1. `start #MerryChristmas` ✅
+1. `start #MerryChristmas`
 1. join any other user to sync
+1. What would you like to play? prompt
 
 Station hash tags
 
@@ -111,9 +112,10 @@ Sending a slack DM: <https://github.com/Microsoft/BotBuilder/issues/2923> <https
 
 ### Submit to Skype marketplace
 
-### Future
+### Unplanned
 
 1. Sync playlists
+1. Return a list of stations for the TeamChannel
 
 ### SpotifyApi.NetCore
 

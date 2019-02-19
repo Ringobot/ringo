@@ -13,6 +13,7 @@ namespace RingoBotNet.Helpers
         public const string StorageStateContainer = "StorageStateContainer";
         public const string BotServiceEndpointAppId = "BotServiceEndpointAppId";
         public const string BotServiceEndpointAppPassword = "BotServiceEndpointAppPassword";
+        public const string StationUriTableName = "StationUriTableName";
 
         public static void CheckConfig(IConfiguration configuration)
         {
@@ -30,6 +31,8 @@ namespace RingoBotNet.Helpers
                 throw new ConfigurationMissingException($"App Setting \"{StorageConnectionString}\" is required.");
             if (string.IsNullOrEmpty(configuration[StorageStateContainer]))
                 throw new ConfigurationMissingException($"App Setting \"{StorageStateContainer}\" is required.");
+            if (string.IsNullOrEmpty(configuration[StationUriTableName]))
+                throw new ConfigurationMissingException($"App Setting \"{StationUriTableName}\" is required.");
         }
     }
 }

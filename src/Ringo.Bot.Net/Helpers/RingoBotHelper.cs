@@ -22,6 +22,8 @@ namespace RingoBotNet.Helpers
             var info = new ConversationInfo
             {
                 ChannelId = activity.ChannelId.ToLower(),
+                ChannelTeamId = activity.ChannelId.ToLower(),
+                ChannelUserId = ChannelUserId(turnContext),
                 FromId = activity.From.Id,
                 FromName = activity.From.Name,
                 RecipientId = activity.Recipient.Id,
@@ -48,17 +50,44 @@ namespace RingoBotNet.Helpers
             return info;
         }
 
-        public static string ToUserStationUri(ConversationInfo info, string username) 
-            => $"{TeamChannelPart(info)}/@{username.ToLower()}";
+        public static string ToUserStationUri(ConversationInfo info, string username)
+        {
+            if (info == null) throw new ArgumentNullException(nameof(info));
+            if (string.IsNullOrEmpty(username)) throw new ArgumentNullException(nameof(username));
+
+            return $"{TeamChannelPart(info)}/@{username.ToLower()}";
+        }
 
         public static string ToHashtagStationUri(ConversationInfo info, string hashtag)
-            => $"{TeamChannelPart(info)}/#{ToHashtag(hashtag).ToLower()}";
+        {
+            if (info == null) throw new ArgumentNullException(nameof(info));
+            if (string.IsNullOrEmpty(hashtag)) throw new ArgumentNullException(nameof(hashtag));
 
-        public static string ToConversationStationUri(ConversationInfo info) 
-            => $"{TeamChannelPart(info)}/#{ToHashtag(info.ConversationName).ToLower()}/{info.ConversationId}";
+            return $"{TeamChannelPart(info)}/#{ToHashtag(hashtag).ToLower()}";
+        }
 
-        private static string TeamChannelPart(ConversationInfo info) => $"{info.ChannelId}/{info.ChannelTeamId}";
+        public static string ToConversationStationUri(ConversationInfo info)
+        {
+            if (info == null) throw new ArgumentNullException(nameof(info));
+            if (string.IsNullOrEmpty(info.ConversationName)) throw new ArgumentNullException(nameof(info.ConversationName));
+            if (string.IsNullOrEmpty(info.ConversationId)) throw new ArgumentNullException(nameof(info.ConversationId));
 
-        public static string ToHashtag(string name) => NonWordRegex.Replace(name, string.Empty);
+            return $"{TeamChannelPart(info)}/#{ToHashtag(info.ConversationName).ToLower()}/{info.ConversationId}";
+        }
+
+        private static string TeamChannelPart(ConversationInfo info)
+        {
+            if (info == null) throw new ArgumentNullException(nameof(info));
+            if (string.IsNullOrEmpty(info.ChannelId)) throw new ArgumentNullException(nameof(info.ChannelId));
+            if (string.IsNullOrEmpty(info.ChannelTeamId)) throw new ArgumentNullException(nameof(info.ChannelTeamId));
+
+            return $"{info.ChannelId}/{info.ChannelTeamId}";
+        }
+
+        public static string ToHashtag(string name)
+        {
+            if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
+            return NonWordRegex.Replace(name, string.Empty);
+        }
     }
 }

@@ -69,7 +69,7 @@ namespace RingoBotNet.Data
             var channelUser = await GetChannelUser(channelUserId);
 
             if (channelUser.Stations == null) channelUser.Stations = new[] { station };
-            else channelUser.Stations.Concat(new[] { station });
+            else channelUser.Stations = channelUser.Stations.Concat(new[] { station });
 
             await Replace(channelUser);
             _logger.LogInformation($"Added Station Id = \"{station.Id} to Channel User Id = \"{channelUserId}\"");
@@ -89,7 +89,10 @@ namespace RingoBotNet.Data
             _logger.LogInformation($"Reset channelUser.SpotifyAccessToken = null for channelUserId = \"{channelUserId}\"");
         }
 
-        public async Task<Station> GetStation(string channelUserId, string stationId) 
-            => (await GetChannelUser(channelUserId))?.Stations.FirstOrDefault(s => s.Id == stationId);
+        public async Task<Station> GetStation(string channelUserId, string stationId)
+        {
+            var channelUser = await GetChannelUser(channelUserId);
+            return channelUser?.Stations.FirstOrDefault(s => s.Id == stationId);
+        }
     }
 }

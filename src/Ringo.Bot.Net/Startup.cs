@@ -135,6 +135,7 @@ namespace RingoBotNet
             services.AddSingleton<IAccountsService, AccountsService>();
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IRingoBotCommands, RingoBotCommands>();
+            services.AddSingleton<IStationData, StationTableData>();
 
             services.AddSingleton<IChannelUserData>(
                 (s) => new CosmosChannelUserData(

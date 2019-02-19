@@ -8,7 +8,7 @@ namespace RingoBotNet.Data
 {
     public interface IStationData
     {
-        Task SaveStationUri(string stationId, string channelUserId, string uri, string hashtag = null);
+        Task CreateStationUri(string stationId, string channelUserId, string uri, string hashtag = null);
         Task<StationUri> GetStationUri(string uri);
     }
 }

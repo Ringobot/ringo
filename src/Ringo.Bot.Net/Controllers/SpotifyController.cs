@@ -71,7 +71,7 @@ namespace RingoBotNet.Controllers
             {
                 ContentType = "text/html",
                 StatusCode = (int)HttpStatusCode.OK,
-                Content = $"<html><body style='font-family:Consolas'><p>Copy this code into the chat window:<br/><input style='width:300px' value='{RingoBotCommands.AuthCommand} {state}'/></p></body></html>"
+                Content = $"<html><body style='font-family:Consolas'><p>Copy this code into the chat window:<br/><input style='width:300px' value='{RingoBotCommands.AuthCommand[0]} {state}'/></p></body></html>"
             };
         }
 

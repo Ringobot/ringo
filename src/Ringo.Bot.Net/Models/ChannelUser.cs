@@ -53,7 +53,7 @@ namespace RingoBotNet.Models
         public static string EncodeId(string channelId, string userId)
         {
             string uid = $"{channelId.Trim()}:{userId.Trim()}";
-            return CryptoHelper.Base64Encode(uid.ToLower());
+            return CryptoHelper.Sha256(uid.ToLower());
         }
 
         public override void EnforceInvariants()
