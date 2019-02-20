@@ -116,6 +116,8 @@ Sending a slack DM: <https://github.com/Microsoft/BotBuilder/issues/2923> <https
 
 1. Sync playlists
 1. Return a list of stations for the TeamChannel
+1. `@ringo version`
+1. `@ringo status`
 
 ### SpotifyApi.NetCore
 

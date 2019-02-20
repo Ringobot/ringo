@@ -53,7 +53,7 @@ namespace RingoBotNet.Services
             {
                 // Don't start authorisation dance in Group chat
                 await turnContext.SendActivityAsync(
-                    $"Before you play or join with Ringo you need to authorize Spotify. DM (direct message) the word `\"{RingoBotCommands.AuthCommand}\"` to @ringo to continue.",
+                    $"Before you play or join with Ringo you need to authorize Spotify. DM (direct message) the word `\"{RingoBotCommands.AuthCommand[0]}\"` to @ringo to continue.",
                     cancellationToken: cancellationToken);
                 return null;
             }

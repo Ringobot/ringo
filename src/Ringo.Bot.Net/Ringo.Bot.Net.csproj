@@ -45,8 +45,12 @@
     <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.1.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.6" />
     <!--<PackageReference Include="StyleCop.Analyzers" Version="1.1.1-beta.61" PrivateAssets="all" />-->
-    <PackageReference Include="SpotifyApi.NetCore" Version="2.3.9" />
+    <!--<PackageReference Include="SpotifyApi.NetCore" Version="2.3.9" />-->
     <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\SpotifyApi.NetCore\src\SpotifyApi.NetCore\SpotifyApi.NetCore.csproj" />
   </ItemGroup>
 
 </Project>
