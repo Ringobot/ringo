@@ -16,4 +16,8 @@
     <ProjectReference Include="..\Ringo.Bot.Net\Ringo.Bot.Net.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\" />
+  </ItemGroup>
+
 </Project>

@@ -23,7 +23,6 @@ namespace RingoBotNet.Helpers
             {
                 ChannelId = activity.ChannelId.ToLower(),
                 ChannelTeamId = activity.ChannelId.ToLower(),
-                ChannelUserId = ChannelUserId(turnContext),
                 FromId = activity.From.Id,
                 FromName = activity.From.Name,
                 RecipientId = activity.Recipient.Id,
@@ -45,6 +44,17 @@ namespace RingoBotNet.Helpers
                     if (ids.Length > 2) info.ConversationId = ids[2];
 
                     break;
+
+                case "msteams":
+                    dynamic teamsChannelData = activity.ChannelData;
+                    info.ChannelTeamId = teamsChannelData.tenant?.id;
+
+                    break;
+
+                //case "emulator":
+                //    dynamic emulatorChannelData = activity.ChannelData;
+
+                //    break;
             }
 
             return info;
@@ -55,7 +65,7 @@ namespace RingoBotNet.Helpers
             if (info == null) throw new ArgumentNullException(nameof(info));
             if (string.IsNullOrEmpty(username)) throw new ArgumentNullException(nameof(username));
 
-            return $"{TeamChannelPart(info)}/@{username.ToLower()}";
+            return $"{TeamChannelPart(info)}/@{NonWordRegex.Replace(username.ToLower(), string.Empty)}";
         }
 
         public static string ToHashtagStationUri(ConversationInfo info, string hashtag)
@@ -89,5 +99,9 @@ namespace RingoBotNet.Helpers
             if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
             return NonWordRegex.Replace(name, string.Empty);
         }
+
+        public static string RingoHandleIfGroupChat(ITurnContext turnContext)
+            => (BotHelper.IsGroup(turnContext) ? "@ringo " : string.Empty);
+
     }
 }

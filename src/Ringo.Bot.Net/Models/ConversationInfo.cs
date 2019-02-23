@@ -24,7 +24,5 @@ namespace RingoBotNet.Models
         public string ConversationName { get; set; }
 
         public bool IsGroup { get; set; }
-
-        public string ChannelUserId { get; set; }
     }
 }

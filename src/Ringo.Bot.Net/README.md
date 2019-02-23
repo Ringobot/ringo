@@ -13,18 +13,26 @@
 
 #### dan/easy-join
 
-1. `play` / `start` creates station ✅
-1. Just `join` or `listen` ✅
-1. Play buttons in place of "Would you like to play X"
-1. `start` starts up at whatever playlist/album the user is currently playing
+1. ✅ `play` / `start` creates station 
+1. ✅ Just `join` or `listen`
+1. ✅ `@ringo sync`
+1. ✅ `start` starts up at whatever playlist/album the user is currently playing
+1. ✅ `@abrahamlarsen is no longer playing. Would you like to play Steve Spacek?` OR just play whatever
+   played last
+1. ✅ `start` alias for `play`
+1. ✅ `@ringo play Johnny Cash #RIPJohnnyCash`
+1. `@ringo join @Daniel2`
 1. If no active device, click button to start player
-1. `@abrahamlarsen is no longer playing. Would you like to play Steve Spacek?` OR just play whatever
-   played last ✅
-1. `play album`
-1. `start` alias for `play` ✅
-1. `start #MerryChristmas`
+1. RULE: If @Daniel2 is now playing a different playlist (and no station), join and create station
 1. join any other user to sync
+1. `start #MerryChristmas`
 1. What would you like to play? prompt
+1. `Station #choicetraxbychromesparks is no longer playing. Would you like to Play "choice trax by chrome sparks"? Type "@ringo play spotify:user:jeremymalvin:playlist:0dPOIm0xYhVRMTqfJKRatQ" to start.`
+1. Play buttons in place of "Would you like to play X"
+1. `help`
+1. `play #LetMeDJ` is an alias to `join #LetMeDJ`
+1. Backoff retry Spotify connections (getting 502's)
+1. 🔹 VISH DEMO
 
 Station hash tags
 
@@ -73,9 +81,9 @@ Sending a slack DM: <https://github.com/Microsoft/BotBuilder/issues/2923> <https
 
 #### dan/sync
 
+1. Once you join a channel station, your Spotify player follows the station
 1. Try sideloading teams
 1. Christian algorithm
-1. sync
 1. Mobile friendly magic number page: https://blog.teamtreehouse.com/create-an-absolute-basic-mobile-css-responsive-navigation-menu.
    Click to copy. 
 1. Auth via Spotify App?
@@ -118,6 +126,15 @@ Sending a slack DM: <https://github.com/Microsoft/BotBuilder/issues/2923> <https
 1. Return a list of stations for the TeamChannel
 1. `@ringo version`
 1. `@ringo status`
+1. `play album`
+1. Fade and switch
+1. `@ringo airhorn`
+1. `@ringo skip 3`
+1. `@ringo np`
+1. `@ringo star`
+1. support Shuffle
+1. Support Artist
+1. Support Albums
 
 ### SpotifyApi.NetCore
 

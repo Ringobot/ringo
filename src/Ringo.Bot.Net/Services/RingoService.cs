@@ -21,7 +21,6 @@ namespace RingoBotNet.Services
     {
         private static readonly Regex SpotifyPlaylistUrlRegex = new Regex("playlist\\/[a-zA-Z0-9]+");
 
-        private readonly HttpClient _http;
         private readonly IPlaylistsApi _playlists;
         private readonly IPlayerApi _player;
         private readonly IConfiguration _config;
@@ -31,7 +30,6 @@ namespace RingoBotNet.Services
         private IStationData _stationData;
 
         public RingoService(
-            HttpClient httpClient,
             IPlaylistsApi playlists,
             IPlayerApi player,
             IConfiguration configuration,
@@ -40,7 +38,6 @@ namespace RingoBotNet.Services
             ILogger<RingoService> logger
             )
         {
-            _http = httpClient;
             _playlists = playlists;
             _player = player;
             _config = configuration;
@@ -51,7 +48,7 @@ namespace RingoBotNet.Services
 
         public async Task<Models.Playlist> GetPlaylist(string token, string playlistUriOrId)
         {
-            var playlistSimple = await _playlists.GetPlaylist(playlistUriOrId);
+            var playlistSimple = await RetryHelper.RetryAsync(() => _playlists.GetPlaylist(playlistUriOrId), logger: _logger);
             return playlistSimple == null ? null : MapToPlaylist(playlistSimple);
         }
 
@@ -119,7 +116,10 @@ namespace RingoBotNet.Services
 
             try
             {
-                await _player.PlayPlaylist(playlist.Id, accessToken);
+                await RetryHelper.RetryAsync(
+                    () => _player.PlayPlaylist(playlist.Id, accessToken), 
+                    logger: _logger, 
+                    cancellationToken: cancellationToken);
             }
             catch (SpotifyApiErrorException ex)
             {
@@ -132,36 +132,36 @@ namespace RingoBotNet.Services
         }
 
         public async Task<Station> CreateStation(
-            ITurnContext turnContext,
+            string channelUserId,
+            ConversationInfo conversation,
             Models.Playlist playlist,
-            CancellationToken cancellationToken,
             string hashtag = null)
         {
             // save station
             var station = await _userData.CreateStation(
-                RingoBotHelper.ChannelUserId(turnContext),
+                channelUserId,
                 playlist, hashtag);
-
-            string channelUserId = RingoBotHelper.ChannelUserId(turnContext);
-            ConversationInfo info = RingoBotHelper.NormalizedConversationInfo(turnContext);
 
             //channelId.lower() / team_id / @username.lower()
             //slack/TA0VBN61L/@daniel
-            await _stationData.CreateStationUri(station.Id, channelUserId, RingoBotHelper.ToUserStationUri(info, info.FromName));
+            await _stationData.CreateStationUri(
+                station.Id, 
+                channelUserId, 
+                RingoBotHelper.ToUserStationUri(conversation, conversation.FromName));
 
-            if (info.IsGroup)
+            if (conversation.IsGroup)
             {
                 //channelId.lowr() / team_id /#conversation.name.replace(\W).lower()/SlackMessage.event.channel
                 //slack/TA0VBN61L/#testing3/CFX3U3TCJ
                 await _stationData.CreateStationUri(station.Id, channelUserId,
-                    RingoBotHelper.ToConversationStationUri(info),
-                    RingoBotHelper.ToHashtag(info.ConversationName));
+                    RingoBotHelper.ToConversationStationUri(conversation),
+                    RingoBotHelper.ToHashtag(conversation.ConversationName));
             }
 
             //channelId.lower() / team_id /#playlist_name.replace(\W).lower()
             //slack/TA0VBN61L/#heatwave2019
             await _stationData.CreateStationUri(station.Id, channelUserId,
-                RingoBotHelper.ToHashtagStationUri(info, playlist.Name),
+                RingoBotHelper.ToHashtagStationUri(conversation, playlist.Name),
                 RingoBotHelper.ToHashtag(playlist.Name));
 
             if (!string.IsNullOrEmpty(hashtag))
@@ -169,7 +169,7 @@ namespace RingoBotNet.Services
                 //channelId.lower() / team_id /#hashtag.lower()
                 //slack/TA0VBN61L/#heatwave
                 await _stationData.CreateStationUri(station.Id, channelUserId,
-                    RingoBotHelper.ToHashtagStationUri(info, hashtag),
+                    RingoBotHelper.ToHashtagStationUri(conversation, hashtag),
                     RingoBotHelper.ToHashtag(hashtag));
             }
 
@@ -200,7 +200,7 @@ namespace RingoBotNet.Services
                 {
                     //TODO: Play button
                     await turnContext.SendActivityAsync(
-                        $"Station #{station.Hashtag} is no longer playing. Would you like to Play \"{station.Playlist.Name}\"? Type `\"{RingoHandleIfGroupChat(turnContext)}play {station.Playlist.Uri}\"` to start.",
+                        $"Station #{station.Hashtag} is no longer playing. Would you like to Play \"{station.Playlist.Name}\"? Type `\"{RingoBotHelper.RingoHandleIfGroupChat(turnContext)}play {station.Playlist.Uri}\"` to start.",
                         cancellationToken: cancellationToken);
                     return;
                 }
@@ -223,7 +223,9 @@ namespace RingoBotNet.Services
 
         public async Task<CurrentPlaybackContext> GetUserNowPlaying(string token)
         {
-            CurrentPlaybackContext info = await _player.GetCurrentPlaybackInfo(token);
+            CurrentPlaybackContext info = await RetryHelper.RetryAsync(
+                () => _player.GetCurrentPlaybackInfo(token),
+                logger: _logger);
 
             if (info == null || !info.IsPlaying || !new[] { "playlist" }.Contains(info.Context.Type))
             {
@@ -238,14 +240,10 @@ namespace RingoBotNet.Services
             return await _userData.CreateChannelUserIfNotExists(channelId, userId, username);
         }
 
-        internal static string RingoHandleIfGroupChat(ITurnContext turnContext) 
-            => (BotHelper.IsGroup(turnContext) ? "@ringo " : string.Empty);
-
-        public async Task<Station> FindStation(ITurnContext turnContext, string query, CancellationToken cancellationToken)
+        public async Task<Station> FindStation(ConversationInfo info, string query, CancellationToken cancellationToken)
         {
             string uri = null;
-            ConversationInfo info = RingoBotHelper.NormalizedConversationInfo(turnContext);
-
+            
             if (query.StartsWith('@'))
             {
                 uri = RingoBotHelper.ToUserStationUri(info, query.Substring(1));
@@ -260,8 +258,11 @@ namespace RingoBotNet.Services
             }
             else
             {
+                // Is this user playing a station?
+                uri = RingoBotHelper.ToUserStationUri(info, info.FromName);
+
                 // TODO: Return a list of stations for the TeamChannel
-                return null;
+                //return null;
             }
 
             StationUri stationUri = await _stationData.GetStationUri(uri);

@@ -9,9 +9,9 @@ namespace RingoBotNet.Services
     public interface IRingoService
     {
         Task<Station> CreateStation(
-            ITurnContext turnContext, 
+            string channelUserId,
+            ConversationInfo conversationInfo,
             Playlist playlist, 
-            CancellationToken cancellationToken, 
             string hashtag = null);
 
         Task<Playlist> PlayPlaylist(ITurnContext turnContext, string searchText, string accessToken, CancellationToken cancellationToken);
@@ -26,7 +26,7 @@ namespace RingoBotNet.Services
 
         Task<ChannelUser> CreateChannelUserIfNotExists(string channelId, string userId, string username);
 
-        Task<Station> FindStation(ITurnContext turnContext, string query, CancellationToken cancellationToken);
+        Task<Station> FindStation(ConversationInfo info, string query, CancellationToken cancellationToken);
 
         Task<SpotifyApi.NetCore.CurrentPlaybackContext> GetUserNowPlaying(string token);
 
