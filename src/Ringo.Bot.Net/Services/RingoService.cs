@@ -90,9 +90,9 @@ namespace RingoBotNet.Services
             if (uriOrId == null)
             {
                 // search for the Playlist
-                var results = await _playlists.SearchPlaylists(
-                    searchText,
-                    accessToken: accessToken);
+                var results = await RetryHelper.RetryAsync(
+                    () => _playlists.SearchPlaylists(searchText, accessToken: accessToken),
+                    logger: _logger, cancellationToken: cancellationToken);
 
                 if (results.Total > 0)
                 {
@@ -208,7 +208,14 @@ namespace RingoBotNet.Services
                 // TODO: Christian algorithm
 
                 // play from offset
-                await _player.PlayPlaylistOffset(info.Context.Uri, info.Item.Id, accessToken: token, positionMs: info.ProgressMs);
+                await RetryHelper.RetryAsync(
+                    () => _player.PlayPlaylistOffset(
+                        info.Context.Uri,
+                        info.Item.Id,
+                        accessToken: token, positionMs:
+                        info.ProgressMs),
+                    logger: _logger,
+                    cancellationToken: cancellationToken);
 
                 await turnContext.SendActivityAsync(
                     $"@{turnContext.Activity.From.Name} has joined #{station.Hashtag}! 🎉",
