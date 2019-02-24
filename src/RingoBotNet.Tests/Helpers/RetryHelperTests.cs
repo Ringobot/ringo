@@ -39,7 +39,7 @@ namespace RingoBotNet.Tests.Helpers
         public async Task Retry_AsyncFuncError_ThrowsException()
         {
             // act
-            await RetryHelper.RetryAsync(() => AddOneError(1), times: 3, waitMs: 0);
+            await RetryHelper.RetryAsync(() => AddOneError(1), times: 3, waitMs: 1);
         }
     }
 }

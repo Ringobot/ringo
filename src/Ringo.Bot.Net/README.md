@@ -21,8 +21,8 @@
    played last
 1. ✅ `start` alias for `play`
 1. ✅ `@ringo play Johnny Cash #RIPJohnnyCash`
+1. ✅ If no active device, click button to open player
 1. `@ringo join @Daniel2`
-1. If no active device, click button to start player
 1. RULE: If @Daniel2 is now playing a different playlist (and no station), join and create station
 1. join any other user to sync
 1. `start #MerryChristmas`
@@ -31,7 +31,7 @@
 1. Play buttons in place of "Would you like to play X"
 1. `help`
 1. `play #LetMeDJ` is an alias to `join #LetMeDJ`
-1. Backoff retry Spotify connections (getting 502's)
+1. ✅ Backoff retry Spotify connections (getting 502's)
 1. 🔹 VISH DEMO
 
 Station hash tags
@@ -139,3 +139,9 @@ Sending a slack DM: <https://github.com/Microsoft/BotBuilder/issues/2923> <https
 ### SpotifyApi.NetCore
 
 1. Move models to `Models` namespace to avoid ambiguous collisions with client Models
+
+## Links
+
+<https://developer.spotify.com/documentation/general/guides/content-linking-guide/>
+
+Using the Spotify Connect Web API: <https://developer.spotify.com/documentation/web-api/guides/using-connect-web-api/>

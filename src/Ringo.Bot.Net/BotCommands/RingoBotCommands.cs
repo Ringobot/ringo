@@ -6,6 +6,7 @@ using RingoBotNet.Models;
 using RingoBotNet.Services;
 using RingoBotNet.State;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -268,48 +269,161 @@ namespace RingoBotNet
                     search = query;
                 }
 
-                playlist = await _ringoService.PlayPlaylist(
-                    turnContext,
+                Playlist[] playlists = await _ringoService.FindPlaylists(
                     search,
+                    token.Token,
+                    cancellationToken);
+
+                if (playlists == null || !playlists.Any())
+                {
+                    await turnContext.SendActivityAsync($"No playlists found!", cancellationToken: cancellationToken);
+                    return;
+                }
+                
+                // TODO: Carousel
+                playlist = playlists[0];
+
+                if (!await IsDeviceActive(
+                    turnContext, 
+                    token.Token, 
+                    playlist, 
+                    $"{RingoBotHelper.RingoHandleIfGroupChat(turnContext)}play", 
+                    cancellationToken))
+                {
+                    return;
+                }
+
+                await _ringoService.PlayPlaylist(
+                    playlist.Id,
                     token.Token,
                     cancellationToken);
             }
 
             if (playlist == null) return;
 
-            await CreateStation(turnContext, 
-                RingoBotHelper.ChannelUserId(turnContext), 
-                token.Token, 
-                playlist, 
-                hashtag, 
+            await CreateStation(turnContext,
+                RingoBotHelper.ChannelUserId(turnContext),
+                token.Token,
+                playlist,
+                hashtag,
                 cancellationToken);
         }
 
+        private async Task<bool> IsDeviceActive(
+            ITurnContext turnContext,
+            string token,
+            Playlist playlist,
+            string commandQuery,
+            CancellationToken cancellationToken)
+        {
+            var devices = await _ringoService.GetDevices(token);
+
+            if (devices.Any(d => d.IsActive)) return true;
+
+            // No active devices
+            var heroCard = new HeroCard
+            {
+                Text = "Open Spotify and click/tap Play",
+                Buttons = new[]
+                {
+                    new CardAction
+                    {
+                        Title = "Open Spotify",
+                        Text = "Open the Spotify Player and click/tap Play to make Spotify active",
+                        Value = playlist.Uri,
+                        Type = ActionTypes.OpenUrl,
+                    },
+                },
+            };
+
+            if (playlist.Images.Any())
+            {
+                heroCard.Images = new[]
+                {
+                    new CardImage
+                    {
+                        Url = playlist.Images[0].Url,
+                        Alt = playlist.Name,
+                        Tap = heroCard.Buttons[0]
+                    }
+                };
+            }
+
+            var attachment = new Attachment
+            {
+                ContentType = HeroCard.ContentType,
+                Content = heroCard
+            };
+
+            var message = MessageFactory.Attachment(
+                attachment, 
+                text: "Ringo can't see any active Spotify devices. Click the button below to open Spotify and then press play. Once Spotify is playing, click/tap Try Again.");
+                
+            message.SuggestedActions = new SuggestedActions()
+            {
+                Actions = new List<CardAction>()
+                {
+                    new CardAction() { Title = "Try Again", Type = ActionTypes.ImBack, Value = commandQuery },
+                },
+            };
+
+            await turnContext.SendActivityAsync(message, cancellationToken: cancellationToken);
+
+            return false;
+        }
+
         private async Task CreateStation(
-            ITurnContext turnContext, 
+            ITurnContext turnContext,
             string channelUserId,
-            string token, 
-            Playlist playlist, 
-            string hashtag, 
+            string token,
+            Playlist playlist,
+            string hashtag,
             CancellationToken cancellationToken)
         {
             var station = await _ringoService.CreateStation(
-                channelUserId, 
-                RingoBotHelper.NormalizedConversationInfo(turnContext), 
-                playlist, 
+                channelUserId,
+                RingoBotHelper.NormalizedConversationInfo(turnContext),
+                playlist,
                 hashtag);
+
+            var heroCard = new HeroCard
+            {
+                Text = $"#{station.Hashtag}"
+            };
+
+            if (playlist.Images.Any())
+            {
+                heroCard.Images = new[]
+                {
+                    new CardImage
+                    {
+                        Url = playlist.Images[0].Url,
+                        Alt = playlist.Name
+                    }
+                };
+            }
+
+            var attachment = new Attachment
+            {
+                ContentType = HeroCard.ContentType,
+                Content = heroCard
+            };
 
             if (BotHelper.IsGroup(turnContext))
             {
-                await turnContext.SendActivityAsync(
-                    $"{turnContext.Activity.From.Name} is playing \"{station.Name}\" #{station.Hashtag}. Type `\"@ringo join\"` to join in! 🎉",
-                        cancellationToken: cancellationToken);
+                var message = MessageFactory.Attachment(
+                    attachment,
+                    text: $"{turnContext.Activity.From.Name} is playing \"{station.Name}\" #{station.Hashtag}. Type `\"@ringo join\"` to join in! 🎉");
+
+                await turnContext.SendActivityAsync(message, cancellationToken: cancellationToken);
             }
             else
             {
-                await turnContext.SendActivityAsync(
-                    $"Now playing \"{station.Name}\" #{station.Hashtag}. Friends can type `\"join #{station.Hashtag}\"` to join in! 🎉",
-                    cancellationToken: cancellationToken);
+                var message = MessageFactory.Attachment(
+                    attachment,
+                    text: $"Now playing \"{station.Name}\" #{station.Hashtag}. Friends can type `\"join #{station.Hashtag}\"` to join in! 🎉");
+
+                await turnContext.SendActivityAsync(message, cancellationToken: cancellationToken);
             }
         }
     }

@@ -11,7 +11,7 @@ namespace RingoBotNet.Models
 
         public string Id { get; set; }
 
-        //public Image[] Images { get; set; }
+        public Image[] Images { get; set; }
 
         public string Name { get; set; }
 
@@ -23,14 +23,14 @@ namespace RingoBotNet.Models
     //    public string Spotify { get; set; }
     //}
 
-    //public partial class Image
-    //{
-    //    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-    //    public int Height { get; set; }
+    public partial class Image
+    {
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public int Height { get; set; }
 
-    //    public string Url { get; set; }
+        public string Url { get; set; }
 
-    //    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-    //    public int Width { get; set; }
-    //}
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public int Width { get; set; }
+    }
 }

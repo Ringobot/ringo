@@ -14,7 +14,9 @@ namespace RingoBotNet.Services
             Playlist playlist, 
             string hashtag = null);
 
-        Task<Playlist> PlayPlaylist(ITurnContext turnContext, string searchText, string accessToken, CancellationToken cancellationToken);
+        Task<Playlist[]> FindPlaylists(string searchText, string accessToken, CancellationToken cancellationToken);
+
+        Task PlayPlaylist(string playlistId, string accessToken, CancellationToken cancellationToken);
 
         Task JoinPlaylist(
             ITurnContext turnContext,
@@ -27,6 +29,8 @@ namespace RingoBotNet.Services
         Task<ChannelUser> CreateChannelUserIfNotExists(string channelId, string userId, string username);
 
         Task<Station> FindStation(ConversationInfo info, string query, CancellationToken cancellationToken);
+
+        Task<SpotifyApi.NetCore.Device[]> GetDevices(string accessToken);
 
         Task<SpotifyApi.NetCore.CurrentPlaybackContext> GetUserNowPlaying(string token);
 

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Bot.Builder;
-using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RingoBotNet.Data;
@@ -8,9 +7,7 @@ using RingoBotNet.Models;
 using SpotifyApi.NetCore;
 using SpotifyApi.NetCore.Helpers;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,20 +43,9 @@ namespace RingoBotNet.Services
             _logger = logger;
         }
 
-        public async Task<Models.Playlist> GetPlaylist(string token, string playlistUriOrId)
+        public async Task<Models.Playlist[]> FindPlaylists(string searchText, string accessToken, CancellationToken cancellationToken)
         {
-            var playlistSimple = await RetryHelper.RetryAsync(() => _playlists.GetPlaylist(playlistUriOrId), logger: _logger);
-            return playlistSimple == null ? null : MapToPlaylist(playlistSimple);
-        }
-
-        public async Task<Models.Playlist> PlayPlaylist(
-            ITurnContext turnContext,
-            string searchText,
-            string accessToken,
-            CancellationToken cancellationToken)
-        {
-            //TODO Model.Playlist
-            Models.Playlist playlist = null;
+            Models.Playlist[] playlists = null;
 
             string uriOrId = null;
 
@@ -92,43 +78,34 @@ namespace RingoBotNet.Services
                 // search for the Playlist
                 var results = await RetryHelper.RetryAsync(
                     () => _playlists.SearchPlaylists(searchText, accessToken: accessToken),
-                    logger: _logger, cancellationToken: cancellationToken);
+                    logger: _logger,
+                    cancellationToken: cancellationToken);
 
                 if (results.Total > 0)
                 {
-                    playlist = MapToPlaylist(results.Items[0]);
-
-                    await turnContext.SendActivityAsync(
-                        $"{results.Total.ToString("N0")} playlists found.",
-                        cancellationToken: cancellationToken);
+                    playlists = results.Items.Take(3).Select(MapToPlaylist).ToArray();
                 }
             }
             else
             {
-                playlist = await GetPlaylist(accessToken, uriOrId);
+                playlists = new[] { await GetPlaylist(accessToken, uriOrId) };
             }
 
-            if (playlist == null)
-            {
-                await turnContext.SendActivityAsync($"No playlists found!", cancellationToken: cancellationToken);
-                return null;
-            }
+            return playlists;
+        }
 
-            try
-            {
-                await RetryHelper.RetryAsync(
-                    () => _player.PlayPlaylist(playlist.Id, accessToken), 
-                    logger: _logger, 
-                    cancellationToken: cancellationToken);
-            }
-            catch (SpotifyApiErrorException ex)
-            {
-                _logger.LogError(ex.Message);
-                await turnContext.SendActivityAsync($"{ex.Message} 🤔 Try opening Spotify on your device and playing a track for a few seconds. Then try typing `play {searchText}` again", cancellationToken: cancellationToken);
-                return null;
-            }
+        public async Task<Models.Playlist> GetPlaylist(string token, string playlistUriOrId)
+        {
+            var playlistSimple = await RetryHelper.RetryAsync(() => _playlists.GetPlaylist(playlistUriOrId), logger: _logger);
+            return playlistSimple == null ? null : MapToPlaylist(playlistSimple);
+        }
 
-            return playlist;
+        public async Task PlayPlaylist(string playlistId, string accessToken, CancellationToken cancellationToken)
+        {
+            await RetryHelper.RetryAsync(
+                () => _player.PlayPlaylist(playlistId, accessToken),
+                logger: _logger,
+                cancellationToken: cancellationToken);
         }
 
         public async Task<Station> CreateStation(
@@ -145,8 +122,8 @@ namespace RingoBotNet.Services
             //channelId.lower() / team_id / @username.lower()
             //slack/TA0VBN61L/@daniel
             await _stationData.CreateStationUri(
-                station.Id, 
-                channelUserId, 
+                station.Id,
+                channelUserId,
                 RingoBotHelper.ToUserStationUri(conversation, conversation.FromName));
 
             if (conversation.IsGroup)
@@ -176,12 +153,32 @@ namespace RingoBotNet.Services
             return station;
         }
 
-        private Models.Playlist MapToPlaylist(PlaylistSimplified playlistSimplified) => new Models.Playlist
+        public async Task<Device[]> GetDevices(string accessToken)
         {
-            Id = playlistSimplified.Id,
-            Name = playlistSimplified.Name,
-            Uri = playlistSimplified.Uri
-        };
+            return await _player.GetDevices<Device[]>(accessToken);
+        }
+
+        private Models.Playlist MapToPlaylist(PlaylistSimplified playlistSimplified)
+        {
+            var playlist = new Models.Playlist
+            {
+                Id = playlistSimplified.Id,
+                Name = playlistSimplified.Name,
+                Uri = playlistSimplified.Uri
+            };
+
+            if (playlistSimplified.Images.Any())
+            {
+                playlist.Images = playlistSimplified.Images.Select(i => new Models.Image
+                {
+                    Height = i.Height,
+                    Url = i.Url,
+                    Width = i.Width
+                }).ToArray();
+            }
+
+            return playlist;
+        }
 
         public async Task JoinPlaylist(
             ITurnContext turnContext,
@@ -250,7 +247,7 @@ namespace RingoBotNet.Services
         public async Task<Station> FindStation(ConversationInfo info, string query, CancellationToken cancellationToken)
         {
             string uri = null;
-            
+
             if (query.StartsWith('@'))
             {
                 uri = RingoBotHelper.ToUserStationUri(info, query.Substring(1));
