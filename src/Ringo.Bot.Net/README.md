@@ -24,7 +24,7 @@
 1. ✅ If no active device, click button to open player
    <https://open.spotify.com/track/6OxAnk3AroaW4c5hsUXNkB?si=BcWvVqgJS-6wE1B1cAFZEw&nd=1>
 1. ✅ Backoff retry Spotify connections (getting 502's)
-1. DM auth, DM no active device
+1. ~~DM auth, DM no active device~~ - DM is not possible.
 
 #### dan/simple-stations
 
