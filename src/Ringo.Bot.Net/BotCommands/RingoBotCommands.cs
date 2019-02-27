@@ -1,4 +1,5 @@
 ﻿using Microsoft.Bot.Builder;
+using Microsoft.Bot.Connector;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 using RingoBotNet.Helpers;
@@ -137,6 +138,13 @@ namespace RingoBotNet
                 userProfile.ResumeAfterAuthorizationWith = (JoinCommand[0], query);
                 return;
             }
+
+            if (!await IsDeviceActive(
+                turnContext,
+                token.Token,
+                station.Playlist,
+                $"{RingoBotHelper.RingoHandleIfGroupChat(turnContext)}join {query}",
+                cancellationToken)) return;
 
             // Join
             await _ringoService.JoinPlaylist(
@@ -322,19 +330,20 @@ namespace RingoBotNet
 
             // No active devices
 
-            // Get the first track in the playlist so that we can autoplay
-            string url = await _ringoService.GetPlaylistTrackOneUrl(token, playlist);
-
             var heroCard = new HeroCard
             {
-                Text = "Open Spotify and click/tap Play",
                 Buttons = new[]
                 {
                     new CardAction
                     {
                         Title = "Open Spotify",
-                        Text = "Open the Spotify Player and click/tap Play to make Spotify active",
-                        Value = url,
+                        Value = playlist.Uri,
+                        Type = ActionTypes.OpenUrl,
+                    },
+                    new CardAction
+                    {
+                        Title = "Open Spotify Web Player",
+                        Value = playlist.ExternalUrls.Spotify,
                         Type = ActionTypes.OpenUrl,
                     },
                     new CardAction
@@ -346,19 +355,6 @@ namespace RingoBotNet
                 },
             };
 
-            if (playlist.Images.Any())
-            {
-                heroCard.Images = new[]
-                {
-                    new CardImage
-                    {
-                        Url = "https://developer.spotify.com/assets/branding-guidelines/icon3@2x.png",
-                        Alt = "Spotify logo",
-                        Tap = heroCard.Buttons[0]
-                    }
-                };
-            }
-
             var attachment = new Attachment
             {
                 ContentType = HeroCard.ContentType,
@@ -367,8 +363,8 @@ namespace RingoBotNet
 
             var message = MessageFactory.Attachment(
                 attachment, 
-                text: "Ringo can't see any active Spotify devices. Click the button below to open Spotify and then press play. Once Spotify is playing, click/tap Try Again.");
-                
+                text: "To play or join with Ringo your Spotify app needs to be active or playing. Open Spotify and press play, then try again.");
+
             await turnContext.SendActivityAsync(message, cancellationToken: cancellationToken);
 
             return false;
