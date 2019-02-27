@@ -287,7 +287,7 @@ namespace RingoBotNet
                     turnContext, 
                     token.Token, 
                     playlist, 
-                    $"{RingoBotHelper.RingoHandleIfGroupChat(turnContext)}play", 
+                    $"{RingoBotHelper.RingoHandleIfGroupChat(turnContext)}play {playlist.Uri}", 
                     cancellationToken))
                 {
                     return;
@@ -321,6 +321,10 @@ namespace RingoBotNet
             if (devices.Any(d => d.IsActive)) return true;
 
             // No active devices
+
+            // Get the first track in the playlist so that we can autoplay
+            string url = await _ringoService.GetPlaylistTrackOneUrl(token, playlist);
+
             var heroCard = new HeroCard
             {
                 Text = "Open Spotify and click/tap Play",
@@ -330,8 +334,14 @@ namespace RingoBotNet
                     {
                         Title = "Open Spotify",
                         Text = "Open the Spotify Player and click/tap Play to make Spotify active",
-                        Value = playlist.Uri,
+                        Value = url,
                         Type = ActionTypes.OpenUrl,
+                    },
+                    new CardAction
+                    {
+                        Title = "Spotify is playing! Try Again",
+                        Type = ActionTypes.ImBack,
+                        Value = commandQuery
                     },
                 },
             };
@@ -342,8 +352,8 @@ namespace RingoBotNet
                 {
                     new CardImage
                     {
-                        Url = playlist.Images[0].Url,
-                        Alt = playlist.Name,
+                        Url = "https://developer.spotify.com/assets/branding-guidelines/icon3@2x.png",
+                        Alt = "Spotify logo",
                         Tap = heroCard.Buttons[0]
                     }
                 };
@@ -359,14 +369,6 @@ namespace RingoBotNet
                 attachment, 
                 text: "Ringo can't see any active Spotify devices. Click the button below to open Spotify and then press play. Once Spotify is playing, click/tap Try Again.");
                 
-            message.SuggestedActions = new SuggestedActions()
-            {
-                Actions = new List<CardAction>()
-                {
-                    new CardAction() { Title = "Try Again", Type = ActionTypes.ImBack, Value = commandQuery },
-                },
-            };
-
             await turnContext.SendActivityAsync(message, cancellationToken: cancellationToken);
 
             return false;

@@ -22,60 +22,29 @@
 1. ✅ `start` alias for `play`
 1. ✅ `@ringo play Johnny Cash #RIPJohnnyCash`
 1. ✅ If no active device, click button to open player
-1. `@ringo join @Daniel2`
-1. RULE: If @Daniel2 is now playing a different playlist (and no station), join and create station
-1. join any other user to sync
-1. `start #MerryChristmas`
-1. What would you like to play? prompt
-1. `Station #choicetraxbychromesparks is no longer playing. Would you like to Play "choice trax by chrome sparks"? Type "@ringo play spotify:user:jeremymalvin:playlist:0dPOIm0xYhVRMTqfJKRatQ" to start.`
-1. Play buttons in place of "Would you like to play X"
-1. `help`
-1. `play #LetMeDJ` is an alias to `join #LetMeDJ`
+   <https://open.spotify.com/track/6OxAnk3AroaW4c5hsUXNkB?si=BcWvVqgJS-6wE1B1cAFZEw&nd=1>
 1. ✅ Backoff retry Spotify connections (getting 502's)
+1. DM auth, DM no active device
+
+#### dan/simple-stations
+
+1. Only two types of stations, channel and user and they persist
+1. When you `play` in a channel you are changing the station for the channel
+1. When you `play` in DM you are changing your own channel
+1. `join` in a channel joins the channel station
+1. `join` in the DM joins any other station, e.g. `join #music_lovers` (joins music_lovers channel
+   station) or `join @abraham` (joins another abraham's station)
+
+#### dan/whkmas
+
 1. 🔹 VISH DEMO
-
-Station hash tags
-
-    # These could all refer to the same station
-    # Stations are global to a realm
-    # Realms are Slack/Team, Teams/Team, Twitter, Skype/User
-
-    channelId.lower()/team_id/@username.lower()
-    slack/TA0VBN61L/@daniel
-
-    channelId.lowr()/team_id/#conversation.name.replace(\W).lower()/SlackMessage.event.channel
-    slack/TA0VBN61L/#testing3/CFX3U3TCJ
-
-    channelId.lower()/team_id/#hashtag.lower()
-    slack/TA0VBN61L/#heatwave
-
-    channelId.lower()/team_id/#playlist_name.replace(\W).lower()
-    slack/TA0VBN61L/#heatwave2019
-
-
-    # StationUri
-    {
-        id: (base64(uri)),
-        pk: (hash(uri)),
-        uri: uri,
-        channelUserId: channelUserId,
-        stationId: stationId,
-        hashtag: (hashtag)
-    }
-
-    # ChannelUser.Station
-    {
-        id: (guid),
-        playlist: [playlist],
-        created: (utc),
-        modified: (utc),
-        isActive: (bool),
-        listenerCount: (int)
-    }
-
-#### dan/dm-auth
-
-1. DM auth
+1. Search results carousel
+1. Ignore anything before `@ringo`
+1. Support Artist
+1. Support Albums
+1. If owner stops playing Ringo searches for new owner
+1. `You and 20 others are playing #JoeGoddard`
+1. Turn LUIS on for Skitch
 
 Sending a slack DM: <https://github.com/Microsoft/BotBuilder/issues/2923> <https://stackoverflow.com/questions/44353520/is-there-a-way-to-start-formflow-dialog-on-conversationupdate-event>
 
@@ -133,12 +102,59 @@ Sending a slack DM: <https://github.com/Microsoft/BotBuilder/issues/2923> <https
 1. `@ringo np`
 1. `@ringo star`
 1. support Shuffle
-1. Support Artist
-1. Support Albums
+1. RULE: If @Daniel2 is now playing a different playlist (and no station), join and create station
+1. `start #MerryChristmas`
+1. What would you like to play? prompt
+1. `Station #choicetraxbychromesparks is no longer playing. Would you like to Play "choice trax by chrome sparks"? Type "@ringo play spotify:user:jeremymalvin:playlist:0dPOIm0xYhVRMTqfJKRatQ" to start.`
+1. Play buttons in place of "Would you like to play X"
+1. `help`
+1. `play #LetMeDJ` is an alias to `join #LetMeDJ`
+1. `@ringo join @Daniel2`
+1. join any other user to sync
 
 ### SpotifyApi.NetCore
 
 1. Move models to `Models` namespace to avoid ambiguous collisions with client Models
+
+## Station hash tags
+
+    # These could all refer to the same station
+    # Stations are global to a realm
+    # Realms are Slack/Team, Teams/Team, Twitter, Skype/User
+
+    channelId.lower()/team_id/@username.lower()
+    slack/TA0VBN61L/@daniel
+
+    channelId.lowr()/team_id/#conversation.name.replace(\W).lower()/SlackMessage.event.channel
+    slack/TA0VBN61L/#testing3/CFX3U3TCJ
+
+    channelId.lower()/team_id/#hashtag.lower()
+    slack/TA0VBN61L/#heatwave
+
+    channelId.lower()/team_id/#playlist_name.replace(\W).lower()
+    slack/TA0VBN61L/#heatwave2019
+
+
+    # StationUri
+    {
+        id: (base64(uri)),
+        pk: (hash(uri)),
+        uri: uri,
+        channelUserId: channelUserId,
+        stationId: stationId,
+        hashtag: (hashtag)
+    }
+
+    # ChannelUser.Station
+    {
+        id: (guid),
+        playlist: [playlist],
+        created: (utc),
+        modified: (utc),
+        isActive: (bool),
+        listenerCount: (int)
+    }
+
 
 ## Links
 

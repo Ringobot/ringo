@@ -5,9 +5,9 @@ namespace RingoBotNet.Models
 {
     public class Playlist
     {
-        //public ExternalUrls ExternalUrls { get; set; }
+        public ExternalUrls ExternalUrls { get; set; }
 
-        //public string Href { get; set; }
+        public string Href { get; set; }
 
         public string Id { get; set; }
 
@@ -18,10 +18,10 @@ namespace RingoBotNet.Models
         public string Uri { get; set; }
     }
 
-    //public partial class ExternalUrls
-    //{
-    //    public string Spotify { get; set; }
-    //}
+    public partial class ExternalUrls
+    {
+        public string Spotify { get; set; }
+    }
 
     public partial class Image
     {

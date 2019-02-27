@@ -35,5 +35,7 @@ namespace RingoBotNet.Services
         Task<SpotifyApi.NetCore.CurrentPlaybackContext> GetUserNowPlaying(string token);
 
         Task<Playlist> GetPlaylist(string token, string uri);
+
+        Task<string> GetPlaylistTrackOneUrl(string token, Playlist playlist);
     }
 }

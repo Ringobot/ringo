@@ -158,13 +158,22 @@ namespace RingoBotNet.Services
             return await _player.GetDevices<Device[]>(accessToken);
         }
 
+        public async Task<string> GetPlaylistTrackOneUrl(string token, Models.Playlist playlist)
+        {
+            var tracks = await _playlists.GetTracks(playlist.Id, accessToken: token, limit: 1);
+            if (tracks.Total < 1) return null;
+            return tracks.Items[0].Track.ExternalUrls.Spotify;
+        }
+
         private Models.Playlist MapToPlaylist(PlaylistSimplified playlistSimplified)
         {
             var playlist = new Models.Playlist
             {
                 Id = playlistSimplified.Id,
                 Name = playlistSimplified.Name,
-                Uri = playlistSimplified.Uri
+                Uri = playlistSimplified.Uri,
+                Href = playlistSimplified.Href,
+                ExternalUrls = new Models.ExternalUrls { Spotify = playlistSimplified.ExternalUrls.Spotify }
             };
 
             if (playlistSimplified.Images.Any())
