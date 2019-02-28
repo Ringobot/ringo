@@ -142,9 +142,12 @@ namespace RingoBotNet
             if (!await IsDeviceActive(
                 turnContext,
                 token.Token,
-                station.Playlist,
                 $"{RingoBotHelper.RingoHandleIfGroupChat(turnContext)}join {query}",
-                cancellationToken)) return;
+                cancellationToken,
+                station.Playlist))
+            {
+                return;
+            }
 
             // Join
             await _ringoService.JoinPlaylist(
@@ -228,6 +231,15 @@ namespace RingoBotNet
 
             if (string.IsNullOrEmpty(query))
             {
+                if (!await IsDeviceActive(
+                    turnContext, 
+                    token.Token, 
+                    $"{RingoBotHelper.RingoHandleIfGroupChat(turnContext)}play", 
+                    cancellationToken))
+                {
+                    return;
+                }
+
                 // no query so start / resume station
                 playlist = await GetNowPlaying(token.Token);
 
@@ -237,8 +249,6 @@ namespace RingoBotNet
                     await turnContext.SendActivityAsync(
                         "You are not currently playing a Spotify Playlist.",
                         cancellationToken: cancellationToken);
-
-                    // TODO: What would you like to play?
                     return;
                 }
             }
@@ -294,9 +304,9 @@ namespace RingoBotNet
                 if (!await IsDeviceActive(
                     turnContext, 
                     token.Token, 
-                    playlist, 
                     $"{RingoBotHelper.RingoHandleIfGroupChat(turnContext)}play {playlist.Uri}", 
-                    cancellationToken))
+                    cancellationToken,
+                    playlist: playlist))
                 {
                     return;
                 }
@@ -320,9 +330,9 @@ namespace RingoBotNet
         private async Task<bool> IsDeviceActive(
             ITurnContext turnContext,
             string token,
-            Playlist playlist,
             string commandQuery,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            Playlist playlist = null)
         {
             var devices = await _ringoService.GetDevices(token);
 
@@ -330,39 +340,36 @@ namespace RingoBotNet
 
             // No active devices
 
-            var heroCard = new HeroCard
+            var heroCard = new HeroCard { Buttons = new List<CardAction>() };
+
+            if (playlist != null)
             {
-                Buttons = new[]
-                {
+                heroCard.Buttons.Add(
                     new CardAction
                     {
                         Title = "Open Spotify",
                         Value = playlist.Uri,
                         Type = ActionTypes.OpenUrl,
-                    },
+                    });
+                heroCard.Buttons.Add(
                     new CardAction
                     {
                         Title = "Open Spotify Web Player",
                         Value = playlist.ExternalUrls.Spotify,
                         Type = ActionTypes.OpenUrl,
-                    },
-                    new CardAction
-                    {
-                        Title = "Spotify is playing! Try Again",
-                        Type = ActionTypes.ImBack,
-                        Value = commandQuery
-                    },
-                },
-            };
+                    });
+            }
 
-            var attachment = new Attachment
-            {
-                ContentType = HeroCard.ContentType,
-                Content = heroCard
-            };
+            heroCard.Buttons.Add(
+                new CardAction
+                {
+                    Title = "Spotify is playing! Try Again",
+                    Type = ActionTypes.ImBack,
+                    Value = commandQuery
+                });
 
             var message = MessageFactory.Attachment(
-                attachment, 
+                new Attachment { ContentType = HeroCard.ContentType, Content = heroCard }, 
                 text: "To play or join with Ringo your Spotify app needs to be active or playing. Open Spotify and press play, then try again.");
 
             await turnContext.SendActivityAsync(message, cancellationToken: cancellationToken);

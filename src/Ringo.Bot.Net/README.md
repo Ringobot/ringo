@@ -34,9 +34,13 @@
 1. `join` in a channel joins the channel station
 1. `join` in the DM joins any other station, e.g. `join #music_lovers` (joins music_lovers channel
    station) or `join @abraham` (joins another abraham's station)
+1. Join Hero Card
+1. play current artist, playlist or album. Otherwise warn.
+1. Revert play "playlist name" feature?
 
 #### dan/whkmas
 
+1. Christian algorithm
 1. 🔹 VISH DEMO
 1. Search results carousel
 1. Ignore anything before `@ringo`
@@ -52,7 +56,6 @@ Sending a slack DM: <https://github.com/Microsoft/BotBuilder/issues/2923> <https
 
 1. Once you join a channel station, your Spotify player follows the station
 1. Try sideloading teams
-1. Christian algorithm
 1. Mobile friendly magic number page: https://blog.teamtreehouse.com/create-an-absolute-basic-mobile-css-responsive-navigation-menu.
    Click to copy. 
 1. Auth via Spotify App?
