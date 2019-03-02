@@ -18,8 +18,7 @@ namespace RingoBotNet.Services
 
         Task PlayPlaylist(string playlistId, string accessToken, CancellationToken cancellationToken);
 
-        Task JoinPlaylist(
-            ITurnContext turnContext,
+        Task<bool> JoinPlaylist(
             string query,
             string token,
             Station station,

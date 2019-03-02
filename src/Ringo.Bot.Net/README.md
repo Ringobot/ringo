@@ -28,15 +28,18 @@
 
 #### dan/simple-stations
 
+1. ✅ Join Hero Card
 1. Only two types of stations, channel and user and they persist
+1. Separate Station Table. Station Type = Channel|User. New Listener table?
 1. When you `play` in a channel you are changing the station for the channel
 1. When you `play` in DM you are changing your own channel
 1. `join` in a channel joins the channel station
 1. `join` in the DM joins any other station, e.g. `join #music_lovers` (joins music_lovers channel
    station) or `join @abraham` (joins another abraham's station)
-1. Join Hero Card
 1. play current artist, playlist or album. Otherwise warn.
 1. Revert play "playlist name" feature?
+1. OK for people to join your personal station (means they can see what you are playing at any time)
+1. If owner stops playing Ringo searches for new owner
 
 #### dan/whkmas
 
@@ -46,8 +49,8 @@
 1. Ignore anything before `@ringo`
 1. Support Artist
 1. Support Albums
-1. If owner stops playing Ringo searches for new owner
 1. `You and 20 others are playing #JoeGoddard`
+1. `You pasted a link, would you like to... (start a station | add to playlist | change the station | ...)`
 1. Turn LUIS on for Skitch
 
 Sending a slack DM: <https://github.com/Microsoft/BotBuilder/issues/2923> <https://stackoverflow.com/questions/44353520/is-there-a-way-to-start-formflow-dialog-on-conversationupdate-event>

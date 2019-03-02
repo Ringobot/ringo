@@ -103,5 +103,8 @@ namespace RingoBotNet.Helpers
         public static string RingoHandleIfGroupChat(ITurnContext turnContext)
             => (BotHelper.IsGroup(turnContext) ? "@ringo " : string.Empty);
 
+        public static string RingoHandleIfGroupChat(ConversationInfo info)
+            => info.IsGroup ? "@ringo " : string.Empty;
+
     }
 }

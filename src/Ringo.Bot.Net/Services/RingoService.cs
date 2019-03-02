@@ -1,6 +1,7 @@
 ﻿using Microsoft.Bot.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using RingoBotNet.Data;
 using RingoBotNet.Helpers;
 using RingoBotNet.Models;
@@ -114,41 +115,49 @@ namespace RingoBotNet.Services
             Models.Playlist playlist,
             string hashtag = null)
         {
+            hashtag = hashtag ?? (conversation.IsGroup
+                ? RingoBotHelper.ToHashtag(conversation.ConversationName)
+                : RingoBotHelper.ToHashtag(conversation.FromName));
+
             // save station
             var station = await _userData.CreateStation(
                 channelUserId,
                 playlist, hashtag);
 
-            //channelId.lower() / team_id / @username.lower()
-            //slack/TA0VBN61L/@daniel
-            await _stationData.CreateStationUri(
-                station.Id,
-                channelUserId,
-                RingoBotHelper.ToUserStationUri(conversation, conversation.FromName));
-
             if (conversation.IsGroup)
             {
                 //channelId.lowr() / team_id /#conversation.name.replace(\W).lower()/SlackMessage.event.channel
                 //slack/TA0VBN61L/#testing3/CFX3U3TCJ
-                await _stationData.CreateStationUri(station.Id, channelUserId,
+                await _stationData.CreateStationUri(
+                    station.Id, 
+                    channelUserId,
                     RingoBotHelper.ToConversationStationUri(conversation),
                     RingoBotHelper.ToHashtag(conversation.ConversationName));
             }
-
-            //channelId.lower() / team_id /#playlist_name.replace(\W).lower()
-            //slack/TA0VBN61L/#heatwave2019
-            await _stationData.CreateStationUri(station.Id, channelUserId,
-                RingoBotHelper.ToHashtagStationUri(conversation, playlist.Name),
-                RingoBotHelper.ToHashtag(playlist.Name));
-
-            if (!string.IsNullOrEmpty(hashtag))
+            else
             {
-                //channelId.lower() / team_id /#hashtag.lower()
-                //slack/TA0VBN61L/#heatwave
-                await _stationData.CreateStationUri(station.Id, channelUserId,
-                    RingoBotHelper.ToHashtagStationUri(conversation, hashtag),
-                    RingoBotHelper.ToHashtag(hashtag));
+                //channelId.lower() / team_id / @username.lower()
+                //slack/TA0VBN61L/@daniel
+                await _stationData.CreateStationUri(
+                    station.Id,
+                    channelUserId,
+                    RingoBotHelper.ToUserStationUri(conversation, conversation.FromName));
             }
+
+            ////channelId.lower() / team_id /#playlist_name.replace(\W).lower()
+            ////slack/TA0VBN61L/#heatwave2019
+            //await _stationData.CreateStationUri(station.Id, channelUserId,
+            //    RingoBotHelper.ToHashtagStationUri(conversation, playlist.Name),
+            //    RingoBotHelper.ToHashtag(playlist.Name));
+
+            //if (!string.IsNullOrEmpty(hashtag))
+            //{
+            //    //channelId.lower() / team_id /#hashtag.lower()
+            //    //slack/TA0VBN61L/#heatwave
+            //    await _stationData.CreateStationUri(station.Id, channelUserId,
+            //        RingoBotHelper.ToHashtagStationUri(conversation, hashtag),
+            //        RingoBotHelper.ToHashtag(hashtag));
+            //}
 
             return station;
         }
@@ -189,49 +198,37 @@ namespace RingoBotNet.Services
             return playlist;
         }
 
-        public async Task JoinPlaylist(
-            ITurnContext turnContext,
+        public async Task<bool> JoinPlaylist(
             string query,
             string token,
             Station station,
             string stationToken,
             CancellationToken cancellationToken)
         {
-            try
+            // is the station playing?
+            var info = await GetUserNowPlaying(stationToken);
+
+            if (info == null || SpotifyUriHelper.PlaylistId(info.Context.Uri) != SpotifyUriHelper.PlaylistId(station.Playlist.Uri))
             {
-                // is the station playing?
-                var info = await GetUserNowPlaying(stationToken);
+                _logger.LogDebug($"JoinPlaylist: station.Playlist.Uri = {station.Playlist.Uri}");
+                _logger.LogDebug($"JoinPlaylist: info = {JsonConvert.SerializeObject(info)}");
 
-                if (info == null || info.Context.Uri != station.Playlist.Uri)
-                {
-                    //TODO: Play button
-                    await turnContext.SendActivityAsync(
-                        $"Station #{station.Hashtag} is no longer playing. Would you like to Play \"{station.Playlist.Name}\"? Type `\"{RingoBotHelper.RingoHandleIfGroupChat(turnContext)}play {station.Playlist.Uri}\"` to start.",
-                        cancellationToken: cancellationToken);
-                    return;
-                }
-
-                // TODO: Christian algorithm
-
-                // play from offset
-                await RetryHelper.RetryAsync(
-                    () => _player.PlayPlaylistOffset(
-                        info.Context.Uri,
-                        info.Item.Id,
-                        accessToken: token, positionMs:
-                        info.ProgressMs),
-                    logger: _logger,
-                    cancellationToken: cancellationToken);
-
-                await turnContext.SendActivityAsync(
-                    $"@{turnContext.Activity.From.Name} has joined #{station.Hashtag}! 🎉",
-                    cancellationToken: cancellationToken);
+                return false;
             }
-            catch (SpotifyApiErrorException ex)
-            {
-                await turnContext.SendActivityAsync(ex.Message, cancellationToken: cancellationToken);
-                return;
-            }
+
+            // TODO: Christian algorithm
+
+            // play from offset
+            await RetryHelper.RetryAsync(
+                () => _player.PlayPlaylistOffset(
+                    info.Context.Uri,
+                    info.Item.Id,
+                    accessToken: token, positionMs:
+                    info.ProgressMs),
+                logger: _logger,
+                cancellationToken: cancellationToken);
+
+            return true;
         }
 
         public async Task<CurrentPlaybackContext> GetUserNowPlaying(string token)

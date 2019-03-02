@@ -1,5 +1,4 @@
 ﻿using Microsoft.Bot.Builder;
-using Microsoft.Bot.Connector;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 using RingoBotNet.Helpers;
@@ -150,18 +149,37 @@ namespace RingoBotNet
             }
 
             // Join
-            await _ringoService.JoinPlaylist(
-                turnContext,
-                query,
-                token.Token,
-                station,
-                stationToken.Token,
-                cancellationToken);
+            try
+            {
+                if (await _ringoService.JoinPlaylist(
+                    query,
+                    token.Token,
+                    station,
+                    stationToken.Token,
+                    cancellationToken))
+                {
+                    await turnContext.SendActivityAsync(
+                        RingoBotMessages.UserHasJoined(info, station),
+                        cancellationToken: cancellationToken);
+                }
+                else
+                {
+                    await turnContext.SendActivityAsync(
+                        RingoBotMessages.StationNoLongerPlaying(info, station),
+                        cancellationToken: cancellationToken);
+                }
+            }
+            catch (SpotifyApi.NetCore.SpotifyApiErrorException ex)
+            {
+                await turnContext.SendActivityAsync(ex.Message, cancellationToken: cancellationToken);
+            }
         }
 
         private async Task CreateAndJoinUserStation(ITurnContext turnContext, string query, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{turnContext.Activity.From.Name} has asked to create and join user station {query}");
+
+            var info = RingoBotHelper.NormalizedConversationInfo(turnContext);
 
             // Join with user who is playing but not created/owned a Station
             string username = query.Substring(1).ToLower();
@@ -192,9 +210,8 @@ namespace RingoBotNet
             }
 
             // Create station
-            await CreateStation(turnContext, channelUserId, joinUserToken.Token, playlist, null, cancellationToken);
-            return;
-
+            var station = await _ringoService.CreateStation(channelUserId, info, playlist);
+            await turnContext.SendActivityAsync(RingoBotMessages.NowPlaying(info, station), cancellationToken: cancellationToken);
         }
 
         private async Task<Playlist> GetNowPlaying(string token)
@@ -217,6 +234,8 @@ namespace RingoBotNet
             CancellationToken cancellationToken,
             TokenResponse token = null)
         {
+            var info = RingoBotHelper.NormalizedConversationInfo(turnContext);
+
             token = token ?? await _authService.Authorize(turnContext, cancellationToken);
 
             if (token == null)
@@ -227,7 +246,7 @@ namespace RingoBotNet
             }
 
             Playlist playlist = null;
-            string hashtag = null;
+            //string hashtag = null;
 
             if (string.IsNullOrEmpty(query))
             {
@@ -257,35 +276,17 @@ namespace RingoBotNet
                 // playlist query
                 string search = null;
 
-                //if (query.StartsWith("album ", StringComparison.InvariantCultureIgnoreCase))
+                //if (query.Contains('#'))
                 //{
-                //    //XXX replace album text...
-                //    string album = query.Substring(6).Trim();
-
-                //    if (album.Length == 0)
-                //    {
-                //        await turnContext.SendActivityAsync(
-                //            "I did not understand. Try `\" \"`",
-                //            cancellationToken: cancellationToken);
-
-                //    }
-
-                //    await _ringoService.PlayAlbum(
-                //        turnContext,
-                //        query.Substring(X, X),
-                //        token.Token,
-                //        cancellationToken);
+                //    search = query.Substring(0, query.IndexOf('#'));
+                //    hashtag = query.Substring(query.IndexOf('#') + 1);
+                //}
+                //else
+                //{
+                //    search = query;
                 //}
 
-                if (query.Contains('#'))
-                {
-                    search = query.Substring(0, query.IndexOf('#'));
-                    hashtag = query.Substring(query.IndexOf('#') + 1);
-                }
-                else
-                {
-                    search = query;
-                }
+                search = query;
 
                 Playlist[] playlists = await _ringoService.FindPlaylists(
                     search,
@@ -319,12 +320,8 @@ namespace RingoBotNet
 
             if (playlist == null) return;
 
-            await CreateStation(turnContext,
-                RingoBotHelper.ChannelUserId(turnContext),
-                token.Token,
-                playlist,
-                hashtag,
-                cancellationToken);
+            var station = await _ringoService.CreateStation(RingoBotHelper.ChannelUserId(turnContext), info, playlist);
+            await turnContext.SendActivityAsync(RingoBotMessages.NowPlaying(info, station), cancellationToken: cancellationToken);
         }
 
         private async Task<bool> IsDeviceActive(
@@ -375,61 +372,6 @@ namespace RingoBotNet
             await turnContext.SendActivityAsync(message, cancellationToken: cancellationToken);
 
             return false;
-        }
-
-        private async Task CreateStation(
-            ITurnContext turnContext,
-            string channelUserId,
-            string token,
-            Playlist playlist,
-            string hashtag,
-            CancellationToken cancellationToken)
-        {
-            var station = await _ringoService.CreateStation(
-                channelUserId,
-                RingoBotHelper.NormalizedConversationInfo(turnContext),
-                playlist,
-                hashtag);
-
-            var heroCard = new HeroCard
-            {
-                Text = $"#{station.Hashtag}"
-            };
-
-            if (playlist.Images.Any())
-            {
-                heroCard.Images = new[]
-                {
-                    new CardImage
-                    {
-                        Url = playlist.Images[0].Url,
-                        Alt = playlist.Name
-                    }
-                };
-            }
-
-            var attachment = new Attachment
-            {
-                ContentType = HeroCard.ContentType,
-                Content = heroCard
-            };
-
-            if (BotHelper.IsGroup(turnContext))
-            {
-                var message = MessageFactory.Attachment(
-                    attachment,
-                    text: $"{turnContext.Activity.From.Name} is playing \"{station.Name}\" #{station.Hashtag}. Type `\"@ringo join\"` to join in! 🎉");
-
-                await turnContext.SendActivityAsync(message, cancellationToken: cancellationToken);
-            }
-            else
-            {
-                var message = MessageFactory.Attachment(
-                    attachment,
-                    text: $"Now playing \"{station.Name}\" #{station.Hashtag}. Friends can type `\"join #{station.Hashtag}\"` to join in! 🎉");
-
-                await turnContext.SendActivityAsync(message, cancellationToken: cancellationToken);
-            }
         }
     }
 }
