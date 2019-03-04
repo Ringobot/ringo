@@ -8,11 +8,15 @@ namespace RingoBotNet.Services
 {
     public interface IRingoService
     {
-        Task<Station> CreateStation(
+        Task<Station> CreateChannelStation(
             string channelUserId,
-            ConversationInfo conversationInfo,
-            Playlist playlist, 
-            string hashtag = null);
+            ConversationInfo info,
+            Models.Playlist playlist);
+
+        Task<Station> CreateUserStation(
+            string channelUserId,
+            ConversationInfo info,
+            Models.Playlist playlist);
 
         Task<Playlist[]> FindPlaylists(string searchText, string accessToken, CancellationToken cancellationToken);
 
@@ -27,8 +31,6 @@ namespace RingoBotNet.Services
 
         Task<ChannelUser> CreateChannelUserIfNotExists(string channelId, string userId, string username);
 
-        Task<Station> FindStation(ConversationInfo info, string query, CancellationToken cancellationToken);
-
         Task<SpotifyApi.NetCore.Device[]> GetDevices(string accessToken);
 
         Task<SpotifyApi.NetCore.CurrentPlaybackContext> GetUserNowPlaying(string token);
@@ -36,5 +38,10 @@ namespace RingoBotNet.Services
         Task<Playlist> GetPlaylist(string token, string uri);
 
         Task<string> GetPlaylistTrackOneUrl(string token, Playlist playlist);
+
+        Task<Station> GetChannelStation(ConversationInfo info, string conversationName = null);
+
+        Task<Station> GetUserStation(ConversationInfo info, string username);
+
     }
 }

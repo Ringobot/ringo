@@ -100,16 +100,33 @@ namespace RingoBotNet
             CancellationToken cancellationToken,
             TokenResponse token = null)
         {
-            // Find a station
             ConversationInfo info = RingoBotHelper.NormalizedConversationInfo(turnContext);
-            Station station = await _ringoService.FindStation(info, query, cancellationToken);
 
-            if (station == null && string.IsNullOrEmpty(query))
+            if (!info.IsGroup && (string.IsNullOrEmpty(query) || (!query.StartsWith('#') && !query.StartsWith('@'))))
             {
+                // must specify #channel or @username in DM to join a Station
                 await turnContext.SendActivityAsync(
-                    "No stations playing. Would you like to start one? Type `\"play (playlist name)\"`",
+                    RingoBotMessages.JoinWhat(),
                     cancellationToken: cancellationToken);
                 return;
+            }
+
+            Station station = null;
+
+            if (string.IsNullOrEmpty(query))
+            {
+                // just `join` in group chat: Play the current channel station
+                station = await _ringoService.GetChannelStation(info);
+            }
+            else if (query.StartsWith('@'))
+            {
+                // user station
+                station = await _ringoService.GetUserStation(info, query.Substring(1));
+            }
+            else if (query.StartsWith('#'))
+            {
+                // could either be a channel station or hashtag station
+                station = await _ringoService.GetChannelStation(info, query.Substring(1));
             }
 
             if (station == null && query.StartsWith('@'))
@@ -121,7 +138,7 @@ namespace RingoBotNet
             if (station == null)
             {
                 await turnContext.SendActivityAsync(
-                    $"Could not find station \"{query}\" 🤔",
+                    RingoBotMessages.CouldNotFindStation(info, query),
                     cancellationToken: cancellationToken);
                 return;
             }
@@ -210,8 +227,8 @@ namespace RingoBotNet
             }
 
             // Create station
-            var station = await _ringoService.CreateStation(channelUserId, info, playlist);
-            await turnContext.SendActivityAsync(RingoBotMessages.NowPlaying(info, station), cancellationToken: cancellationToken);
+            var station = await _ringoService.CreateUserStation(channelUserId, info, playlist);
+            await turnContext.SendActivityAsync(RingoBotMessages.NowPlayingStation(info, station), cancellationToken: cancellationToken);
         }
 
         private async Task<Playlist> GetNowPlaying(string token)
@@ -250,6 +267,7 @@ namespace RingoBotNet
 
             if (string.IsNullOrEmpty(query))
             {
+                // Play whatever the user is currently playing on Spotify
                 if (!await IsDeviceActive(
                     turnContext, 
                     token.Token, 
@@ -273,6 +291,8 @@ namespace RingoBotNet
             }
             else
             {
+                // Search for a Playlist and command Spotify to Play it
+
                 // playlist query
                 string search = null;
 
@@ -312,6 +332,7 @@ namespace RingoBotNet
                     return;
                 }
 
+                // Command Spotify to play the Playlist
                 await _ringoService.PlayPlaylist(
                     playlist.Id,
                     token.Token,
@@ -320,8 +341,11 @@ namespace RingoBotNet
 
             if (playlist == null) return;
 
-            var station = await _ringoService.CreateStation(RingoBotHelper.ChannelUserId(turnContext), info, playlist);
-            await turnContext.SendActivityAsync(RingoBotMessages.NowPlaying(info, station), cancellationToken: cancellationToken);
+            // Playlist is playing, now create a station
+            var station = info.IsGroup
+                ? await _ringoService.CreateChannelStation(RingoBotHelper.ChannelUserId(turnContext), info, playlist)
+                : await _ringoService.CreateUserStation(RingoBotHelper.ChannelUserId(turnContext), info, playlist);
+            await turnContext.SendActivityAsync(RingoBotMessages.NowPlayingStation(info, station), cancellationToken);
         }
 
         private async Task<bool> IsDeviceActive(

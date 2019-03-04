@@ -7,6 +7,7 @@ namespace RingoBotNet.Helpers
 {
     public static class RingoBotHelper
     {
+        public const string RingoBotName = "ringo";
         public static readonly Regex NonWordRegex = new Regex("\\W");
 
         public static string ChannelUserId(ITurnContext context)
@@ -65,7 +66,8 @@ namespace RingoBotNet.Helpers
             if (info == null) throw new ArgumentNullException(nameof(info));
             if (string.IsNullOrEmpty(username)) throw new ArgumentNullException(nameof(username));
 
-            return $"{TeamChannelPart(info)}/@{NonWordRegex.Replace(username.ToLower(), string.Empty)}";
+            // ringo:slack/TA0VBN61L:station:user/daniel312
+            return $"{RingoBotName}:{TeamChannelPart(info)}:station:user/{NonWordRegex.Replace(username.ToLower(), string.Empty)}";
         }
 
         public static string ToHashtagStationUri(ConversationInfo info, string hashtag)
@@ -73,16 +75,18 @@ namespace RingoBotNet.Helpers
             if (info == null) throw new ArgumentNullException(nameof(info));
             if (string.IsNullOrEmpty(hashtag)) throw new ArgumentNullException(nameof(hashtag));
 
-            return $"{TeamChannelPart(info)}/#{ToHashtag(hashtag).ToLower()}";
+            // ringo:twitter:station:hashtag/datenight
+            return $"{RingoBotName}:{TeamChannelPart(info)}:station:hashtag/{ToHashtag(hashtag).ToLower()}";
         }
 
-        public static string ToConversationStationUri(ConversationInfo info)
+        public static string ToChannelStationUri(ConversationInfo info, string conversationName = null)
         {
             if (info == null) throw new ArgumentNullException(nameof(info));
-            if (string.IsNullOrEmpty(info.ConversationName)) throw new ArgumentNullException(nameof(info.ConversationName));
-            if (string.IsNullOrEmpty(info.ConversationId)) throw new ArgumentNullException(nameof(info.ConversationId));
+            if (string.IsNullOrEmpty(conversationName) && string.IsNullOrEmpty(info.ConversationName))
+                throw new ArgumentNullException(nameof(conversationName));
 
-            return $"{TeamChannelPart(info)}/#{ToHashtag(info.ConversationName).ToLower()}/{info.ConversationId}";
+            // ringo:slack/TA0VBN61L:station:channel/testing3
+            return $"{RingoBotName}:{TeamChannelPart(info)}:station:channel/{ToHashtag(conversationName ?? info.ConversationName).ToLower()}";
         }
 
         private static string TeamChannelPart(ConversationInfo info)
@@ -105,6 +109,5 @@ namespace RingoBotNet.Helpers
 
         public static string RingoHandleIfGroupChat(ConversationInfo info)
             => info.IsGroup ? "@ringo " : string.Empty;
-
     }
 }

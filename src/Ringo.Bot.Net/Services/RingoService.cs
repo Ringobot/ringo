@@ -1,5 +1,4 @@
-﻿using Microsoft.Bot.Builder;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RingoBotNet.Data;
@@ -109,58 +108,25 @@ namespace RingoBotNet.Services
                 cancellationToken: cancellationToken);
         }
 
-        public async Task<Station> CreateStation(
+        public async Task<Station> CreateChannelStation(
             string channelUserId,
-            ConversationInfo conversation,
-            Models.Playlist playlist,
-            string hashtag = null)
-        {
-            hashtag = hashtag ?? (conversation.IsGroup
-                ? RingoBotHelper.ToHashtag(conversation.ConversationName)
-                : RingoBotHelper.ToHashtag(conversation.FromName));
-
-            // save station
-            var station = await _userData.CreateStation(
+            ConversationInfo info,
+            Models.Playlist playlist)
+            => await CreateStation(
                 channelUserId,
-                playlist, hashtag);
+                playlist,
+                RingoBotHelper.ToChannelStationUri(info),
+                RingoBotHelper.ToHashtag(info.ConversationName));
 
-            if (conversation.IsGroup)
-            {
-                //channelId.lowr() / team_id /#conversation.name.replace(\W).lower()/SlackMessage.event.channel
-                //slack/TA0VBN61L/#testing3/CFX3U3TCJ
-                await _stationData.CreateStationUri(
-                    station.Id, 
-                    channelUserId,
-                    RingoBotHelper.ToConversationStationUri(conversation),
-                    RingoBotHelper.ToHashtag(conversation.ConversationName));
-            }
-            else
-            {
-                //channelId.lower() / team_id / @username.lower()
-                //slack/TA0VBN61L/@daniel
-                await _stationData.CreateStationUri(
-                    station.Id,
-                    channelUserId,
-                    RingoBotHelper.ToUserStationUri(conversation, conversation.FromName));
-            }
-
-            ////channelId.lower() / team_id /#playlist_name.replace(\W).lower()
-            ////slack/TA0VBN61L/#heatwave2019
-            //await _stationData.CreateStationUri(station.Id, channelUserId,
-            //    RingoBotHelper.ToHashtagStationUri(conversation, playlist.Name),
-            //    RingoBotHelper.ToHashtag(playlist.Name));
-
-            //if (!string.IsNullOrEmpty(hashtag))
-            //{
-            //    //channelId.lower() / team_id /#hashtag.lower()
-            //    //slack/TA0VBN61L/#heatwave
-            //    await _stationData.CreateStationUri(station.Id, channelUserId,
-            //        RingoBotHelper.ToHashtagStationUri(conversation, hashtag),
-            //        RingoBotHelper.ToHashtag(hashtag));
-            //}
-
-            return station;
-        }
+        public async Task<Station> CreateUserStation(
+            string channelUserId,
+            ConversationInfo info,
+            Models.Playlist playlist)
+            => await CreateStation(
+                channelUserId,
+                playlist,
+                RingoBotHelper.ToUserStationUri(info, info.FromName),
+                RingoBotHelper.ToHashtag(info.FromName));
 
         public async Task<Device[]> GetDevices(string accessToken)
         {
@@ -250,35 +216,43 @@ namespace RingoBotNet.Services
             return await _userData.CreateChannelUserIfNotExists(channelId, userId, username);
         }
 
-        public async Task<Station> FindStation(ConversationInfo info, string query, CancellationToken cancellationToken)
+        public async Task<Station> GetUserStation(ConversationInfo info, string username)
         {
-            string uri = null;
-
-            if (query.StartsWith('@'))
-            {
-                uri = RingoBotHelper.ToUserStationUri(info, query.Substring(1));
-            }
-            else if (query.StartsWith('#'))
-            {
-                uri = RingoBotHelper.ToHashtagStationUri(info, query.Substring(1));
-            }
-            else if (info.IsGroup)
-            {
-                uri = RingoBotHelper.ToConversationStationUri(info);
-            }
-            else
-            {
-                // Is this user playing a station?
-                uri = RingoBotHelper.ToUserStationUri(info, info.FromName);
-
-                // TODO: Return a list of stations for the TeamChannel
-                //return null;
-            }
-
-            StationUri stationUri = await _stationData.GetStationUri(uri);
+            var stationUri = await _stationData.GetStationUri(RingoBotHelper.ToUserStationUri(info, username));
             if (stationUri == null) return null;
-
             return await _userData.GetStation(stationUri.ChannelUserId, stationUri.StationId);
+        }
+
+        public async Task<Station> GetChannelStation(ConversationInfo info, string conversationName = null)
+        {
+            if (!info.IsGroup && string.IsNullOrEmpty(conversationName))
+            {
+                throw new ArgumentException("Must provide conversationName if not in group chat", nameof(conversationName));
+            }
+
+            var stationUri = await _stationData.GetStationUri(RingoBotHelper.ToChannelStationUri(info, conversationName));
+            if (stationUri == null) return null;
+            return await _userData.GetStation(stationUri.ChannelUserId, stationUri.StationId);
+        }
+
+        private async Task<Station> CreateStation(
+            string channelUserId,
+            Models.Playlist playlist,
+            string uri,
+            string hashtag)
+        {
+            // save station
+            var station = await _userData.CreateStation(channelUserId, playlist, hashtag);
+
+            await _stationData.CreateStationUri(
+                station.Id,
+                channelUserId,
+                uri,
+                hashtag);
+
+            _logger.LogInformation($"CreateStation: uri = {uri}, hashtag = {hashtag}, playlist = {playlist.Name}");
+
+            return station;
         }
     }
 }
