@@ -63,16 +63,23 @@ namespace RingoBotNet.Data
             await Replace(channelUser);
         }
 
-        public async Task<Station> CreateStation(string channelUserId, Playlist playlist, string hashtag = null)
+        public async Task<Station> CreateStation(
+            string channelUserId, 
+            Album album = null, 
+            Artist artist = null, 
+            Playlist playlist = null, 
+            string hashtag = null)
         {
-            var station = new Station(channelUserId, playlist, hashtag);
+            var station = new Station(channelUserId, album, artist, playlist, hashtag);
             var channelUser = await GetChannelUser(channelUserId);
 
             if (channelUser.Stations == null) channelUser.Stations = new[] { station };
             else channelUser.Stations = channelUser.Stations.Concat(new[] { station });
 
             await Replace(channelUser);
+
             _logger.LogInformation($"Added Station Id = \"{station.Id} to Channel User Id = \"{channelUserId}\"");
+
             return station;
         }
 

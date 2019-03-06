@@ -63,6 +63,8 @@ namespace RingoBotNet.Models
             if (string.IsNullOrEmpty(ChannelId)) throw new InvariantException("ChannelId must not be null or empty");
             if (Id != EncodeId(ChannelId, UserId))
                 throw new InvariantException("Id must be a hash of ChannelId and UserId. See `EncodeId`.");
+
+            if (Stations != null) foreach (var station in Stations) station.EnforceInvariants();
         }
     }
 

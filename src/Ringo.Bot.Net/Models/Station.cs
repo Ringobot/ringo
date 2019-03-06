@@ -5,12 +5,18 @@ namespace RingoBotNet.Models
 {
     public class Station
     {
-        public Station(string channelUserId, Playlist playlist, string hashtag = null)
+        public Station() { }
+
+        public Station(string channelUserId, Album album, Artist artist, Playlist playlist, string hashtag = null)
         {
+            string name = album?.Name ?? artist?.Name ?? playlist?.Name;
+
             Id = Guid.NewGuid().ToString("N");
-            Name = playlist.Name;
+            Name = name;
             ChannelUserId = channelUserId;
-            Hashtag = hashtag ?? RingoBotHelper.NonWordRegex.Replace(playlist.Name, string.Empty);
+            Hashtag = hashtag ?? RingoBotHelper.NonWordRegex.Replace(name, string.Empty);
+            Album = album;
+            Artist = artist;
             Playlist = playlist;
             CreatedDate = ModifiedDate = DateTime.UtcNow;
             IsActive = true;
@@ -21,9 +27,13 @@ namespace RingoBotNet.Models
 
         public string Name { get; set; }
 
-        public string ChannelUserId { get; internal set; }
+        public string ChannelUserId { get; set; }
 
         public string Hashtag { get; set; }
+
+        public Album Album { get; set; }
+
+        public Artist Artist { get; set; }
 
         public Playlist Playlist { get; set; }
 
@@ -34,5 +44,17 @@ namespace RingoBotNet.Models
         public bool IsActive { get; set; }
 
         public int ListenerCount { get; set; }
+
+        public void EnforceInvariants()
+        {
+            if (string.IsNullOrEmpty(ChannelUserId)) throw new InvariantNullException(nameof(ChannelUserId));
+            if (Album == null && Artist == null && Playlist == null) throw new InvariantException("Station must have Album or Artist or Playlist property set.");
+            if ((Album != null && (Artist != null || Playlist != null)) 
+                || (Artist != null && (Album != null || Playlist != null))
+                || (Playlist != null && (Album != null || Artist != null)))
+            {
+                throw new InvariantException("Station must have only one of Album or Artist or Playlist property set.");
+            }
+        }
     }
 }

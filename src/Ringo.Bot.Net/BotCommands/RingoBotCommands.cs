@@ -129,11 +129,11 @@ namespace RingoBotNet
                 station = await _ringoService.GetChannelStation(info, query.Substring(1));
             }
 
-            if (station == null && query.StartsWith('@'))
-            {
-                await CreateAndJoinUserStation(turnContext, query, cancellationToken);
-                return;
-            }
+            //if (station == null && query.StartsWith('@'))
+            //{
+            //    await CreateAndJoinUserStation(turnContext, query, cancellationToken);
+            //    return;
+            //}
 
             if (station == null)
             {
@@ -192,57 +192,44 @@ namespace RingoBotNet
             }
         }
 
-        private async Task CreateAndJoinUserStation(ITurnContext turnContext, string query, CancellationToken cancellationToken)
-        {
-            _logger.LogInformation($"{turnContext.Activity.From.Name} has asked to create and join user station {query}");
+        //private async Task CreateAndJoinUserStation(ITurnContext turnContext, string query, CancellationToken cancellationToken)
+        //{
+        //    _logger.LogInformation($"{turnContext.Activity.From.Name} has asked to create and join user station {query}");
 
-            var info = RingoBotHelper.NormalizedConversationInfo(turnContext);
+        //    var info = RingoBotHelper.NormalizedConversationInfo(turnContext);
 
-            // Join with user who is playing but not created/owned a Station
-            string username = query.Substring(1).ToLower();
-            string channelUserId = RingoBotHelper.ChannelUserId(turnContext.Activity.ChannelId, username);
+        //    // Join with user who is playing but not created/owned a Station
+        //    string username = query.Substring(1).ToLower();
+        //    string channelUserId = RingoBotHelper.ChannelUserId(turnContext.Activity.ChannelId, username);
 
-            TokenResponse joinUserToken = await _authService.GetAccessToken(channelUserId);
-            if (joinUserToken == null)
-            {
-                _logger.LogWarning($"Could not find join user token for user `{username}`");
-                // join user does not have a current access token
-                await turnContext.SendActivityAsync(
-                    $"Ringo bot is not authorized to join {query} 😢",
-                    cancellationToken: cancellationToken);
-                return;
-            }
+        //    TokenResponse joinUserToken = await _authService.GetAccessToken(channelUserId);
+        //    if (joinUserToken == null)
+        //    {
+        //        _logger.LogWarning($"Could not find join user token for user `{username}`");
+        //        // join user does not have a current access token
+        //        await turnContext.SendActivityAsync(
+        //            $"Ringo bot is not authorized to join {query} 😢",
+        //            cancellationToken: cancellationToken);
+        //        return;
+        //    }
 
-            var playlist = await GetNowPlaying(joinUserToken.Token);
+        //    var playlist = await GetNowPlaying(joinUserToken.Token);
 
-            if (playlist == null)
-            {
-                // join user is not playing a playlist
-                await turnContext.SendActivityAsync(
-                    $"{query} is not currently playing a Spotify Playlist.",
-                    cancellationToken: cancellationToken);
+        //    if (playlist == null)
+        //    {
+        //        // join user is not playing a playlist
+        //        await turnContext.SendActivityAsync(
+        //            $"{query} is not currently playing a Spotify Playlist.",
+        //            cancellationToken: cancellationToken);
 
-                // TODO: What would you like to play?
-                return;
-            }
+        //        // TODO: What would you like to play?
+        //        return;
+        //    }
 
-            // Create station
-            var station = await _ringoService.CreateUserStation(channelUserId, info, playlist);
-            await turnContext.SendActivityAsync(RingoBotMessages.NowPlayingStation(info, station), cancellationToken: cancellationToken);
-        }
-
-        private async Task<Playlist> GetNowPlaying(string token)
-        {
-            SpotifyApi.NetCore.CurrentPlaybackContext nowPlaying = await _ringoService.GetUserNowPlaying(token);
-
-            if (nowPlaying == null)
-            {
-                return null;
-            }
-
-            // Get the playlist that is now playing
-            return await _ringoService.GetPlaylist(token, nowPlaying.Context.Uri);
-        }
+        //    // Create station
+        //    var station = await _ringoService.CreateUserStation(channelUserId, info, playlist);
+        //    await turnContext.SendActivityAsync(RingoBotMessages.NowPlayingStation(info, station), cancellationToken: cancellationToken);
+        //}
 
         public async Task Play(
             ITurnContext turnContext,
@@ -252,7 +239,9 @@ namespace RingoBotNet
             TokenResponse token = null)
         {
             var info = RingoBotHelper.NormalizedConversationInfo(turnContext);
+            string channelUserId = RingoBotHelper.ChannelUserId(turnContext);
 
+            // User authorised?
             token = token ?? await _authService.Authorize(turnContext, cancellationToken);
 
             if (token == null)
@@ -262,32 +251,22 @@ namespace RingoBotNet
                 return;
             }
 
-            Playlist playlist = null;
-            //string hashtag = null;
+            // Device active?
+            if (!await IsDeviceActive(
+                turnContext,
+                token.Token,
+                $"{RingoBotHelper.RingoHandleIfGroupChat(turnContext)}play {query}",
+                cancellationToken))
+            {
+                return;
+            }
+
+            Station station = null;
 
             if (string.IsNullOrEmpty(query))
             {
-                // Play whatever the user is currently playing on Spotify
-                if (!await IsDeviceActive(
-                    turnContext, 
-                    token.Token, 
-                    $"{RingoBotHelper.RingoHandleIfGroupChat(turnContext)}play", 
-                    cancellationToken))
-                {
-                    return;
-                }
-
-                // no query so start / resume station
-                playlist = await GetNowPlaying(token.Token);
-
-                if (playlist == null)
-                {
-                    // user is not playing a playlist
-                    await turnContext.SendActivityAsync(
-                        "You are not currently playing a Spotify Playlist.",
-                        cancellationToken: cancellationToken);
-                    return;
-                }
+                // Play whatever is now playing on Spotify
+                station = await PlayNowPlaying(turnContext, token.Token, cancellationToken);
             }
             else
             {
@@ -320,7 +299,7 @@ namespace RingoBotNet
                 }
                 
                 // TODO: Carousel
-                playlist = playlists[0];
+                Playlist playlist = playlists[0];
 
                 if (!await IsDeviceActive(
                     turnContext, 
@@ -337,15 +316,68 @@ namespace RingoBotNet
                     playlist.Id,
                     token.Token,
                     cancellationToken);
+
+                if (playlist == null) return;
+
+                // Playlist is playing, now create a station
+                station = info.IsGroup
+                    ? await _ringoService.CreateChannelStation(channelUserId, info, playlist: playlist)
+                    : await _ringoService.CreateUserStation(channelUserId, info, playlist: playlist);
+
             }
 
-            if (playlist == null) return;
-
-            // Playlist is playing, now create a station
-            var station = info.IsGroup
-                ? await _ringoService.CreateChannelStation(RingoBotHelper.ChannelUserId(turnContext), info, playlist)
-                : await _ringoService.CreateUserStation(RingoBotHelper.ChannelUserId(turnContext), info, playlist);
             await turnContext.SendActivityAsync(RingoBotMessages.NowPlayingStation(info, station), cancellationToken);
+        }
+
+        private async Task<Station> PlayNowPlaying(ITurnContext turnContext, string token, CancellationToken cancellationToken)
+        {
+            // no query so start / resume station
+            // Play whatever the user is currently playing on Spotify
+
+            var info = RingoBotHelper.NormalizedConversationInfo(turnContext);
+            var channelUserId = RingoBotHelper.ChannelUserId(turnContext);
+
+            //playlist = await GetNowPlaying(token.Token);
+            SpotifyApi.NetCore.CurrentPlaybackContext nowPlaying = await _ringoService.GetUserNowPlaying(token);
+
+            if (nowPlaying == null || !nowPlaying.IsPlaying)
+            {
+                await turnContext.SendActivityAsync(RingoBotMessages.NotPlayingAnything(info), cancellationToken);
+                return null;
+            }
+
+            Station station = null;
+
+            switch (nowPlaying.Context.Type)
+            {
+                case "playlist":
+                    var playlist = await _ringoService.GetPlaylist(token, nowPlaying.Context.Uri);
+                    station = info.IsGroup
+                        ? await _ringoService.CreateChannelStation(channelUserId, info, playlist:playlist)
+                        : await _ringoService.CreateUserStation(channelUserId, info, playlist:playlist);
+                    break;
+
+                case "album":
+                    var album = await _ringoService.GetAlbum(token, nowPlaying.Context.Uri);
+                    station = info.IsGroup
+                        ? await _ringoService.CreateChannelStation(channelUserId, info, album: album)
+                        : await _ringoService.CreateUserStation(channelUserId, info, album: album);
+                    break;
+
+                case "artist":
+                    var artist = await _ringoService.GetArtist(token, nowPlaying.Context.Uri);
+                    station = info.IsGroup
+                        ? await _ringoService.CreateChannelStation(channelUserId, info, artist: artist)
+                        : await _ringoService.CreateUserStation(channelUserId, info, artist: artist);
+                    break;
+
+                default:
+                    await turnContext.SendActivityAsync(
+                        RingoBotMessages.NowPlayingNotSupported(info, nowPlaying.Context.Type), cancellationToken);
+                    break;
+            }
+
+            return station;
         }
 
         private async Task<bool> IsDeviceActive(

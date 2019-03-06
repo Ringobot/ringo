@@ -128,6 +128,8 @@ namespace RingoBotNet
             });
 
             services.AddSingleton<IRingoService, RingoService>();
+            services.AddSingleton<IAlbumsApi, AlbumsApi>();
+            services.AddSingleton<IArtistsApi, ArtistsApi>();
             services.AddSingleton<IPlaylistsApi, PlaylistsApi>();
             services.AddSingleton<IPlayerApi, PlayerApi>();
             services.AddSingleton<HttpClient, HttpClient>();

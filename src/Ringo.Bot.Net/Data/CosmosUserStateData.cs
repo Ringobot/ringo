@@ -1,9 +1,7 @@
 ﻿using Microsoft.Azure.Documents;
-using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RingoBotNet.Models;
-using SpotifyApi.NetCore;
 using System;
 using System.Threading.Tasks;
 
@@ -16,7 +14,7 @@ namespace RingoBotNet.Data
             ILogger<CosmosUserStateData> logger,
             IDocumentClient documentClient,
             string databaseName,
-            string collectionName) 
+            string collectionName)
             : base(configuration, logger, documentClient, databaseName, collectionName)
         { }
 
@@ -45,7 +43,7 @@ namespace RingoBotNet.Data
         /// <param name="channelUserId">The Id of the ChannelUser document (not the UserId)</param>
         /// <param name="state">The State value</param>
         /// <returns>The created UserState document</returns>
-        public async Task<UserState> SaveUserStateToken(string channelUserId, string state) 
+        public async Task<UserState> SaveUserStateToken(string channelUserId, string state)
             => await Create(new UserState(channelUserId, state));
 
         /// <summary>
@@ -56,16 +54,5 @@ namespace RingoBotNet.Data
         /// <returns>The created UserState document</returns>
         public async Task<UserState> SaveUserStateToken(string channelId, string userId, string state)
             => await Create(new UserState(channelId, userId, state));
-
-        public Task<Station> CreateStation(
-            string channelId,
-            string userId,
-            string username,
-            string hashcode,
-            PlaylistSimplified playlistSimplified)
-        {
-            throw new NotImplementedException();
-        }
-
     }
 }

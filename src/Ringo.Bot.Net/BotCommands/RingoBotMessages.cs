@@ -20,39 +20,69 @@ namespace RingoBotNet
 
             if (info.IsGroup)
             {
-                messageText += $" Would you like to start a Station? Play a Playlist in Spotify. Then click/tap **Play**";
+                messageText += $" Would you like to start a Station? Play some music in Spotify. Then click/tap **Play**";
 
                 heroCard.Buttons.Add(
                     new CardAction
                     {
-                        Title = $"Play",
-                        Value = "play",
+                        Title = "Play",
+                        Value = $"{RingoBotHelper.RingoHandleIfGroupChat(info)}play",
                         Type = ActionTypes.ImBack,
                     });
             }
 
-            return MessageFactory.Attachment(
-                new Attachment
-                {
-                    ContentType = HeroCard.ContentType,
-                    Content = heroCard
-                },
-                text: messageText);
+            return MessageAttachment(heroCard, messageText);
         }
 
         public static IMessageActivity JoinWhat() => MessageFactory.Text("Which Station would you like to Join? Try `\"join #channel_name\"` or `\"join @username\"`");
+
+        public static IMessageActivity NotPlayingAnything(ConversationInfo info)
+        {
+            var heroCard = NewHeroCard();
+
+            heroCard.Buttons.Add(
+                new CardAction
+                {
+                    Title = "Spotify is playing - Try again!",
+                    Value = $"{RingoBotHelper.RingoHandleIfGroupChat(info)}play",
+                    Type = ActionTypes.ImBack,
+                });
+
+            return MessageAttachment(
+                heroCard,
+                "You are not currently playing anything 🤔 Play some music in Spotify and try again.");
+        }
+
+        public static IMessageActivity NowPlayingNotSupported(ConversationInfo info, string type)
+        {
+            var heroCard = NewHeroCard();
+
+            heroCard.Buttons.Add(
+                new CardAction
+                {
+                    Title = "Try again!",
+                    Value = $"{RingoBotHelper.RingoHandleIfGroupChat(info)}play",
+                    Type = ActionTypes.ImBack,
+                });
+
+            return MessageAttachment(
+                heroCard,
+                $"You playing a {type} in Spotify which Ringo does not support 🤔 Play a Playlist, Album or Artists in Spotify and try again.");
+        }
 
         public static IMessageActivity NowPlayingStation(ConversationInfo info, Station station)
         {
             var heroCard = NewHeroCard();
 
-            if (station.Playlist.Images.Any())
+            var images = station.Album?.Images ?? station.Artist?.Images ?? station.Playlist?.Images;
+
+            if (images.Any())
             {
                 heroCard.Images.Add(
                     new CardImage
                     {
-                        Url = station.Playlist.Images[0].Url,
-                        Alt = station.Playlist.Name
+                        Url = images[0].Url,
+                        Alt = station.Name
                     });
             }
 
@@ -65,40 +95,31 @@ namespace RingoBotNet
                 heroCard.Buttons.Add(
                     new CardAction
                     {
-                        Title = $"Join \"{station.Playlist.Name}\" in #{station.Hashtag}",
+                        Title = $"Join \"{station.Name}\" in #{station.Hashtag}",
                         Value = "join",
                         Type = ActionTypes.ImBack,
                     });
             }
 
-            return MessageFactory.Attachment(
-                new Attachment
-                {
-                    ContentType = HeroCard.ContentType,
-                    Content = heroCard
-                },
-                text: messageText);
+            return MessageAttachment(heroCard, messageText);
         }
 
         public static IMessageActivity StationNoLongerPlaying(ConversationInfo info, Station station)
         {
             var heroCard = NewHeroCard();
+            string uri = station.Album?.Uri ?? station.Artist?.Uri ?? station.Playlist?.Uri;
 
             heroCard.Buttons.Add(
                 new CardAction
                 {
-                    Title = $"Play {station.Playlist.Name}",
-                    Value = $"{RingoBotHelper.RingoHandleIfGroupChat(info)}play {station.Playlist.Uri}",
+                    Title = $"Play {station.Name}",
+                    Value = $"{RingoBotHelper.RingoHandleIfGroupChat(info)}play {uri}",
                     Type = ActionTypes.ImBack,
                 });
 
-            return MessageFactory.Attachment(
-                new Attachment
-                {
-                    ContentType = HeroCard.ContentType,
-                    Content = heroCard
-                }, 
-                text: $"#{station.Hashtag} is no longer playing. Would you like to play \"{station.Playlist.Name}\"?");
+            return MessageAttachment(
+                heroCard, 
+                $"#{station.Hashtag} is no longer playing. Would you like to play \"{station.Name}\"?");
         }
 
         public static IMessageActivity UserHasJoined(ConversationInfo info, Station station)
@@ -114,19 +135,17 @@ namespace RingoBotNet
 
             if (info.IsGroup)
             {
-                messageText = $"@{info.FromName} has joined \"{station.Playlist.Name}\" in #{station.Hashtag}! 🎉";
+                messageText = $"@{info.FromName} has joined \"{station.Name}\" in #{station.Hashtag}! 🎉";
 
                 heroCard.Buttons.Add(
                     new CardAction
                     {
-                        Title = $"Join \"{station.Playlist.Name}\" in #{station.Hashtag}",
+                        Title = $"Join \"{station.Name}\" in #{station.Hashtag}",
                         Value = "join",
                         Type = ActionTypes.ImBack,
                     });
 
-                return MessageFactory.Attachment(
-                        new Attachment { ContentType = HeroCard.ContentType, Content = heroCard }, text: messageText);
-
+                return MessageAttachment(heroCard, messageText);
             }
 
             return MessageFactory.Text($"You have joined @{station.Hashtag}! 🎉");
@@ -140,5 +159,13 @@ namespace RingoBotNet
                 Text = text
             };
 
+        private static IMessageActivity MessageAttachment(HeroCard heroCard, string messageText)
+            => MessageFactory.Attachment(
+                new Attachment
+                {
+                    ContentType = HeroCard.ContentType,
+                    Content = heroCard
+                },
+                text: messageText);
     }
 }

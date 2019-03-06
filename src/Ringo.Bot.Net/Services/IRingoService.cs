@@ -11,12 +11,16 @@ namespace RingoBotNet.Services
         Task<Station> CreateChannelStation(
             string channelUserId,
             ConversationInfo info,
-            Models.Playlist playlist);
+            Models.Album album = null,
+            Models.Artist artist = null,
+            Models.Playlist playlist = null);
 
         Task<Station> CreateUserStation(
             string channelUserId,
             ConversationInfo info,
-            Models.Playlist playlist);
+            Models.Album album = null,
+            Models.Artist artist = null,
+            Models.Playlist playlist = null);
 
         Task<Playlist[]> FindPlaylists(string searchText, string accessToken, CancellationToken cancellationToken);
 
@@ -34,6 +38,10 @@ namespace RingoBotNet.Services
         Task<SpotifyApi.NetCore.Device[]> GetDevices(string accessToken);
 
         Task<SpotifyApi.NetCore.CurrentPlaybackContext> GetUserNowPlaying(string token);
+
+        Task<Models.Album> GetAlbum(string token, string uri);
+
+        Task<Models.Artist> GetArtist(string token, string uri);
 
         Task<Playlist> GetPlaylist(string token, string uri);
 

@@ -16,9 +16,15 @@ namespace RingoBotNet.Data
 
         Task SetTokenValidated(string channelId, string userId);
 
-        Task<Station> CreateStation(string channelUserId, Playlist playlist, string hashtag = null);
+        Task<Station> CreateStation(
+            string channelUserId,
+            Album album = null,
+            Artist artist = null,
+            Playlist playlist = null,
+            string hashtag = null);
 
         Task ResetAuthorization(string channelUserId, CancellationToken cancellationToken);
+
         Task<Station> GetStation(string channelUserId, string stationId);
     }
 }

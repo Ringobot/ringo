@@ -2,7 +2,7 @@
 
 ## TODO
 
-#### dan/auth-bugs
+### dan/auth-bugs
 
 1. ~~BUG: Expired token on join bug~~
 1. ~~Don't authorize in the clear! - still not fixed, Play will start auth flow in group chat :|~~
@@ -11,7 +11,7 @@
 1. ~~`auth` alias~~
 1. ~~`auth (magic number)`~~
 
-#### dan/easy-join
+### dan/easy-join
 
 1. ✅ `play` / `start` creates station 
 1. ✅ Just `join` or `listen`
@@ -26,7 +26,7 @@
 1. ✅ Backoff retry Spotify connections (getting 502's)
 1. ~~DM auth, DM no active device~~ - DM is not possible.
 
-#### dan/simple-stations
+### dan/simple-stations
 
 1. ✅ Join Hero Card
 1. ✅ Only two types of stations, channel and user and they persist
@@ -35,98 +35,97 @@
 1. ✅ `join` in a channel joins the channel station
 1. ▶ `join` in the DM joins any other station, e.g. `join #music_lovers` (joins music_lovers channel
    station) or `join @abraham` (joins another abraham's station)
-1. play current artist, playlist or album. Otherwise warn.
-1. Revert play "playlist name" feature?
-1. OK for people to join your personal station (means they can see what you are playing at any time)
-1. If owner stops playing Ringo searches for new owner
-1. `@daniel has joined #general playing "Joy" with 3 others`
+1. ▶ ⭐ play current artist, playlist or album. Otherwise warn.
+1. ⭐ If owner stops playing Ringo searches for new owner
+1. ⭐ `@daniel has joined #general playing "Joy" with 3 others`
 1. Separate Station Table? Station Type = Channel|User. 
 1. New Listener table?
 1. Station list?
+1. OK for people to join your personal station (means they can see what you are playing at any time)
+1. ~~Revert play "playlist name" feature?~~
 
-#### dan/whkmas
+### dan/whkmas
 
-1. `You and 20 others are playing #JoeGoddard`
-1. `next | skip | skip 3`
-1. Christian algorithm
-1. Support Artist
-1. Support Albums
-1. 🔹 VISH DEMO
-1. `You pasted a link, would you like to... (start a station | add to playlist | change the station | ...)`
+1. ⭐ `You and 20 others are playing #JoeGoddard`
+1. ⭐ `next | skip | skip 3`
+1. ⭐ Christian algorithm
+1. ⭐ `You pasted a link, would you like to... (start a station | add to playlist | change the station | ...)`
+1. ⭐ `You mentioned Album x, would you like Ringo to add it to a playlist? Add to current playlist a | Add to channel playlist b | Add to A different playlist `
 1. Ignore anything before `@ringo`
 1. Turn LUIS on for Skitch
 1. Search results carousel
+1. ⭐ `@ringo np`
+1. ⭐ `@ringo star`
+1. ⭐ Turn off shuffle
 
 Sending a slack DM: <https://github.com/Microsoft/BotBuilder/issues/2923> <https://stackoverflow.com/questions/44353520/is-there-a-way-to-start-formflow-dialog-on-conversationupdate-event>
 
-#### dan/sync
+### dan/sync
 
 1. Once you join a channel station, your Spotify player follows the station
-1. Try sideloading teams
-1. Mobile friendly magic number page: https://blog.teamtreehouse.com/create-an-absolute-basic-mobile-css-responsive-navigation-menu.
-   Click to copy. 
-1. Auth via Spotify App?
-1. Should be able to join anyone - Ringo figures out which station
-1. "You and n other listeners"
-1. Play an Album
+1. ⭐ Mobile friendly magic number page: https://blog.teamtreehouse.com/create-an-absolute-basic-mobile-css-responsive-navigation-menu.
+   Click to copy. Redirect back to app via slack:XXXX URI?
+1. ~~Auth via Spotify App?~~ Only in Mobile SDK
 1. Better Playlist sorting and selection (carousel)
-1. Show Album hero artwork
-1. Application insights
+1. To sync or not sync
+1. live mode / discover mode (Abraham)
+1. Sync at the end of each song?
+1. Automatically switch playlists if the person you are listening to changes?
+
+### dan/slack-mvp-release
+
+1. Application Insights
 1. Azure Devops Staging pipeline
-1. Launch app to make active?
+1. `ringo privacy`
+1. `ringo feedback`
 
-### Submit to Slack marketplace
+### dan/teams
 
-1. Join a station from any channel (hashcode)
+1. Try sideloading teams
 1. Teams enhancements
 
-### Submit to Teams marketplace
+### dan/twitter
 
 1. Twitter bot
 
-### Soft launch on Twitter
+### dan/skype
 
-1. Automatically switch playlists if the person you are listening to changes
-1. Port Ringo JS features
-1. List devices and choose one
-1. To sync or not sync
-1. live mode / discover mode
-1. Sync at the end of each song?
-1. Ringo like this song
-1. Ringo add this song to playlist x
-1. Speech
 1. Skype features
-
-### Submit to Skype marketplace
 
 ### Unplanned
 
+1. Port Ringo JS features
+1. List devices and choose one
+1. Speech
 1. Sync playlists
-1. Return a list of stations for the TeamChannel
 1. `@ringo version`
 1. `@ringo status`
-1. `play album`
 1. Fade and switch
 1. `@ringo airhorn`
-1. `@ringo skip 3`
-1. `@ringo np`
-1. `@ringo star`
 1. support Shuffle
-1. RULE: If @Daniel2 is now playing a different playlist (and no station), join and create station
-1. `start #MerryChristmas`
+1. ✅ RULE: If @Daniel2 is now playing a different playlist (and no station), join and create station
+1. ✅ `start #MerryChristmas`
 1. What would you like to play? prompt
-1. `Station #choicetraxbychromesparks is no longer playing. Would you like to Play "choice trax by chrome sparks"? Type "@ringo play spotify:user:jeremymalvin:playlist:0dPOIm0xYhVRMTqfJKRatQ" to start.`
-1. Play buttons in place of "Would you like to play X"
+1. ✅ Play buttons in place of "Would you like to play X"
 1. `help`
-1. `play #LetMeDJ` is an alias to `join #LetMeDJ`
-1. `@ringo join @Daniel2`
-1. join any other user to sync
+1. `play #LetMeDJ` is an alias to `join #LetMeDJ` ?
+1. ✅ `@ringo join @Daniel2`
+1. ✅ join any other user to sync
+1. Ringo account creates and owns curated playlists (based on graph recommendations) and suggests them
+   first up to get users started (Matt)
 
 ### SpotifyApi.NetCore
 
 1. Move models to `Models` namespace to avoid ambiguous collisions with client Models
 
-## Station hash tags
+## Beta users
+
+* Whkmas
+* Vishesh
+* Akudos
+* MSFT NZ (Teams)
+
+## Ringo Station URI
 
 ### v2
 
