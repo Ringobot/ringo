@@ -188,7 +188,7 @@ namespace RingoBotNet
             }
             catch (SpotifyApi.NetCore.SpotifyApiErrorException ex)
             {
-                await turnContext.SendActivityAsync(ex.Message, cancellationToken: cancellationToken);
+                await turnContext.SendActivityAsync(RingoBotMessages.SpotifyError(info, ex, $"join {query}"), cancellationToken: cancellationToken);
             }
         }
 

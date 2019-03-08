@@ -2,6 +2,7 @@
 using Microsoft.Bot.Schema;
 using RingoBotNet.Helpers;
 using RingoBotNet.Models;
+using SpotifyApi.NetCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -102,6 +103,23 @@ namespace RingoBotNet
             }
 
             return MessageAttachment(heroCard, messageText);
+        }
+
+        public static IMessageActivity SpotifyError(ConversationInfo info, SpotifyApiErrorException ex, string command)
+        {
+            var heroCard = NewHeroCard();
+
+            heroCard.Buttons.Add(
+                new CardAction
+                {
+                    Title = $"Try again",
+                    Value = $"{RingoBotHelper.RingoHandleIfGroupChat(info)}{command}",
+                    Type = ActionTypes.ImBack,
+                });
+
+            return MessageAttachment(
+                heroCard,
+                $"Ringo can't talk to Spotify right now 🤔 Please try again in a minute. Spotify says: \"{ex.Message}\"");
         }
 
         public static IMessageActivity StationNoLongerPlaying(ConversationInfo info, Station station)
