@@ -66,11 +66,10 @@ namespace RingoBotNet.Data
         public async Task<Station> CreateStation(
             string channelUserId, 
             Album album = null, 
-            Artist artist = null, 
             Playlist playlist = null, 
             string hashtag = null)
         {
-            var station = new Station(channelUserId, album, artist, playlist, hashtag);
+            var station = new Station(channelUserId, album, playlist, hashtag);
             var channelUser = await GetChannelUser(channelUserId);
 
             if (channelUser.Stations == null) channelUser.Stations = new[] { station };

@@ -101,15 +101,15 @@ namespace RingoBotNet.Services
             return playlists;
         }
 
-        public async Task<Models.Album> GetAlbum(string token, string uri) 
+        public async Task<Models.Album> GetAlbum(string token, string uri)
             => ItemMappers.MapToAlbum(await RetryHelper.RetryAsync(() => _albums.GetAlbum(uri, accessToken: token), logger: _logger));
 
         public async Task<Models.Artist> GetArtist(string token, string uri)
-            => ItemMappers.MapToArtist(await RetryHelper.RetryAsync(() => _artists.GetArtist(uri, accessToken:token), logger: _logger));
+            => ItemMappers.MapToArtist(await RetryHelper.RetryAsync(() => _artists.GetArtist(uri, accessToken: token), logger: _logger));
 
-        public async Task<Models.Playlist> GetPlaylist(string token, string uriOrId) 
+        public async Task<Models.Playlist> GetPlaylist(string token, string uriOrId)
             => ItemMappers.MapToPlaylist(await RetryHelper.RetryAsync(
-                () => _playlists.GetPlaylist(uriOrId, accessToken:token), 
+                () => _playlists.GetPlaylist(uriOrId, accessToken: token),
                 logger: _logger));
 
         public async Task PlayPlaylist(string playlistId, string accessToken, CancellationToken cancellationToken)
@@ -124,28 +124,24 @@ namespace RingoBotNet.Services
             string channelUserId,
             ConversationInfo info,
             Models.Album album = null,
-            Models.Artist artist = null,
             Models.Playlist playlist = null)
             => await CreateStation(
                 channelUserId,
                 RingoBotHelper.ToChannelStationUri(info),
                 RingoBotHelper.ToHashtag(info.ConversationName),
                 album: album,
-                artist: artist,
                 playlist: playlist);
 
         public async Task<Station> CreateUserStation(
             string channelUserId,
             ConversationInfo info,
             Models.Album album = null,
-            Models.Artist artist = null,
             Models.Playlist playlist = null)
             => await CreateStation(
                 channelUserId,
                 RingoBotHelper.ToUserStationUri(info, info.FromName),
                 RingoBotHelper.ToHashtag(info.FromName),
                 album: album,
-                artist: artist,
                 playlist: playlist);
 
         public async Task<Device[]> GetDevices(string accessToken)
@@ -170,25 +166,48 @@ namespace RingoBotNet.Services
             // is the station playing?
             var info = await GetUserNowPlaying(stationToken);
 
-            if (info == null || SpotifyUriHelper.PlaylistId(info.Context.Uri) != SpotifyUriHelper.PlaylistId(station.Playlist.Uri))
+            if (
+                info == null
+                || !info.IsPlaying
+                || info.Context == null
+                || SpotifyUriHelper.NormalizeUri(info.Context.Uri) != SpotifyUriHelper.NormalizeUri(station.SpotifyUri))
             {
+                _logger.LogInformation($"JoinPlaylist: No longer playing station {station}", station);
                 _logger.LogDebug($"JoinPlaylist: station.Playlist.Uri = {station.Playlist.Uri}");
                 _logger.LogDebug($"JoinPlaylist: info = {JsonConvert.SerializeObject(info)}");
-
                 return false;
             }
 
             // TODO: Christian algorithm
 
             // play from offset
-            await RetryHelper.RetryAsync(
-                () => _player.PlayPlaylistOffset(
-                    info.Context.Uri,
-                    info.Item.Id,
-                    accessToken: token, positionMs:
-                    info.ProgressMs),
-                logger: _logger,
-                cancellationToken: cancellationToken);
+            switch (station.SpotifyContextType)
+            {
+                case "album":
+                    await RetryHelper.RetryAsync(
+                        () => _player.PlayAlbumOffset(
+                            info.Context.Uri,
+                            info.Item.Id,
+                            accessToken: token, positionMs:
+                            info.ProgressMs),
+                        logger: _logger,
+                        cancellationToken: cancellationToken);
+                    break;
+
+                case "playlist":
+                    await RetryHelper.RetryAsync(
+                        () => _player.PlayPlaylistOffset(
+                            info.Context.Uri,
+                            info.Item.Id,
+                            accessToken: token, positionMs:
+                            info.ProgressMs),
+                        logger: _logger,
+                        cancellationToken: cancellationToken);
+                    break;
+
+                default:
+                    throw new NotSupportedException($"\"{station.SpotifyContextType}\" is not a supported Spotify context type");
+            }
 
             return true;
         }
@@ -236,11 +255,10 @@ namespace RingoBotNet.Services
             string uri,
             string hashtag,
             Models.Album album = null,
-            Models.Artist artist = null,
             Models.Playlist playlist = null)
         {
             // save station
-            var station = await _userData.CreateStation(channelUserId, album, artist, playlist, hashtag);
+            var station = await _userData.CreateStation(channelUserId, album, playlist, hashtag);
 
             await _stationData.CreateStationUri(
                 station.Id,
@@ -248,7 +266,7 @@ namespace RingoBotNet.Services
                 uri,
                 hashtag);
 
-            _logger.LogInformation($"CreateStation: uri = {uri}, hashtag = {hashtag}, item = {(album?.Name ?? artist?.Name ?? playlist?.Name)}");
+            _logger.LogInformation($"CreateStation: uri = {uri}, hashtag = {hashtag}, item = {(album?.Name ?? playlist?.Name)}");
 
             return station;
         }

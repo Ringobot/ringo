@@ -19,7 +19,6 @@ namespace RingoBotNet.Data
         Task<Station> CreateStation(
             string channelUserId,
             Album album = null,
-            Artist artist = null,
             Playlist playlist = null,
             string hashtag = null);
 

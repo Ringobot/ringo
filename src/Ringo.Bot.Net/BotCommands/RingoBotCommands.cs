@@ -267,6 +267,7 @@ namespace RingoBotNet
             {
                 // Play whatever is now playing on Spotify
                 station = await PlayNowPlaying(turnContext, token.Token, cancellationToken);
+                if (station == null) return;
             }
             else
             {
@@ -362,13 +363,6 @@ namespace RingoBotNet
                     station = info.IsGroup
                         ? await _ringoService.CreateChannelStation(channelUserId, info, album: album)
                         : await _ringoService.CreateUserStation(channelUserId, info, album: album);
-                    break;
-
-                case "artist":
-                    var artist = await _ringoService.GetArtist(token, nowPlaying.Context.Uri);
-                    station = info.IsGroup
-                        ? await _ringoService.CreateChannelStation(channelUserId, info, artist: artist)
-                        : await _ringoService.CreateUserStation(channelUserId, info, artist: artist);
                     break;
 
                 default:

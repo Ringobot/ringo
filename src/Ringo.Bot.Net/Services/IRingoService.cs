@@ -12,14 +12,12 @@ namespace RingoBotNet.Services
             string channelUserId,
             ConversationInfo info,
             Models.Album album = null,
-            Models.Artist artist = null,
             Models.Playlist playlist = null);
 
         Task<Station> CreateUserStation(
             string channelUserId,
             ConversationInfo info,
             Models.Album album = null,
-            Models.Artist artist = null,
             Models.Playlist playlist = null);
 
         Task<Playlist[]> FindPlaylists(string searchText, string accessToken, CancellationToken cancellationToken);

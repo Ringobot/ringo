@@ -68,14 +68,16 @@ namespace RingoBotNet
 
             return MessageAttachment(
                 heroCard,
-                $"You playing a {type} in Spotify which Ringo does not support 🤔 Play a Playlist, Album or Artists in Spotify and try again.");
+                type == "artist" 
+                    ? $"Unfortunately Ringo does not currently support playing Artists in Spotify 😢 Play a Playlist or an Album and try again."
+                    : $"Ringo does not currently support playing a {type} in Spotify 😢 Play a Playlist or an Album and try again.");
         }
 
         public static IMessageActivity NowPlayingStation(ConversationInfo info, Station station)
         {
             var heroCard = NewHeroCard();
 
-            var images = station.Album?.Images ?? station.Artist?.Images ?? station.Playlist?.Images;
+            var images = station.Album?.Images ?? station.Playlist?.Images;
 
             if (images != null && images.Any())
             {
@@ -125,7 +127,7 @@ namespace RingoBotNet
         public static IMessageActivity StationNoLongerPlaying(ConversationInfo info, Station station)
         {
             var heroCard = NewHeroCard();
-            string uri = station.Album?.Uri ?? station.Artist?.Uri ?? station.Playlist?.Uri;
+            string uri = station.Album?.Uri ?? station.Playlist?.Uri;
 
             heroCard.Buttons.Add(
                 new CardAction
@@ -167,7 +169,7 @@ namespace RingoBotNet
         {
             var heroCard = NewHeroCard();
 
-            string messageText = $"Hi {memberName}, I'm Ringo! 👋 The easiest way to get started is to open Spotify and start playing music. Then click/tap \"Play\".";
+            string messageText = $"Hi {memberName}, I'm Ringo! 👋 To get started, open Spotify and start playing music. Then click / tap / type \"Play\".";
 
             heroCard.Buttons.Add(
                 new CardAction
@@ -179,7 +181,7 @@ namespace RingoBotNet
 
             if (info.IsGroup)
             {
-                messageText += " Or click/tap \"Join\" to join in with others who are playing music.";
+                messageText += " Or click/tap \"Join\" to join in with others!";
 
                 heroCard.Buttons.Add(
                     new CardAction
@@ -192,7 +194,7 @@ namespace RingoBotNet
                 
             }
 
-            messageText += " Type \"`help`\" at anytime for help.";
+            messageText += " Also, you can type \"`help`\" at any time for help.";
             return MessageAttachment(heroCard, messageText);
         }
 

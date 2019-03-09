@@ -1,4 +1,5 @@
-﻿using RingoBotNet.Helpers;
+﻿using Newtonsoft.Json;
+using RingoBotNet.Helpers;
 using System;
 
 namespace RingoBotNet.Models
@@ -7,16 +8,15 @@ namespace RingoBotNet.Models
     {
         public Station() { }
 
-        public Station(string channelUserId, Album album, Artist artist, Playlist playlist, string hashtag = null)
+        public Station(string channelUserId, Album album, Playlist playlist, string hashtag = null)
         {
-            string name = album?.Name ?? artist?.Name ?? playlist?.Name;
+            string name = album?.Name ?? playlist?.Name;
 
             Id = Guid.NewGuid().ToString("N");
             Name = name;
             ChannelUserId = channelUserId;
             Hashtag = hashtag ?? RingoBotHelper.NonWordRegex.Replace(name, string.Empty);
             Album = album;
-            Artist = artist;
             Playlist = playlist;
             CreatedDate = ModifiedDate = DateTime.UtcNow;
             IsActive = true;
@@ -31,10 +31,10 @@ namespace RingoBotNet.Models
 
         public string Hashtag { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public Album Album { get; set; }
 
-        public Artist Artist { get; set; }
-
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public Playlist Playlist { get; set; }
 
         public DateTime CreatedDate { get; set; }
@@ -48,13 +48,24 @@ namespace RingoBotNet.Models
         public void EnforceInvariants()
         {
             if (string.IsNullOrEmpty(ChannelUserId)) throw new InvariantNullException(nameof(ChannelUserId));
-            if (Album == null && Artist == null && Playlist == null) throw new InvariantException("Station must have Album or Artist or Playlist property set.");
-            if ((Album != null && (Artist != null || Playlist != null)) 
-                || (Artist != null && (Album != null || Playlist != null))
-                || (Playlist != null && (Album != null || Artist != null)))
+            if (Album == null && Playlist == null) throw new InvariantException("Station must have Album or Playlist property set.");
+            if (Album != null && Playlist != null) 
             {
-                throw new InvariantException("Station must have only one of Album or Artist or Playlist property set.");
+                throw new InvariantException("Station must have only one of Album or Playlist property set.");
             }
         }
+
+        [JsonIgnore]
+        public string SpotifyContextType {
+            get
+            {
+                if (Album != null) return "album";
+                if (Playlist != null) return "playlist";
+                return null;
+            }
+        }
+
+        [JsonIgnore]
+        public string SpotifyUri => Album?.Uri ?? Playlist?.Uri;
     }
 }
