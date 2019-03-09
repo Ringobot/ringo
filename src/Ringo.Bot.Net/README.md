@@ -33,22 +33,17 @@
 1. ✅ When you `play` in a channel you are changing the station for the channel
 1. ✅ When you `play` in DM you are changing your own channel
 1. ✅ `join` in a channel joins the channel station
-1. ▶ `join` in the DM joins any other station, e.g. `join #music_lovers` (joins music_lovers channel
+1. ✅ `join` in the DM joins any other station, e.g. `join #music_lovers` (joins music_lovers channel
    station) or `join @abraham` (joins another abraham's station)
-1. ▶ ⭐ play current artist, playlist or album. Otherwise warn.
-1. ⭐ If owner stops playing Ringo searches for new owner
-1. ⭐ `@daniel has joined #general playing "Joy" with 3 others`
-1. Separate Station Table? Station Type = Channel|User. 
-1. New Listener table?
-1. Station list?
+1. ✅ ⭐ play current ~~artist~~, playlist or album. Otherwise warn.
 1. OK for people to join your personal station (means they can see what you are playing at any time)
 1. ~~Revert play "playlist name" feature?~~
 
 ### dan/whkmas
 
-1. ⭐ `You and 20 others are playing #JoeGoddard`
-1. ⭐ `next | skip | skip 3`
 1. ⭐ Christian algorithm
+1. ⭐ `next | skip | skip 3`
+1. ⭐ `You and 20 others are playing #JoeGoddard`
 1. ⭐ `You pasted a link, would you like to... (start a station | add to playlist | change the station | ...)`
 1. ⭐ `You mentioned Album x, would you like Ringo to add it to a playlist? Add to current playlist a | Add to channel playlist b | Add to A different playlist `
 1. Ignore anything before `@ringo`
@@ -62,14 +57,20 @@
    afternoon set? Would we just use playlists?
 1. `queue Trojan Dub` - adds playlist to station queue 
 1. `queue 0600 Dan's breakfast show` - queues playlist to play at 6am
+1. ⭐ Mobile friendly magic number page: https://blog.teamtreehouse.com/create-an-absolute-basic-mobile-css-responsive-navigation-menu.
+   Click to copy. Redirect back to app via slack:XXXX URI?
 
-Sending a slack DM: <https://github.com/Microsoft/BotBuilder/issues/2923> <https://stackoverflow.com/questions/44353520/is-there-a-way-to-start-formflow-dialog-on-conversationupdate-event>
+### dan/endless-stations
+
+1. ⭐ If owner stops playing Ringo searches for new owner
+1. ⭐ `@daniel has joined #general playing "Joy" with 3 others`
+1. Separate Station Table? Station Type = Channel|User. 
+1. New Listener table?
+1. Station list?
 
 ### dan/sync
 
 1. Once you join a channel station, your Spotify player follows the station
-1. ⭐ Mobile friendly magic number page: https://blog.teamtreehouse.com/create-an-absolute-basic-mobile-css-responsive-navigation-menu.
-   Click to copy. Redirect back to app via slack:XXXX URI?
 1. ~~Auth via Spotify App?~~ Only in Mobile SDK
 1. Better Playlist sorting and selection (carousel)
 1. To sync or not sync
@@ -99,6 +100,7 @@ Sending a slack DM: <https://github.com/Microsoft/BotBuilder/issues/2923> <https
 
 ### Unplanned
 
+1. Support albums
 1. Port Ringo JS features
 1. List devices and choose one
 1. Speech
