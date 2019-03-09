@@ -19,7 +19,7 @@ namespace RingoBotNet.Mappers
                 Artists = album.Artists.Select(MapToArtist).ToArray()
             };
 
-            if (album.Images.Any())
+            if (album.Images != null && album.Images.Any())
             {
                 item.Images = album.Images.Select(i => new Image
                 {
@@ -45,7 +45,7 @@ namespace RingoBotNet.Mappers
                 ExternalUrls = new ExternalUrls { Spotify = artist.ExternalUrls.Spotify }
             };
 
-            if (artist.Images.Any())
+            if (artist.Images != null && artist.Images.Any())
             {
                 item.Images = artist.Images.Select(i => new Image
                 {
@@ -71,7 +71,7 @@ namespace RingoBotNet.Mappers
                 ExternalUrls = new ExternalUrls { Spotify = playlist.ExternalUrls.Spotify }
             };
 
-            if (playlist.Images.Any())
+            if (playlist.Images != null && playlist.Images.Any())
             {
                 item.Images = playlist.Images.Select(i => new Image
                 {

@@ -60,6 +60,8 @@
 1. @skitch: So this is spotify's radio - how would we do like a day of each others radio stations e.g.
    say we make friday's 'join' days  and take turns at doing morning set, miday set and jamming 
    afternoon set? Would we just use playlists?
+1. `queue Trojan Dub` - adds playlist to station queue 
+1. `queue 0600 Dan's breakfast show` - queues playlist to play at 6am
 
 Sending a slack DM: <https://github.com/Microsoft/BotBuilder/issues/2923> <https://stackoverflow.com/questions/44353520/is-there-a-way-to-start-formflow-dialog-on-conversationupdate-event>
 

@@ -77,7 +77,7 @@ namespace RingoBotNet
 
             var images = station.Album?.Images ?? station.Artist?.Images ?? station.Playlist?.Images;
 
-            if (images.Any())
+            if (images != null && images.Any())
             {
                 heroCard.Images.Add(
                     new CardImage
@@ -143,12 +143,6 @@ namespace RingoBotNet
         public static IMessageActivity UserHasJoined(ConversationInfo info, Station station)
         {
             var heroCard = NewHeroCard();
-
-            //if (station.Playlist.Images.Any())
-            //{
-            //    heroCard.Images.Add(new CardImage { Url = station.Playlist.Images[0].Url, Alt = station.Playlist.Name });
-            //}
-
             string messageText = null;
 
             if (info.IsGroup)
@@ -167,6 +161,39 @@ namespace RingoBotNet
             }
 
             return MessageFactory.Text($"You have joined @{station.Hashtag}! 🎉");
+        }
+
+        public static IMessageActivity Welcome(ConversationInfo info, string memberName)
+        {
+            var heroCard = NewHeroCard();
+
+            string messageText = $"Hi {memberName}, I'm Ringo! 👋 The easiest way to get started is to open Spotify and start playing music. Then click/tap \"Play\".";
+
+            heroCard.Buttons.Add(
+                new CardAction
+                {
+                    Title = "Spotify is Playing! Play",
+                    Value = "play",
+                    Type = ActionTypes.ImBack,
+                });
+
+            if (info.IsGroup)
+            {
+                messageText += " Or click/tap \"Join\" to join in with others who are playing music.";
+
+                heroCard.Buttons.Add(
+                    new CardAction
+                    {
+                        Title = "Join",
+                        Value = "join",
+                        Type = ActionTypes.ImBack,
+                    });
+
+                
+            }
+
+            messageText += " Type \"`help`\" at anytime for help.";
+            return MessageAttachment(heroCard, messageText);
         }
 
         private static HeroCard NewHeroCard(string text = null) 

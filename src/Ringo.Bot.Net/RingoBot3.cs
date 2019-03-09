@@ -238,7 +238,7 @@ namespace RingoBotNet
                 if (member.Id != turnContext.Activity.Recipient.Id)
                 {
                     await turnContext.SendActivityAsync(
-                        $"Hi {member.Name}, I'm Ringo! Try `\"play (playlist name)\"` to begin. Or type `\"help\"`.",
+                        RingoBotMessages.Welcome(RingoBotHelper.NormalizedConversationInfo(turnContext), member.Name),
                         cancellationToken: cancellationToken);
                 }
             }
