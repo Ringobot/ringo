@@ -341,9 +341,22 @@ namespace RingoBotNet
             //playlist = await GetNowPlaying(token.Token);
             SpotifyApi.NetCore.CurrentPlaybackContext nowPlaying = await _ringoService.GetUserNowPlaying(token);
 
-            if (nowPlaying == null || !nowPlaying.IsPlaying)
+            if (nowPlaying == null || !nowPlaying.IsPlaying || nowPlaying.Context == null)
             {
-                await turnContext.SendActivityAsync(RingoBotMessages.NotPlayingAnything(info), cancellationToken);
+                if (nowPlaying.IsPlaying && nowPlaying.Context == null)
+                {
+                    await turnContext.SendActivityAsync(RingoBotMessages.NowPlayingNoContext(info), cancellationToken);
+                }
+                else if (nowPlaying.IsPlaying && !new[] { "playlist", "album" }.Contains(nowPlaying.Context.Type))
+                {
+                    await turnContext.SendActivityAsync(
+                        RingoBotMessages.NowPlayingNotSupported(info, nowPlaying.Context.Type), cancellationToken);
+                }
+                else
+                {
+                    await turnContext.SendActivityAsync(RingoBotMessages.NotPlayingAnything(info), cancellationToken);
+                }
+                
                 return null;
             }
 

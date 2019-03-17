@@ -69,8 +69,25 @@ namespace RingoBotNet
             return MessageAttachment(
                 heroCard,
                 type == "artist" 
-                    ? $"Unfortunately Ringo does not currently support playing Artists in Spotify 😢 Play a Playlist or an Album and try again."
+                    ? "Unfortunately Ringo does not currently support playing Artists in Spotify 😢 Play a Playlist or an Album and try again."
                     : $"Ringo does not currently support playing a {type} in Spotify 😢 Play a Playlist or an Album and try again.");
+        }
+
+        public static IMessageActivity NowPlayingNoContext(ConversationInfo info)
+        {
+            var heroCard = NewHeroCard();
+
+            heroCard.Buttons.Add(
+                new CardAction
+                {
+                    Title = "Try again!",
+                    Value = $"{RingoBotHelper.RingoHandleIfGroupChat(info)}play",
+                    Type = ActionTypes.ImBack,
+                });
+
+            return MessageAttachment(
+                heroCard,
+                "Unfortunately Ringo does not support playing single Tracks or endless Playlists (including Daily Mixes) 😢 Play a Playlist or an Album in Spotify and try again.");
         }
 
         public static IMessageActivity NowPlayingStation(ConversationInfo info, Station station)

@@ -8,6 +8,7 @@ using RingoBotNet.Models;
 using SpotifyApi.NetCore;
 using SpotifyApi.NetCore.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -17,6 +18,7 @@ namespace RingoBotNet.Services
 {
     public class RingoService : IRingoService
     {
+        private static readonly string[] SupportedSpotifyItemTypes = new[] { "playlist", "album" };
         private static readonly Regex SpotifyPlaylistUrlRegex = new Regex("playlist\\/[a-zA-Z0-9]+");
 
         private readonly IPlaylistsApi _playlists;
@@ -25,7 +27,6 @@ namespace RingoBotNet.Services
         private readonly IPlayerApi _player;
         private readonly IConfiguration _config;
         private readonly IChannelUserData _userData;
-        //private readonly IStationHashcodeData _stationHashcodeData;
         private readonly ILogger _logger;
         private IStationData _stationData;
 
@@ -178,7 +179,11 @@ namespace RingoBotNet.Services
                 return false;
             }
 
-            // TODO: Christian algorithm
+            if (!SupportedSpotifyItemTypes.Contains(station.SpotifyContextType))
+                throw new NotSupportedException($"\"{station.SpotifyContextType}\" is not a supported Spotify context type");
+
+            var (success, progressMs, utc) = await GetOffset(token);
+            if (!success) progressMs = info.ProgressMs;
 
             // play from offset
             switch (station.SpotifyContextType)
@@ -188,8 +193,8 @@ namespace RingoBotNet.Services
                         () => _player.PlayAlbumOffset(
                             info.Context.Uri,
                             info.Item.Id,
-                            accessToken: token, positionMs:
-                            info.ProgressMs),
+                            accessToken: token, 
+                            positionMs: progressMs),
                         logger: _logger,
                         cancellationToken: cancellationToken);
                     break;
@@ -199,32 +204,70 @@ namespace RingoBotNet.Services
                         () => _player.PlayPlaylistOffset(
                             info.Context.Uri,
                             info.Item.Id,
-                            accessToken: token, positionMs:
-                            info.ProgressMs),
+                            accessToken: token, 
+                            positionMs: progressMs),
                         logger: _logger,
                         cancellationToken: cancellationToken);
                     break;
-
-                default:
-                    throw new NotSupportedException($"\"{station.SpotifyContextType}\" is not a supported Spotify context type");
             }
+
+            if (success) await SyncJoiningPlayer(token, progressMs, utc);
 
             return true;
         }
 
-        public async Task<CurrentPlaybackContext> GetUserNowPlaying(string token)
+        private async Task SyncJoiningPlayer(string token, long progressMs, DateTime utc)
         {
-            CurrentPlaybackContext info = await RetryHelper.RetryAsync(
+            // TODO:
+            // Christian algorithm
+            //  T + RTT/2
+            //  Time + RoundTripTime / 2
+            return;
+        }
+
+        protected internal async Task<(bool success, long progressMs, DateTime utc)> GetOffset(string token)
+        {
+            // Christian algorithm
+            //  T + RTT/2
+            //  Time + RoundTripTime / 2
+
+            var results = new List<(long progressMs, long roundtripMs, DateTime utc)>();
+
+            for (int i = 0; i < 3; i++)
+            {
+                try
+                {
+                    results.Add(await GetRoundTrip(token));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"GetOffset: Try {i + 1} of 3 failed");
+                }
+            }
+
+            if (results.Any())
+            {
+                (long progressMs, long roundtripMs, DateTime utc) = results.OrderBy(r => r.roundtripMs).First();
+                return (true, progressMs + (roundtripMs / 2), utc);
+            }
+
+            return (false, 0, DateTime.MinValue);
+        }
+
+        protected internal virtual async Task<(long progressMs, long roundtripMs, DateTime utc)> GetRoundTrip(string token)
+        {
+            // DateTime has enough fidelity for these timings
+            var start = DateTime.UtcNow;
+            CurrentPlaybackContext info1 = await _player.GetCurrentPlaybackInfo(token);
+            var finish = DateTime.UtcNow;
+            double rtt = start.Subtract(finish).TotalMilliseconds;
+            return (info1.ProgressMs, Convert.ToInt64(rtt), finish);
+        }
+
+        public async Task<CurrentPlaybackContext> GetUserNowPlaying(string token) 
+            => await RetryHelper.RetryAsync(
                 () => _player.GetCurrentPlaybackInfo(token),
                 logger: _logger);
-
-            //if (info == null || !info.IsPlaying || !new[] { "playlist", "album", "artist" }.Contains(info.Context.Type))
-            //{
-            //    return null;
-            //}
-
-            return info;
-        }
 
         public async Task<ChannelUser> CreateChannelUserIfNotExists(string channelId, string userId, string username)
         {

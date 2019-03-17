@@ -132,6 +132,21 @@
 * Akudos
 * MSFT NZ (Teams)
 
+## Cristian algorithm
+
+Cristian's algorithm works between a process P, and a time server S — connected to a source of UTC 
+(Coordinated Universal Time). Put simply:
+
+    P requests the time from S
+    After receiving the request from P, S prepares a response and appends the time T from its own clock.
+    P then sets its time to be T + RTT/2
+
+This method assumes that the RTT (Round Trip Time) is split equally between request and response, which 
+may not always be the case but is a reasonable assumption on a LAN connection.
+
+Further accuracy can be gained by making multiple requests to S and using the response with the shortest 
+RTT. 
+
 ## Ringo Station URI
 
 ### v2
