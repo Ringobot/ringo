@@ -14,7 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\SpotifyApi.NetCore\src\SpotifyApi.NetCore\SpotifyApi.NetCore.csproj" />
     <ProjectReference Include="..\Ringo.Bot.Net\Ringo.Bot.Net.csproj" />
   </ItemGroup>
 

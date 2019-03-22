@@ -15,9 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!--<Content Include="BotConfiguration.local.bot">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>-->
     <Content Include="BotConfiguration.bot">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -33,7 +30,6 @@
     <PackageReference Include="Microsoft.AspNetCore" Version="2.1.6" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.6" />
     <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="0.10.1-preview" />
-    <!--<PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" PrivateAssets="all" />-->
     <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="2.2.1" />
     <PackageReference Include="Microsoft.Bot.Builder" Version="4.2.0" />
     <PackageReference Include="Microsoft.Bot.Builder.Azure" Version="4.2.0" />
@@ -44,13 +40,12 @@
     <PackageReference Include="Microsoft.Bot.Schema" Version="4.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.1.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.6" />
-    <!--<PackageReference Include="StyleCop.Analyzers" Version="1.1.1-beta.61" PrivateAssets="all" />-->
-    <!--<PackageReference Include="SpotifyApi.NetCore" Version="2.3.9" />-->
+    <PackageReference Include="SpotifyApi.NetCore" Version="2.4.4" />
     <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!--<ItemGroup>
     <ProjectReference Include="..\..\..\SpotifyApi.NetCore\src\SpotifyApi.NetCore\SpotifyApi.NetCore.csproj" />
-  </ItemGroup>
+  </ItemGroup>-->
 
 </Project>

@@ -5,9 +5,7 @@ VisualStudioVersion = 15.0.28306.52
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ringo.Bot.Net", "Ringo.Bot.Net\Ringo.Bot.Net.csproj", "{02417AAA-9F3A-4F76-9645-E5BCA757059F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpotifyApi.NetCore", "..\..\SpotifyApi.NetCore\src\SpotifyApi.NetCore\SpotifyApi.NetCore.csproj", "{40378E5F-96B1-4BCB-B4C9-FB6638742166}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RingoBotNet.Tests", "RingoBotNet.Tests\RingoBotNet.Tests.csproj", "{5B347FE3-8385-46E9-A0CA-E84DE34729FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RingoBotNet.Tests", "RingoBotNet.Tests\RingoBotNet.Tests.csproj", "{5B347FE3-8385-46E9-A0CA-E84DE34729FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,10 +17,6 @@ Global
 		{02417AAA-9F3A-4F76-9645-E5BCA757059F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02417AAA-9F3A-4F76-9645-E5BCA757059F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02417AAA-9F3A-4F76-9645-E5BCA757059F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{40378E5F-96B1-4BCB-B4C9-FB6638742166}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{40378E5F-96B1-4BCB-B4C9-FB6638742166}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{40378E5F-96B1-4BCB-B4C9-FB6638742166}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{40378E5F-96B1-4BCB-B4C9-FB6638742166}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5B347FE3-8385-46E9-A0CA-E84DE34729FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5B347FE3-8385-46E9-A0CA-E84DE34729FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B347FE3-8385-46E9-A0CA-E84DE34729FB}.Release|Any CPU.ActiveCfg = Release|Any CPU

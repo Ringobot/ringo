@@ -182,7 +182,7 @@ namespace RingoBotNet.Services
             if (!SupportedSpotifyItemTypes.Contains(station.SpotifyContextType))
                 throw new NotSupportedException($"\"{station.SpotifyContextType}\" is not a supported Spotify context type");
 
-            var (success, progressMs, utc) = await GetOffset(token);
+            var (success, progressMs, utc) = await GetOffset(stationToken);
             if (!success) progressMs = info.ProgressMs;
 
             // play from offset
@@ -216,13 +216,22 @@ namespace RingoBotNet.Services
             return true;
         }
 
-        private async Task SyncJoiningPlayer(string token, long progressMs, DateTime utc)
+        private async Task SyncJoiningPlayer(string token, long stationProgressMs, DateTime stationUtc)
         {
             // TODO:
             // Christian algorithm
             //  T + RTT/2
             //  Time + RoundTripTime / 2
-            return;
+            (bool success, long joinerProgressMs, DateTime joinerUtc) = await GetOffset(token);
+            if (!success) return;
+
+            long stationPlayheadNow = 
+                stationProgressMs + (Convert.ToInt64(DateTime.UtcNow.Subtract(stationUtc).TotalMilliseconds));
+
+            long error = stationPlayheadNow - joinerProgressMs;
+
+            // play @ Station_Playhead_Now + error
+            await _player.Seek(stationPlayheadNow + error, accessToken: token);
         }
 
         protected internal async Task<(bool success, long progressMs, DateTime utc)> GetOffset(string token)

@@ -59,6 +59,11 @@
 1. `queue 0600 Dan's breakfast show` - queues playlist to play at 6am
 1. ⭐ Mobile friendly magic number page: https://blog.teamtreehouse.com/create-an-absolute-basic-mobile-css-responsive-navigation-menu.
    Click to copy. Redirect back to app via slack:XXXX URI?
+1. Should there only be one station per channel? What if two users want to play different lists in the
+   same channel at the same time? 🤔
+1. Check for shuffle flag
+1. 🐞 Two spaces between `@ringo` and `play`
+1. 🐞 sync when no station = error
 
 ### dan/endless-stations
 
