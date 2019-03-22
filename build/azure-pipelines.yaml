@@ -20,7 +20,7 @@ steps:
 - script: |
     dotnet build src/Ringo.Bot.Net --configuration $(buildConfiguration)
     dotnet test src/RingoBotNet.Tests --configuration $(buildConfiguration) --logger trx --filter "TestCategory!=Integration"
-    dotnet publish Ringo.Bot.Net --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
+    dotnet publish src/Ringo.Bot.Net --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
 
 - task: PublishTestResults@2
   inputs:
