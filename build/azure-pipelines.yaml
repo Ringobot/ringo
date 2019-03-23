@@ -20,12 +20,19 @@ steps:
 - script: |
     dotnet build src/Ringo.Bot.Net --configuration $(buildConfiguration)
     dotnet test src/RingoBotNet.Tests --configuration $(buildConfiguration) --logger trx --filter "TestCategory!=Integration"
-    dotnet publish src/Ringo.Bot.Net --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
+    dotnet publish src/Ringo.Bot.Net --configuration $(buildConfiguration) --output $(Build.BinariesDirectory)
 
 - task: PublishTestResults@2
   inputs:
     testRunner: VSTest
     testResultsFiles: '**/*.trx'
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.BinariesDirectory)' 
+    #includeRootFolder: true 
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip' 
 
 - task: PublishBuildArtifacts@1
   inputs: 
