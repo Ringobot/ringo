@@ -216,22 +216,52 @@ namespace RingoBotNet.Services
             return true;
         }
 
-        private async Task SyncJoiningPlayer(string token, long stationProgressMs, DateTime stationUtc)
+        private async Task SyncJoiningPlayer(string token, long stationPositionMs, DateTime stationUtc)
         {
             // TODO:
             // Christian algorithm
             //  T + RTT/2
             //  Time + RoundTripTime / 2
-            (bool success, long joinerProgressMs, DateTime joinerUtc) = await GetOffset(token);
-            if (!success) return;
+            var joinerNewPositionMs = new Func<long, DateTime, long, (long, DateTime)>((
+                long stationLastPositionMs,
+                DateTime stationLastUtc,
+                long joinerCurrentPositionMs) =>
+            {
+                DateTime utc = DateTime.UtcNow;
+                long stationCurrentPositionMs
+                    = stationLastPositionMs + Convert.ToInt64(utc.Subtract(stationLastUtc).TotalMilliseconds);
+                // error is positive if joiner lags station
+                long error = stationCurrentPositionMs - joinerCurrentPositionMs;
 
-            long stationPlayheadNow = 
-                stationProgressMs + (Convert.ToInt64(DateTime.UtcNow.Subtract(stationUtc).TotalMilliseconds));
+                _logger.LogDebug(
+                    $"SyncJoiningPlayer: joinerNewPositionMs: Token = {BotHelper.TokenForLogging(token)}, error = {error}");
 
-            long error = stationPlayheadNow - joinerProgressMs;
+                return (joinerCurrentPositionMs + error, utc);
+            });
 
-            // play @ Station_Playhead_Now + error
-            await _player.Seek(stationPlayheadNow + error, accessToken: token);
+            var syncJoiner = new Func<long, DateTime, Task<(bool, long, DateTime)>>(async (long lastPositionMs, DateTime lastUtc) =>
+            {
+                (bool success, long currentPositionMs, DateTime currentUtc) = await GetOffset(token);
+                if (!success) return (false, 0, DateTime.MinValue);
+
+                var (newPositionMs, newUtc) = joinerNewPositionMs(lastPositionMs, lastUtc, currentPositionMs);
+
+                if (newPositionMs < 0) return (false, 0, DateTime.MinValue);
+
+                // play @ Station_Playhead_Now + error
+                await _player.Seek(newPositionMs, accessToken: token);
+
+                _logger.LogDebug(
+                    $"SyncJoiningPlayer: Token = {BotHelper.TokenForLogging(token)}, newPositionMs = {newPositionMs}, newUtc = {newUtc}");
+
+                return (true, newPositionMs, newUtc);
+            });
+
+            (bool success, long newPositionMs, DateTime newUtc) attempt1 = await syncJoiner(stationPositionMs, stationUtc);
+            if (!attempt1.success) return;
+            
+            // do it again
+            await syncJoiner(attempt1.newPositionMs, attempt1.newUtc);
         }
 
         protected internal async Task<(bool success, long progressMs, DateTime utc)> GetOffset(string token)
@@ -273,7 +303,7 @@ namespace RingoBotNet.Services
             var start = DateTime.UtcNow;
             CurrentPlaybackContext info1 = await _player.GetCurrentPlaybackInfo(token);
             var finish = DateTime.UtcNow;
-            double rtt = start.Subtract(finish).TotalMilliseconds;
+            double rtt = finish.Subtract(start).TotalMilliseconds;
             return (info1.ProgressMs, Convert.ToInt64(rtt), finish);
         }
 
