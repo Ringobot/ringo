@@ -246,7 +246,9 @@ namespace RingoBotNet.Services
             {
                 try
                 {
-                    results.Add(await GetRoundTrip(token));
+                    var rt = await GetRoundTrip(token);
+                    results.Add(rt);
+                    _logger.LogDebug($"GetOffset: Token = {BotHelper.TokenForLogging(token)}, GetRoundTrip = {rt}");
                 }
                 catch (Exception ex)
                 {
@@ -257,7 +259,9 @@ namespace RingoBotNet.Services
             if (results.Any())
             {
                 (long progressMs, long roundtripMs, DateTime utc) = results.OrderBy(r => r.roundtripMs).First();
-                return (true, progressMs + (roundtripMs / 2), utc);
+                var result = (true, progressMs + (roundtripMs / 2), utc);
+                _logger.LogDebug($"GetOffset: {BotHelper.TokenForLogging(token)}, result = {result}");
+                return result;
             }
 
             return (false, 0, DateTime.MinValue);

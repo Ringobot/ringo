@@ -11,6 +11,23 @@ namespace RingoBotNet
 {
     public static class RingoBotMessages
     {
+        public static IMessageActivity AuthHasBeenReset(ConversationInfo info)
+        {
+            var heroCard = NewHeroCard();
+
+            heroCard.Buttons.Add(
+                new CardAction
+                {
+                    Title = "Authorize",
+                    Value = "auth",
+                    Type = ActionTypes.ImBack,
+                });
+
+            return MessageAttachment(
+                heroCard, 
+                "Spotify authorization has been reset. You can type `\"auth\"` at any time to authorize Spotify again.");
+        }
+
         public static IMessageActivity CouldNotFindStation(ConversationInfo info, string query)
         {
             var heroCard = NewHeroCard();

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
 
 namespace RingoBotNet.Models
 {
@@ -24,5 +21,8 @@ namespace RingoBotNet.Models
         public string ConversationName { get; set; }
 
         public bool IsGroup { get; set; }
+
+        [JsonIgnore]
+        public string BotName { get => RecipientName; }
     }
 }

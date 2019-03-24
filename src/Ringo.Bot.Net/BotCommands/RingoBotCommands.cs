@@ -32,11 +32,13 @@ namespace RingoBotNet
 
         public async Task Auth(ITurnContext turnContext, UserProfile userProfile, string query, CancellationToken cancellationToken)
         {
+            var info = RingoBotHelper.NormalizedConversationInfo(turnContext);
+
             // Don't auth in group chat
             if (BotHelper.IsGroup(turnContext))
             {
                 await turnContext.SendActivityAsync(
-                    "Ringo cannot authorize you in Group Chat. DM (direct message) @ringo instead.",
+                    $"Ringo cannot authorize you in Group Chat. DM (direct message) @{info.BotName} instead.",
                     cancellationToken: cancellationToken);
                 return;
             }
@@ -45,9 +47,7 @@ namespace RingoBotNet
             if (query.ToLower() == "reset")
             {
                 await _authService.ResetAuthorization(turnContext, cancellationToken);
-                await turnContext.SendActivityAsync(
-                    "Spotify authorization has been reset. Type `\"authorize\"` to authorize Spotify again.",
-                    cancellationToken: cancellationToken);
+                await turnContext.SendActivityAsync(RingoBotMessages.AuthHasBeenReset(info), cancellationToken);
                 return;
             }
 

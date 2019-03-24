@@ -45,6 +45,8 @@ namespace RingoBotNet.Services
 
         public async Task<TokenResponse> Authorize(ITurnContext turnContext, CancellationToken cancellationToken)
         {
+            var info = RingoBotHelper.NormalizedConversationInfo(turnContext);
+
             TokenResponse token = await GetAccessToken(turnContext.Activity.ChannelId, turnContext.Activity.From.Id);
             if (token != null) return token;
 
@@ -53,7 +55,7 @@ namespace RingoBotNet.Services
             {
                 // Don't start authorisation dance in Group chat
                 await turnContext.SendActivityAsync(
-                    $"Before you play or join with Ringo you need to authorize Spotify. DM (direct message) the word `\"{RingoBotCommands.AuthCommand[0]}\"` to @ringo to continue.",
+                    $"Before you play or join with Ringo you need to authorize Spotify. DM (direct message) the word `\"{RingoBotCommands.AuthCommand[0]}\"` to @{info.BotName} to continue.",
                     cancellationToken: cancellationToken);
                 return null;
             }

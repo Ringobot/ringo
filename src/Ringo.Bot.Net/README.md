@@ -61,6 +61,7 @@
    Click to copy. Redirect back to app via slack:XXXX URI?
 1. Should there only be one station per channel? What if two users want to play different lists in the
    same channel at the same time? 🤔
+1. Listener should `listen` instead of `join` ?
 1. Check for shuffle flag
 1. 🐞 Two spaces between `@ringo` and `play`
 1. 🐞 sync when no station = error
@@ -208,3 +209,18 @@ RTT.
 <https://developer.spotify.com/documentation/general/guides/content-linking-guide/>
 
 Using the Spotify Connect Web API: <https://developer.spotify.com/documentation/web-api/guides/using-connect-web-api/>
+
+### Teams
+
+<https://docs.microsoft.com/en-us/microsoftteams/add-bots>
+
+<https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/apps/apps-upload>
+
+<https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/apps/apps-package>
+
+<https://docs.microsoft.com/en-us/microsoftteams/platform/resources/schema/manifest-schema>
+
+<https://docs.microsoft.com/en-us/microsoftteams/platform/resources/dev-preview/developer-preview-intro>
+
+<https://docs.microsoft.com/en-us/microsoftteams/platform/resources/dev-preview/developer-preview-features>
+

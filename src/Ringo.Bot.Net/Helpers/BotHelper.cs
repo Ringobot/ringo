@@ -45,5 +45,11 @@ namespace RingoBotNet.Helpers
             return mentions.Any(m => m.Mentioned.Id == turnContext.Activity.Recipient.Id);
         }
 
+        public static string TokenForLogging(string token)
+        {
+            if (token == null) return null;
+            if (token.Length <= 5) return token;
+            return $"{token.Substring(0, 5)}...";
+        }
     }
 }
