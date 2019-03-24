@@ -94,8 +94,8 @@ namespace RingoBotNet
                         }
                         else
                         {
-                            _logger.LogDebug($"Token = {token2.Token.Substring(0, 5)}...");
-                            await turnContext.SendActivityAsync($"Already logged in with Token {token2.Token.Substring(0, 5)} 👌. Type `logout` if you would like to logout.");
+                            _logger.LogDebug($"Token = {BotHelper.TokenForLogging(token2.Token)}");
+                            await turnContext.SendActivityAsync($"Already logged in with Token {BotHelper.TokenForLogging(token2.Token)} 👌. Type `logout` if you would like to logout.");
                         }
 
                         break;
@@ -142,8 +142,8 @@ namespace RingoBotNet
                         }
                         else
                         {
-                            _logger.LogDebug($"Token = {token2.Token.Substring(0, 5)}...");
-                            await turnContext.SendActivityAsync($"Logged in with Token {token2.Token.Substring(0, 5)} 👌");
+                            _logger.LogDebug($"Token = {BotHelper.TokenForLogging(token2.Token)}");
+                            await turnContext.SendActivityAsync($"Logged in with Token {BotHelper.TokenForLogging(token2.Token)} 👌");
                         }
 
                         break;
@@ -195,8 +195,8 @@ namespace RingoBotNet
                     }
                     else
                     {
-                        _logger.LogDebug($"Token = {token.Token.Substring(0, 5)}...");
-                        await turnContext.SendActivityAsync($"Logged in with Token {token.Token.Substring(0, 5)} 👌");
+                        _logger.LogDebug($"Token = {BotHelper.TokenForLogging(token.Token)}");
+                        await turnContext.SendActivityAsync($"Logged in with Token {BotHelper.TokenForLogging(token.Token)} 👌");
                     }
 
                     break;
