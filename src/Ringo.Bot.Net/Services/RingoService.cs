@@ -220,7 +220,7 @@ namespace RingoBotNet.Services
                     break;
             }
 
-            if (offset.success) await SyncJoiningPlayer(token, position.positionMs, position.atUtc);
+            if (offset.success) await SyncJoiningPlayer(stationToken: stationToken, joiningToken: token);
 
             return true;
         }
@@ -246,7 +246,7 @@ namespace RingoBotNet.Services
             return Convert.ToInt64(epoch2.Subtract(epoch1).TotalMilliseconds);
         }
 
-        private async Task SyncJoiningPlayer(string token, long stationPositionMs, DateTime stationUtc)
+        private async Task SyncJoiningPlayer(string stationToken, string joiningToken)
         {
             // TODO:
             // Christian algorithm
@@ -260,7 +260,7 @@ namespace RingoBotNet.Services
                 long error = PositionDiff(stationPosition, joinerPosition);
 
                 _logger.LogDebug(
-                    $"SyncJoiningPlayer: joinerNewPositionMs: Token = {BotHelper.TokenForLogging(token)}, error = {error}");
+                    $"SyncJoiningPlayer: joinerNewPositionMs: Token = {BotHelper.TokenForLogging(joiningToken)}, error = {error}");
 
                 // shift position of joiner relative to time
                 return (joinerPosition.positionMs + error, joinerPosition.atUtc);
@@ -268,7 +268,7 @@ namespace RingoBotNet.Services
 
             var syncJoiner = new Func<(long, DateTime), Task<(bool, long, (long, DateTime))>>(async ((long positionMs, DateTime atUtc) lastPosition) =>
             {
-                (bool success, string itemId, (long positionMs, DateTime currentUtc) position) current = await GetOffset(token);
+                (bool success, string itemId, (long positionMs, DateTime currentUtc) position) current = await GetOffset(joiningToken);
                 if (!current.success) return (false, 0, (0, DateTime.MinValue));
 
                 (long positionMs, DateTime atUtc) adjustedPosition = joinerNewPositionMs(lastPosition, current.position);
@@ -276,26 +276,29 @@ namespace RingoBotNet.Services
                 if (newPosition.positionMs < 0) return (false, 0, (0, DateTime.MinValue));
 
                 // play @ Station_Playhead_Now + error
-                await _player.Seek(newPosition.positionMs, accessToken: token);
+                await _player.Seek(newPosition.positionMs, accessToken: joiningToken);
 
                 long error = PositionDiff(current.position, newPosition);
 
                 _logger.LogDebug(
-                    $"SyncJoiningPlayer: syncJoiner: Token = {BotHelper.TokenForLogging(token)}, Joiner was synced from {current.position} to {newPosition} (error = {error} ms) based on station position of {lastPosition}");
+                    $"SyncJoiningPlayer: syncJoiner: Token = {BotHelper.TokenForLogging(joiningToken)}, Joiner was synced from {current.position} to {newPosition} (error = {error} ms) based on station position of {lastPosition}");
 
                 return (true, error, newPosition);
             });
 
-            const long errorAdjustmentThresholdMs = 100;
+            //const long errorAdjustmentThresholdMs = 100;
+
+            var stationOffset = await GetOffset(stationToken);
 
             (bool success, long error, (long positionMs, DateTime atUtc) newPosition) attempt1 
-                = await syncJoiner((stationPositionMs, stationUtc));
+                = await syncJoiner(stationOffset.position);
 
             // if attempt as unsuccessful, or the adjusted error was less than errorAdjustmentThresholdMs, return
-            if (!attempt1.success || Math.Abs(attempt1.error) <= errorAdjustmentThresholdMs) return;
-            
+            //if (!attempt1.success || Math.Abs(attempt1.error) <= errorAdjustmentThresholdMs) return;
+
             // do it again
-            await syncJoiner(attempt1.newPosition);
+            stationOffset = await GetOffset(stationToken);
+            await syncJoiner(stationOffset.position);
         }
 
         protected internal async Task<(bool success, string itemId, (long progressMs, DateTime atUtc) position)> GetOffset(
