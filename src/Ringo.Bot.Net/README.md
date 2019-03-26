@@ -1,5 +1,7 @@
 # Ringo bot .NET Core
 
+[![Build Status](https://dalars.visualstudio.com/ringo/_apis/build/status/Build%20RingoBotNet?branchName=master)](https://dalars.visualstudio.com/ringo/_build/latest?definitionId=30&branchName=master)
+
 ## TODO
 
 ### dan/auth-bugs
@@ -209,6 +211,8 @@ RTT.
 <https://developer.spotify.com/documentation/general/guides/content-linking-guide/>
 
 Using the Spotify Connect Web API: <https://developer.spotify.com/documentation/web-api/guides/using-connect-web-api/>
+
+Logger debug in the Debug window: <https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-2.2#configuration>
 
 ### Teams
 

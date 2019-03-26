@@ -19,24 +19,24 @@ namespace RingoBotNet.Tests.Services
             // ClassUnderTest
             var cut = new Mock<RingoService>(null, null, null, null, null, null, null, mockLogger.Object)
             { CallBase = true };
-            cut.Setup(c => c.GetRoundTrip(It.IsAny<string>())).ReturnsAsync((1000, 1000, DateTime.UtcNow));
+            cut.Setup(c => c.GetRoundTrip(It.IsAny<string>())).ReturnsAsync((null, 1000, 1000, DateTime.UtcNow));
 
             // act
-            (bool success, long progressMs, DateTime utc) = await cut.Object.GetOffset(string.Empty);
+            (bool success, string itemId, (long positionMs, DateTime utc) position) result = await cut.Object.GetOffset(string.Empty);
 
             // assert
-            Assert.AreEqual(1500, progressMs);
+            Assert.AreEqual(1500, result.position.positionMs);
         }
 
         [TestMethod]
         public async Task GetOffset_ThreeRoundtripResults_ReturnsMin()
         {
             // arrange
-            var results = new Stack<(long, long, DateTime)>(new (long, long, DateTime)[] 
+            var results = new Stack<(string, long, long, DateTime)>(new (string, long, long, DateTime)[] 
                 {
-                    (1000, 1000, DateTime.UtcNow),
-                    (2000, 2000, DateTime.UtcNow),
-                    (3000, 3000, DateTime.UtcNow)
+                    (null, 1000, 1000, DateTime.UtcNow),
+                    (null, 2000, 2000, DateTime.UtcNow),
+                    (null, 3000, 3000, DateTime.UtcNow)
                 });
 
             var mockLogger = new Mock<ILogger<RingoService>>();
@@ -46,10 +46,10 @@ namespace RingoBotNet.Tests.Services
             cut.Setup(c => c.GetRoundTrip(It.IsAny<string>())).ReturnsAsync(results.Pop);
 
             // act
-            (bool success, long progressMs, DateTime utc) = await cut.Object.GetOffset(string.Empty);
+            (bool success, string itemId, (long positionMs, DateTime utc) position) result = await cut.Object.GetOffset(string.Empty);
 
             // assert
-            Assert.AreEqual(1500, progressMs);
+            Assert.AreEqual(1500, result.position.positionMs);
         }
     }
 }
