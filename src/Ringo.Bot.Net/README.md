@@ -43,8 +43,7 @@
 
 ### dan/whkmas
 
-1. ⭐ Update getting started docs
-1. ⭐ Christian algorithm
+1. ✅ ⭐ Christian algorithm
 1. ⭐ `next | skip | skip 3`
 1. ⭐ `You and 20 others are playing #JoeGoddard`
 1. ⭐ `You pasted a link, would you like to... (start a station | add to playlist | change the station | ...)`
@@ -54,7 +53,7 @@
 1. Search results carousel
 1. ⭐ `@ringo np`
 1. ⭐ `@ringo star`
-1. ⭐ Turn off shuffle
+1. ✅ ⭐ Turn off shuffle
 1. @skitch: So this is spotify's radio - how would we do like a day of each others radio stations e.g.
    say we make friday's 'join' days  and take turns at doing morning set, miday set and jamming 
    afternoon set? Would we just use playlists?
@@ -62,10 +61,10 @@
 1. `queue 0600 Dan's breakfast show` - queues playlist to play at 6am
 1. ⭐ Mobile friendly magic number page: https://blog.teamtreehouse.com/create-an-absolute-basic-mobile-css-responsive-navigation-menu.
    Click to copy. Redirect back to app via slack:XXXX URI?
-1. Should there only be one station per channel? What if two users want to play different lists in the
+1. ⭐ Should there only be one station per channel? What if two users want to play different lists in the
    same channel at the same time? 🤔
 1. Listener should `listen` instead of `join` ?
-1. Check for shuffle flag
+1. DM user if Ringo turns shuffle / repeat off. 
 1. 🐞 Two spaces between `@ringo` and `play`
 1. 🐞 sync when no station = error
 
