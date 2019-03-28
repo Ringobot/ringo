@@ -43,6 +43,7 @@
 
 ### dan/whkmas
 
+1. ⭐ Update getting started docs
 1. ⭐ Christian algorithm
 1. ⭐ `next | skip | skip 3`
 1. ⭐ `You and 20 others are playing #JoeGoddard`

@@ -7,6 +7,7 @@ using RingoBotNet.Mappers;
 using RingoBotNet.Models;
 using SpotifyApi.NetCore;
 using SpotifyApi.NetCore.Helpers;
+using SpotifyApi.NetCore.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -165,10 +166,9 @@ namespace RingoBotNet.Services
             CancellationToken cancellationToken)
         {
             // is the station playing?
-            var info = await GetUserNowPlaying(stationToken);
-
             // default the position to what was returned by get info
-            (string itemId, long positionMs, DateTime atUtc) position = (info.Item.Id, info.ProgressMs, DateTime.UtcNow);
+            var info = await GetUserNowPlaying(stationToken);
+            (string itemId, (long positionMs, DateTime atUtc) position) itemPosition = (info.Item.Id, (info.ProgressMs, DateTime.UtcNow));
 
             if (
                 info == null
@@ -189,38 +189,61 @@ namespace RingoBotNet.Services
 
             if (offset.success)
             {
-                // if offset was successfully calculated, and the same item is still playing, recalculate the position now
-                var positionNow = PositionMsNow(offset.position);
-                position = (position.itemId, positionNow.positionMs, positionNow.atUtc);
+                // reset position to Station position
+                itemPosition.itemId = offset.itemId;
+                itemPosition.position = offset.position;
             }
 
-            // play from offset
-            switch (station.SpotifyContextType)
+            // shuffle and repeat
+            if (info.ShuffleState)
             {
-                case "album":
-                    await RetryHelper.RetryAsync(
-                        () => _player.PlayAlbumOffset(
-                            info.Context.Uri,
-                            info.Item.Id,
-                            accessToken: token, 
-                            positionMs: position.positionMs),
-                        logger: _logger,
-                        cancellationToken: cancellationToken);
-                    break;
-
-                case "playlist":
-                    await RetryHelper.RetryAsync(
-                        () => _player.PlayPlaylistOffset(
-                            info.Context.Uri,
-                            info.Item.Id,
-                            accessToken: token, 
-                            positionMs: position.positionMs),
-                        logger: _logger,
-                        cancellationToken: cancellationToken);
-                    break;
+                await _player.Shuffle(false, accessToken: token, deviceId: info.Device.Id);
             }
 
-            if (offset.success) await SyncJoiningPlayer(stationToken: stationToken, joiningToken: token);
+            if (info.RepeatState != RepeatStates.Off)
+            {
+                await _player.Repeat(RepeatStates.Off, accessToken: token, deviceId: info.Device.Id);
+            }
+
+            try
+            {
+                // mute joining player
+                await _player.Volume(0, accessToken: token, deviceId: info.Device.Id);
+
+                // play from offset
+                switch (station.SpotifyContextType)
+                {
+                    case "album":
+                        await RetryHelper.RetryAsync(
+                            () => _player.PlayAlbumOffset(
+                                info.Context.Uri,
+                                info.Item.Id,
+                                accessToken: token,
+                                positionMs: PositionMsNow(itemPosition.position).positionMs),
+                            logger: _logger,
+                            cancellationToken: cancellationToken);
+                        break;
+
+                    case "playlist":
+                        await RetryHelper.RetryAsync(
+                            () => _player.PlayPlaylistOffset(
+                                info.Context.Uri,
+                                info.Item.Id,
+                                accessToken: token,
+                                positionMs: PositionMsNow(itemPosition.position).positionMs),
+                            logger: _logger,
+                            cancellationToken: cancellationToken);
+                        break;
+                }
+
+                if (offset.success) await SyncJoiningPlayer(stationToken: stationToken, joiningToken: token);
+
+            }
+            finally
+            {
+                // unmute joining player
+                await _player.Volume((int)info.Device.VolumePercent, accessToken: token, deviceId: info.Device.Id);
+            }
 
             return true;
         }

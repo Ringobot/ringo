@@ -40,7 +40,7 @@
     <PackageReference Include="Microsoft.Bot.Schema" Version="4.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.1.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.6" />
-    <PackageReference Include="SpotifyApi.NetCore" Version="2.4.4" />
+    <PackageReference Include="SpotifyApi.NetCore" Version="2.4.6-beta" />
     <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
   </ItemGroup>
 
