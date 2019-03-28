@@ -338,7 +338,6 @@ namespace RingoBotNet
             var info = RingoBotHelper.NormalizedConversationInfo(turnContext);
             var channelUserId = RingoBotHelper.ChannelUserId(turnContext);
 
-            //playlist = await GetNowPlaying(token.Token);
             SpotifyApi.NetCore.CurrentPlaybackContext nowPlaying = await _ringoService.GetUserNowPlaying(token);
 
             if (nowPlaying == null || !nowPlaying.IsPlaying || nowPlaying.Context == null)
@@ -359,6 +358,8 @@ namespace RingoBotNet
                 
                 return null;
             }
+
+            await _ringoService.TurnOffShuffleRepeat(token, nowPlaying);
 
             Station station = null;
 

@@ -49,5 +49,7 @@ namespace RingoBotNet.Services
 
         Task<Station> GetUserStation(ConversationInfo info, string username);
 
+        Task TurnOffShuffleRepeat(string token, SpotifyApi.NetCore.CurrentPlaybackContext info);
+
     }
 }

@@ -194,16 +194,7 @@ namespace RingoBotNet.Services
                 itemPosition.position = offset.position;
             }
 
-            // shuffle and repeat
-            if (info.ShuffleState)
-            {
-                await _player.Shuffle(false, accessToken: token, deviceId: info.Device.Id);
-            }
-
-            if (info.RepeatState != RepeatStates.Off)
-            {
-                await _player.Repeat(RepeatStates.Off, accessToken: token, deviceId: info.Device.Id);
-            }
+            await TurnOffShuffleRepeat(token, info);
 
             try
             {
@@ -246,6 +237,20 @@ namespace RingoBotNet.Services
             }
 
             return true;
+        }
+
+        public async Task TurnOffShuffleRepeat(string token, CurrentPlaybackContext info)
+        {
+            // turn off shuffle and repeat
+            if (info.ShuffleState)
+            {
+                await _player.Shuffle(false, accessToken: token, deviceId: info.Device.Id);
+            }
+
+            if (info.RepeatState != RepeatStates.Off)
+            {
+                await _player.Repeat(RepeatStates.Off, accessToken: token, deviceId: info.Device.Id);
+            }
         }
 
         /// <summary>
