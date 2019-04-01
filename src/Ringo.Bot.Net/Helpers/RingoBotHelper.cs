@@ -7,8 +7,14 @@ namespace RingoBotNet.Helpers
 {
     public static class RingoBotHelper
     {
-        //public const string RingoBotName = "ringo";
+        /// <summary>
+        /// The system name for Ringobot. This should never change. For bot user name, see <see cref="ConversationInfo"/>
+        /// </summary>
+        public const string RingoBotName = "ringo";
+
         public static readonly Regex NonWordRegex = new Regex("\\W");
+
+        public static readonly Regex HashtagRegex = new Regex("[^a-zA-Z0-9]");
 
         public static string ChannelUserId(ITurnContext context)
             => ChannelUserId(context.Activity.ChannelId, context.Activity.From.Id);
@@ -23,7 +29,7 @@ namespace RingoBotNet.Helpers
             var info = new ConversationInfo
             {
                 ChannelId = activity.ChannelId.ToLower(),
-                ChannelTeamId = activity.ChannelId.ToLower(),
+                ChannelTeamId = null,
                 FromId = activity.From.Id,
                 FromName = activity.From.Name,
                 RecipientId = activity.Recipient.Id,
@@ -61,41 +67,36 @@ namespace RingoBotNet.Helpers
             return info;
         }
 
-        public static string ToUserStationUri(ConversationInfo info, string username)
+        public static string ToUserStationUri(ConversationInfo info, string username, string hashtag = null)
         {
             if (info == null) throw new ArgumentNullException(nameof(info));
             if (string.IsNullOrEmpty(username)) throw new ArgumentNullException(nameof(username));
 
-            // ringo:slack/TA0VBN61L:station:user/daniel312
-            return $"{info.BotName}:{TeamChannelPart(info)}:station:user/{NonWordRegex.Replace(username.ToLower(), string.Empty)}";
+            // ringo:{tenant62}:station:user:{username62}[:hashtag:{hashtag}]
+            string uri = $"{RingoBotName}:{TeamChannelPart(info)}:station:user:{CryptoHelper.Base62Encode(NonWordRegex.Replace(username.ToLower(), string.Empty))}";
+            if (!string.IsNullOrEmpty(hashtag)) uri += $":hashtag:{ToHashtag(hashtag).ToLower()}";
+            return uri;
         }
 
-        public static string ToHashtagStationUri(ConversationInfo info, string hashtag)
-        {
-            if (info == null) throw new ArgumentNullException(nameof(info));
-            if (string.IsNullOrEmpty(hashtag)) throw new ArgumentNullException(nameof(hashtag));
-
-            // ringo:twitter:station:hashtag/datenight
-            return $"{info.BotName}:{TeamChannelPart(info)}:station:hashtag/{ToHashtag(hashtag).ToLower()}";
-        }
-
-        public static string ToChannelStationUri(ConversationInfo info, string conversationName = null)
+        public static string ToChannelStationUri(ConversationInfo info, string conversationName = null, string hashtag = null)
         {
             if (info == null) throw new ArgumentNullException(nameof(info));
             if (string.IsNullOrEmpty(conversationName) && string.IsNullOrEmpty(info.ConversationName))
                 throw new ArgumentNullException(nameof(conversationName));
 
-            // ringo:slack/TA0VBN61L:station:channel/testing3
-            return $"{info.BotName}:{TeamChannelPart(info)}:station:channel/{ToHashtag(conversationName ?? info.ConversationName).ToLower()}";
+            // ringo:{tenant62}:station:channel:{channelName62}[:hashtag:{hashtag}]
+            string uri = $"{RingoBotName}:{TeamChannelPart(info)}:station:channel:{CryptoHelper.Base62Encode(ToHashtag(conversationName ?? info.ConversationName).ToLower())}";
+            if (!string.IsNullOrEmpty(hashtag)) uri += $":hashtag:{ToHashtag(hashtag).ToLower()}";
+            return uri;
         }
 
         private static string TeamChannelPart(ConversationInfo info)
         {
             if (info == null) throw new ArgumentNullException(nameof(info));
             if (string.IsNullOrEmpty(info.ChannelId)) throw new ArgumentNullException(nameof(info.ChannelId));
-            if (string.IsNullOrEmpty(info.ChannelTeamId)) throw new ArgumentNullException(nameof(info.ChannelTeamId));
-
-            return $"{info.ChannelId}/{info.ChannelTeamId}";
+            string teamChannel = CryptoHelper.Base62Encode(info.ChannelId);
+            if (!string.IsNullOrEmpty(info.ChannelTeamId)) teamChannel += $"/{CryptoHelper.Base62Encode(info.ChannelTeamId)}";
+            return teamChannel;
         }
 
         public static string ToHashtag(string name)

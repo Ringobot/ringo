@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Base62;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -9,6 +10,8 @@ namespace RingoBotNet.Helpers
 {
     public static class CryptoHelper
     {
+        private static readonly Base62Converter _base62Converter = new Base62Converter();
+
         public static string Sha256(string input)
         {
             using (var algorithm = SHA256.Create())
@@ -39,6 +42,16 @@ namespace RingoBotNet.Helpers
         {
             var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
             return Encoding.UTF8.GetString(base64EncodedBytes);
+        }
+
+        public static string Base62Encode(string plainText)
+        {
+            return _base62Converter.Encode(plainText);
+        }
+
+        public static string Base62Decode(string base62EncodedData)
+        {
+            return _base62Converter.Decode(base62EncodedData);
         }
     }
 }
