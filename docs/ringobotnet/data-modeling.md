@@ -2,18 +2,20 @@
 
 * C1. Create a `User`
 * C2. Create a `Station`
-* Q2. Get `User`
-* Q3. Get `Station`
-* C4. Increment/Decrement `Station` `Listener` count 
-* C5. Create new `Listener` for a Station
-* Q6. Get all `Listeners` for a `Station`
-* Q7. Delete a `Listener` that is no longer playing the `Station`
-* C7. Create a `Programme` (Queue of Playlists)
-* C8. Change the Station Owner (find the next owner)
-* C9. Delete the `Station`
-* C9. Get the token for a `Listener` -> `User`
-* Q8. Get `Station` ListenerCount
-* Q9. Get `Station` by Hashtag
+* Q1. Get `User`
+* Q2. Get `Station`
+* C3. Increment/Decrement `Station` `Listener` count 
+* C4. Create new `Listener` for a Station
+* C5. Get all `Listeners` for a `Station`
+* C6. Delete a `Listener` that is no longer playing the `Station`
+* CX. Create a `Programme` (Queue of Playlists)
+* Q3. Get the Owner Listener
+* Q4. Get a recently modified active Listener
+* C7. Change the Owner
+* C8. Delete the `Station`
+* Q5. Get the token for a `Listener` -> `User`
+* Q6. Get `Station` ListenerCount
+* Q7. Get `Station` by Hashtag
 
 ### XXX
 
@@ -43,19 +45,22 @@
         Type: "station",
         Name,
         Hashtag,
-        Playlist: {},
-        Album: {},
+        Playlist: { Playlist },
+        Album: { Album },
+        Owner: { User },
         ListenerCount: int,
         CreatedDate: datetime,
-        IsActive: bool
+        IsActive: bool,
+        ActiveListeners: [ { Listener (max 10) } ]
     }
 
     // Listener
     {
-        PK: StationId,
+        PK: Station.Uri,
+        Id: User.Id,
         Type: "listener",
-        StationId,
-        UserId,
-        ListenerNumber : (sequential),
-        IsOwner : bool
+        Station: { Station },
+        User: { User },
+        CreatedDate,
+        LastActiveDate: datetime?
     }

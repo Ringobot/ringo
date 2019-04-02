@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using RingoBotNet.Helpers;
 using System;
+using System.Linq;
 
 namespace RingoBotNet.Models
 {
@@ -10,12 +11,12 @@ namespace RingoBotNet.Models
 
         public Station2() { }
 
-        public Station2(string uri, Album album, Playlist playlist, string hashtag = null)
+        public Station2(string uri, Album album, Playlist playlist, User owner, string hashtag = null)
         {
             if (string.IsNullOrEmpty(uri)) throw new ArgumentNullException(uri);
 
             Id = uri;
-            PartitionKey = EncodePK(uri);
+            PartitionKey = EncodePK(Id);
             Type = TypeName;
 
             string name = album?.Name ?? playlist?.Name;
@@ -26,9 +27,12 @@ namespace RingoBotNet.Models
             Hashtag = hashtag ?? RingoBotHelper.ToHashtag(name);
             Album = album;
             Playlist = playlist;
+            Owner = owner;
             CreatedDate = DateTime.UtcNow;
             IsActive = true;
             ListenerCount = 1;
+
+            ActiveListeners = new[] { new Listener(this, owner) };
         }
 
         /// <summary>
@@ -63,6 +67,8 @@ namespace RingoBotNet.Models
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public Playlist Playlist { get; set; }
 
+        public User Owner { get; set; }
+
         /// <summary>
         /// The date this entity was first created.
         /// </summary>
@@ -77,6 +83,11 @@ namespace RingoBotNet.Models
         /// An estimate of the number of users that are currently listening to this station.
         /// </summary>
         public int ListenerCount { get; set; }
+
+        /// <summary>
+        /// Maximum 10 of the most recent active Listeners
+        /// </summary>
+        public Listener[] ActiveListeners { get; set; }
 
         /// <summary>
         /// Derives the Spotify Context type for the context that this Station is currently playing.
@@ -104,18 +115,26 @@ namespace RingoBotNet.Models
         [JsonIgnore]
         public string SpotifyUri => Album?.Uri ?? Playlist?.Uri;
 
-        public override void EnforceInvariants()
+        public override void EnforceInvariants(bool isRoot = false)
         {
             base.EnforceInvariants();
             if (string.IsNullOrEmpty(Uri)) throw new InvariantException("Uri must not be null");
             if (string.IsNullOrEmpty(Hashtag)) throw new InvariantException("Hashtag must not be null");
             if (string.IsNullOrEmpty(Name)) throw new InvariantException("Name must not be null");
             if (Album == null && Playlist == null) throw new InvariantException("Station must have Album or Playlist property set.");
+
             if (Album != null && Playlist != null)
             {
                 throw new InvariantException("Station must have only one of Album or Playlist property set.");
             }
+
             if (ListenerCount < 0) throw new InvariantException("ListenerCount must not be less than Zero");
+
+            if (isRoot)
+            {
+                Owner.EnforceInvariants();
+                foreach (var listener in ActiveListeners) listener.EnforceInvariants();
+            }
         }
     }
 }

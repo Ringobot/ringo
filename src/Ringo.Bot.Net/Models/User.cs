@@ -70,7 +70,7 @@ namespace RingoBotNet.Models
             return CryptoHelper.Sha256(uid.ToLower());
         }
 
-        public override void EnforceInvariants()
+        public override void EnforceInvariants(bool isRoot = false)
         {
             base.EnforceInvariants();
             if (Type != TypeName) throw new InvariantException("Type must not be null or empty");
