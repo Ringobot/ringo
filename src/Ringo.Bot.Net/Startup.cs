@@ -137,27 +137,9 @@ namespace RingoBotNet
             services.AddSingleton<IAccountsService, AccountsService>();
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IRingoBotCommands, RingoBotCommands>();
-            services.AddSingleton<IStationData, StationTableData>();
-
-            services.AddSingleton<IChannelUserData>(
-                (s) => new CosmosChannelUserData(
-                    Configuration,
-                    _loggerFactory.CreateLogger<CosmosChannelUserData>(),
-                    new DocumentClient(
-                        new Uri(Configuration[ConfigHelper.CosmosDBEndpoint]), 
-                        Configuration[ConfigHelper.CosmosDBPrimaryKey]),
-                    Configuration[ConfigHelper.CosmosDBDatabaseName],
-                    Configuration[ConfigHelper.CosmosDBChannelUserCollectionName]));
-
-            services.AddSingleton<IUserStateData>(
-                (s) => new CosmosUserStateData(
-                    Configuration,
-                    _loggerFactory.CreateLogger<CosmosUserStateData>(),
-                    new DocumentClient(
-                        new Uri(Configuration[ConfigHelper.CosmosDBEndpoint]),
-                        Configuration[ConfigHelper.CosmosDBPrimaryKey]),
-                    Configuration[ConfigHelper.CosmosDBDatabaseName],
-                    Configuration[ConfigHelper.CosmosDBUserStateCollectionName]));
+            services.AddSingleton<IUserData, UserData>();
+            services.AddSingleton<IStationData, StationData>();
+            services.AddSingleton<IListenerData, ListenerData>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

@@ -23,7 +23,7 @@ namespace RingoBotNet.Services
         private readonly IUserAccountsService _userAccounts;
         private readonly IConfiguration _config;
         private readonly IUserStateData _userStateData;
-        private readonly IChannelUserData _userData;
+        private readonly IUserData _userData;
         private readonly ILogger _logger;
 
 
@@ -31,7 +31,7 @@ namespace RingoBotNet.Services
             HttpClient httpClient,
             IUserAccountsService userAccounts,
             IConfiguration configuration,
-            IChannelUserData channelUserData,
+            IUserData channelUserData,
             IUserStateData userStateData,
             ILogger<RingoService> logger)
         {
@@ -62,7 +62,7 @@ namespace RingoBotNet.Services
 
             _logger.LogInformation($"Requesting Spotify Authorization for channelUserId {RingoBotHelper.ChannelUserId(turnContext)}");
 
-            await _userData.CreateChannelUserIfNotExists(
+            await _userData.CreateUserIfNotExists(
                 turnContext.Activity.ChannelId,
                 turnContext.Activity.From.Id,
                 turnContext.Activity.From.Name);

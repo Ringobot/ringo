@@ -27,9 +27,13 @@ namespace RingoBotNet.Models
             UserId = userId;
             Username = username;
             ChannelId = channelId;
-            SpotifyAuth = new Auth { BearerAccessToken = spotifyAccessToken, CreatedDate = now };
-
             CreatedDate = now;
+
+
+            if (spotifyAccessToken != null)
+            {
+                SpotifyAuth = new Auth { BearerAccessToken = spotifyAccessToken, CreatedDate = now };
+            }
         }
 
         /// <summary>
@@ -86,6 +90,17 @@ namespace RingoBotNet.Models
     /// </summary>
     public class Auth
     {
+        public Auth()
+        {
+
+        }
+
+        public Auth(BearerAccessToken2 accessToken)
+        {
+            BearerAccessToken = accessToken;
+            CreatedDate = DateTime.UtcNow;
+        }
+
         /// <summary>
         /// Bearer access Token details
         /// </summary>

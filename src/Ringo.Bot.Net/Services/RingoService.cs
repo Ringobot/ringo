@@ -27,7 +27,7 @@ namespace RingoBotNet.Services
         private readonly IArtistsApi _artists;
         private readonly IPlayerApi _player;
         private readonly IConfiguration _config;
-        private readonly IChannelUserData _userData;
+        private readonly IUserData _userData;
         private readonly ILogger _logger;
         private IStationData _stationData;
 
@@ -37,7 +37,7 @@ namespace RingoBotNet.Services
             IAlbumsApi albums,
             IArtistsApi artists,
             IConfiguration configuration,
-            IChannelUserData channelUserData,
+            IUserData channelUserData,
             IStationData stationData,
             ILogger<RingoService> logger
             )
@@ -168,7 +168,6 @@ namespace RingoBotNet.Services
             // is the station playing?
             // default the position to what was returned by get info
             var info = await GetUserNowPlaying(stationToken);
-            (string itemId, (long positionMs, DateTime atUtc) position) itemPosition = (info.Item.Id, (info.ProgressMs, DateTime.UtcNow));
 
             if (
                 info == null
@@ -181,6 +180,9 @@ namespace RingoBotNet.Services
                 _logger.LogDebug($"JoinPlaylist: info = {JsonConvert.SerializeObject(info)}");
                 return false;
             }
+
+            (string itemId, (long positionMs, DateTime atUtc) position) itemPosition = (info.Item?.Id, (info.ProgressMs, DateTime.UtcNow));
+
 
             if (!SupportedSpotifyItemTypes.Contains(station.SpotifyContextType))
                 throw new NotSupportedException($"\"{station.SpotifyContextType}\" is not a supported Spotify context type");
@@ -381,7 +383,7 @@ namespace RingoBotNet.Services
 
         public async Task<ChannelUser> CreateChannelUserIfNotExists(string channelId, string userId, string username)
         {
-            return await _userData.CreateChannelUserIfNotExists(channelId, userId, username);
+            return await _userData.CreateUserIfNotExists(channelId, userId, username);
         }
 
         public async Task<Station> GetUserStation(ConversationInfo info, string username)

@@ -15,14 +15,14 @@ namespace RingoBotNet.Controllers
         private readonly IUserAccountsService _userAccounts;
         //private readonly UserAuthService _authService;
         //private readonly AuthStateService _stateService;
-        private readonly IChannelUserData _userData;
+        private readonly IUserData _userData;
         private readonly IUserStateData _userStateData;
 
         public SpotifyController(
             IUserAccountsService userAccounts,
             //UserAuthService authService,
             //AuthStateService stateService,
-            IChannelUserData channelUserData,
+            IUserData channelUserData,
             IUserStateData userStateData)
         {
             _userAccounts = userAccounts;

@@ -2,6 +2,7 @@
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using RingoBotNet.Helpers;
 using RingoBotNet.Models;
 using System;
 using System.Threading.Tasks;
@@ -10,50 +11,50 @@ namespace RingoBotNet.Data
 {
     public abstract class CosmosData
     {
-        protected readonly IConfiguration _config;
-        protected readonly IDocumentClient _client;
-        protected readonly string _databaseName;
-        protected readonly string _collectionName;
-        protected readonly Uri _collectionUri;
+        //protected readonly IConfiguration _config;
         protected readonly ILogger _logger;
+        private readonly IDocumentClient _client;
+        private readonly string _databaseName;
+        private readonly string _collectionName;
+        protected readonly Uri _collectionUri;
 
         public CosmosData(
             IConfiguration configuration,
             ILogger logger,
-            IDocumentClient documentClient,
-            string databaseName,
             string collectionName)
         {
-            _config = configuration;
             _logger = logger;
-            _client = documentClient;
-            _databaseName = databaseName;
+            _databaseName = configuration[ConfigHelper.CosmosDBDatabaseName];
             _collectionName = collectionName;
             _collectionUri = UriFactory.CreateDocumentCollectionUri(_databaseName, _collectionName);
+
+            _client = new DocumentClient(
+                        new Uri(configuration[ConfigHelper.CosmosDBEndpoint]),
+                        configuration[ConfigHelper.CosmosDBPrimaryKey]);
         }
 
-        protected async Task<T> Create<T>(T document) where T:CosmosDocument
+        protected async Task<T> Create<T>(T document) where T : CosmosEntity
         {
             document.EnforceInvariants();
             return await _client.CreateDocumentAsync(
-                _collectionUri, 
-                document, 
+                _collectionUri,
+                document,
                 options: new RequestOptions { PartitionKey = new PartitionKey(document.PartitionKey) },
                 disableAutomaticIdGeneration: true) as T;
         }
 
-        protected async Task Upsert(CosmosDocument document)
+        protected async Task Upsert(CosmosEntity document)
         {
             document.EnforceInvariants();
             // last write wins
             await _client.UpsertDocumentAsync(
-                _collectionUri, 
-                document, 
-                options: new RequestOptions { PartitionKey = new PartitionKey(document.PartitionKey) }, 
+                _collectionUri,
+                document,
+                options: new RequestOptions { PartitionKey = new PartitionKey(document.PartitionKey) },
                 disableAutomaticIdGeneration: true);
         }
 
-        protected async Task Replace(CosmosDocument document)
+        protected async Task Replace(CosmosEntity document)
         {
             document.EnforceInvariants();
             // last write wins
@@ -70,7 +71,7 @@ namespace RingoBotNet.Data
         /// <param name="id">The document Id</param>
         /// <param name="partitionKey">Optional. A partition key for the document. If null, Id will be used.</param>
         /// <returns>The document as T</returns>
-        protected async Task<T> Read<T>(string id, string partitionKey = null) where T:class
+        protected async Task<T> Read<T>(string id, string partitionKey = null) where T : class
         {
             try
             {
@@ -85,7 +86,7 @@ namespace RingoBotNet.Data
                 {
                     Logger.Error(ex.Message, ex, nameof(CosmosData));
                     Logger.Information(
-                        $"Document not found. Returning null. id = \"{id}\" partition key = \"{partitionKey}\".", 
+                        $"Document not found. Returning null. id = \"{id}\" partition key = \"{partitionKey}\".",
                         nameof(CosmosData));
                     return null;
                 }
