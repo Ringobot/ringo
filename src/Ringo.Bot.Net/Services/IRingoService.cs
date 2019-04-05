@@ -1,55 +1,26 @@
-﻿using Microsoft.Bot.Builder;
-using Microsoft.Bot.Schema;
-using RingoBotNet.Models;
-using System.Threading;
+﻿using RingoBotNet.Models;
 using System.Threading.Tasks;
 
 namespace RingoBotNet.Services
 {
     public interface IRingoService
     {
-        Task<Station> CreateChannelStation(
-            string channelUserId,
+        Task<Station2> CreateChannelStation(
+            string userId,
             ConversationInfo info,
-            Models.Album album = null,
-            Models.Playlist playlist = null);
+            Album album = null,
+            Playlist playlist = null);
 
-        Task<Station> CreateUserStation(
-            string channelUserId,
+        Task<Station2> CreateUserStation(
+            string userId,
             ConversationInfo info,
-            Models.Album album = null,
-            Models.Playlist playlist = null);
+            Album album = null,
+            Playlist playlist = null);
 
-        Task<Playlist[]> FindPlaylists(string searchText, string accessToken, CancellationToken cancellationToken);
+        Task<User> CreateUserIfNotExists(string channelId, string userId, string username);
 
-        Task PlayPlaylist(string playlistId, string accessToken, CancellationToken cancellationToken);
+        Task<Station2> GetChannelStation(ConversationInfo info, string conversationName = null);
 
-        Task<bool> JoinPlaylist(
-            string query,
-            string token,
-            Station station,
-            string stationToken,
-            CancellationToken cancellationToken);
-
-        Task<ChannelUser> CreateChannelUserIfNotExists(string channelId, string userId, string username);
-
-        Task<SpotifyApi.NetCore.Device[]> GetDevices(string accessToken);
-
-        Task<SpotifyApi.NetCore.CurrentPlaybackContext> GetUserNowPlaying(string token);
-
-        Task<Models.Album> GetAlbum(string token, string uri);
-
-        Task<Models.Artist> GetArtist(string token, string uri);
-
-        Task<Playlist> GetPlaylist(string token, string uri);
-
-        Task<string> GetPlaylistTrackOneUrl(string token, Playlist playlist);
-
-        Task<Station> GetChannelStation(ConversationInfo info, string conversationName = null);
-
-        Task<Station> GetUserStation(ConversationInfo info, string username);
-
-        Task TurnOffShuffleRepeat(string token, SpotifyApi.NetCore.CurrentPlaybackContext info);
-
+        Task<Station2> GetUserStation(ConversationInfo info, string username);
     }
 }

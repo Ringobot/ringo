@@ -1,15 +1,13 @@
-﻿//using System.Threading.Tasks;
-//using RingoBotNet.Models;
-//using SpotifyApi.NetCore;
+﻿using System.Threading.Tasks;
+using RingoBotNet.Models;
+using SpotifyApi.NetCore;
 
-//namespace RingoBotNet.Data
-//{
-//    public interface IUserStateData
-//    {
-//        Task<string> GetChannelUserIdFromStateToken(string state);
+namespace RingoBotNet.Data
+{
+    public interface IStateData
+    {
+        Task<string> GetUserIdFromStateToken(string state);
 
-//        Task<UserState> SaveUserStateToken(string channelUserId, string state);
-
-//        Task<UserState> SaveUserStateToken(string channelId, string userId, string state);
-//    }
-//}
+        Task SaveStateToken(string channelUserId, string state);
+    }
+}

@@ -22,7 +22,7 @@ namespace RingoBotNet.Services
         private readonly HttpClient _http;
         private readonly IUserAccountsService _userAccounts;
         private readonly IConfiguration _config;
-        private readonly IUserStateData _userStateData;
+        private readonly IStateData _userStateData;
         private readonly IUserData _userData;
         private readonly ILogger _logger;
 
@@ -32,8 +32,8 @@ namespace RingoBotNet.Services
             IUserAccountsService userAccounts,
             IConfiguration configuration,
             IUserData channelUserData,
-            IUserStateData userStateData,
-            ILogger<RingoService> logger)
+            IStateData userStateData,
+            ILogger<SpotifyService> logger)
         {
             _http = httpClient;
             _userAccounts = userAccounts;
@@ -46,8 +46,9 @@ namespace RingoBotNet.Services
         public async Task<TokenResponse> Authorize(ITurnContext turnContext, CancellationToken cancellationToken)
         {
             var info = RingoBotHelper.NormalizedConversationInfo(turnContext);
+            string userId = RingoBotHelper.ChannelUserId(turnContext);
 
-            TokenResponse token = await GetAccessToken(turnContext.Activity.ChannelId, turnContext.Activity.From.Id);
+            TokenResponse token = await GetAccessToken(userId);
             if (token != null) return token;
 
             // User is not authorized by Spotify
@@ -60,7 +61,7 @@ namespace RingoBotNet.Services
                 return null;
             }
 
-            _logger.LogInformation($"Requesting Spotify Authorization for channelUserId {RingoBotHelper.ChannelUserId(turnContext)}");
+            _logger.LogInformation($"Requesting Spotify Authorization for UserId {userId}");
 
             await _userData.CreateUserIfNotExists(
                 turnContext.Activity.ChannelId,
@@ -75,7 +76,7 @@ namespace RingoBotNet.Services
                 throw new InvalidOperationException("Generated state token does not match RingoBotStateRegex");
 
             // save state token
-            await _userStateData.SaveUserStateToken(turnContext.Activity.ChannelId, turnContext.Activity.From.Id, state);
+            await _userStateData.SaveStateToken(userId, state);
 
             // get URL
             string url = UserAccountsService.AuthorizeUrl(
@@ -114,16 +115,14 @@ namespace RingoBotNet.Services
             string text,
             CancellationToken cancellationToken)
         {
-            string channelUserId = await _userStateData.GetChannelUserIdFromStateToken(text);
+            string channelUserId = await _userStateData.GetUserIdFromStateToken(text);
             if (channelUserId == ChannelUser.EncodeId(turnContext.Activity.ChannelId, turnContext.Activity.From.Id))
             {
                 await turnContext.SendActivityAsync(
                     $"Magic Number OK. Ringo is authorized to play Spotify. Ready to rock! 😎",
                     cancellationToken: cancellationToken);
-                await _userData.SetTokenValidated(turnContext.Activity.ChannelId, turnContext.Activity.From.Id);
-                return MapToTokenResponse(await _userData.GetUserAccessToken(
-                    turnContext.Activity.ChannelId,
-                    turnContext.Activity.From.Id));
+                await _userData.SetTokenValidated(channelUserId, text);
+                return await GetAccessToken(channelUserId);
             }
 
             _logger.LogWarning($"Invalid Magic Number \"{text}\" for channelUserId {RingoBotHelper.ChannelUserId(turnContext)}");
@@ -135,35 +134,35 @@ namespace RingoBotNet.Services
 
         public async Task ResetAuthorization(ITurnContext turnContext, CancellationToken cancellationToken)
         {
-            await _userData.ResetAuthorization(RingoBotHelper.ChannelUserId(turnContext), cancellationToken);
+            await _userData.ResetAuthorization(RingoBotHelper.ChannelUserId(turnContext));
         }
 
-        /// <summary>
-        /// Gets a current Bearer Token for the Spotify service, refreshing if neccessary
-        /// </summary>
-        public async Task<TokenResponse> GetAccessToken(string channelId, string userId)
-            => await GetAccessToken(RingoBotHelper.ChannelUserId(channelId, userId));
-
-        public async Task<TokenResponse> GetAccessToken(string channelUserId)
+        public async Task<TokenResponse> GetAccessToken(string userId)
         {
-            Models.BearerAccessToken token = await _userData.GetUserAccessToken(channelUserId);
+            // get user
+            var user = await _userData.GetUser(userId);
+
+            if (
+                user == null 
+                || user.SpotifyAuth == null 
+                || !user.SpotifyAuth.Validated 
+                || user.SpotifyAuth.BearerAccessToken == null)
+            {
+                return null;
+            }
+
+            var token = user.SpotifyAuth.BearerAccessToken;
 
             // token had not expired and has been validated - return the token
-            if (
-                token != null
-                && !token.AccessTokenExpired
-                && token.Validated)
+            if (!token.AccessTokenExpired)
             {
                 return MapToTokenResponse(token);
             }
 
             // token has been validated, but has expired - refresh the token and return it
-            if (
-                token != null
-                && token.AccessTokenExpired
-                && token.Validated)
+            if (token.AccessTokenExpired)
             {
-                _logger.LogInformation($"Refreshing access token for channelUserId {channelUserId}");
+                _logger.LogInformation($"Refreshing access token for channelUserId {userId}");
                 var bearer = await _userAccounts.RefreshUserAccessToken(token.RefreshToken);
 
                 // map to BearerAccessToken
@@ -173,11 +172,11 @@ namespace RingoBotNet.Services
                 if (token.Scope != bearer.Scope)
                 {
                     token.Scope = bearer.Scope;
-                    _logger.LogWarning($"token Scope has changed when being refreshed. channeUserlID = {channelUserId}");
+                    _logger.LogWarning($"token Scope has changed when being refreshed. channeUserlID = {userId}");
                 }
 
                 // save token
-                await _userData.SaveUserAccessToken(channelUserId, token);
+                await _userData.SaveUserAccessToken(userId, token);
 
                 return MapToTokenResponse(token);
             }
@@ -185,7 +184,7 @@ namespace RingoBotNet.Services
             return null;
         }
 
-        private static TokenResponse MapToTokenResponse(Models.BearerAccessToken token)
+        private static TokenResponse MapToTokenResponse(Models.BearerAccessToken2 token)
             => new TokenResponse(
                 connectionName: null,
                 token: token.AccessToken,

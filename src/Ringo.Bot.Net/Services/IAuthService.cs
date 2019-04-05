@@ -11,8 +11,6 @@ namespace RingoBotNet.Services
 
         Task<TokenResponse> GetAccessToken(string channelUserId);
 
-        Task<TokenResponse> GetAccessToken(string channelId, string userId);
-
         Task<TokenResponse> ValidateMagicNumber(ITurnContext turnContext, string text, CancellationToken cancellationToken);
 
         Task ResetAuthorization(ITurnContext turnContext, CancellationToken cancellationToken);

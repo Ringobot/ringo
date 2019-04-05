@@ -67,6 +67,7 @@
 1. DM user if Ringo turns shuffle / repeat off. 
 1. 🐞 Two spaces between `@ringo` and `play`
 1. 🐞 sync when no station = error
+1. 🐞 Spotify API: `Can't have offset for context type: COLLECTION_ALBUM"` - from Album collection 
 
 ### dan/endless-stations
 

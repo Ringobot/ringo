@@ -26,6 +26,7 @@ namespace RingoBotNet
         private const string ConnectionName = "spotify_connection_3";
         private static readonly Regex _magicCodeRegex = new Regex("^[0-9]{6}$");
         private readonly ILogger _logger;
+        private readonly ISpotifyService _spotifyService;
         private readonly IRingoService _ringoService;
         private readonly RingoBotAccessors _stateAccessors;
         private readonly string _contentRoot;
@@ -33,6 +34,7 @@ namespace RingoBotNet
 
         public RingoBot3(
             ILogger<RingoBot3> logger,
+            ISpotifyService spotifyService,
             IRingoService ringoService,
             RingoBotAccessors accessors,
             IConfiguration configuration,
@@ -40,6 +42,7 @@ namespace RingoBotNet
         {
             _logger = logger;
             _ringoService = ringoService;
+            _spotifyService = spotifyService;
             _stateAccessors = accessors ?? throw new ArgumentNullException(nameof(accessors));
             _contentRoot = configuration.GetValue<string>(WebHostDefaults.ContentRootKey);
             _commands = ringoBotCommands;
@@ -220,7 +223,7 @@ namespace RingoBotNet
             {
                 if (member.Id != turnContext.Activity.Recipient.Id)
                 {
-                    await _ringoService.CreateChannelUserIfNotExists(
+                    await _ringoService.CreateUserIfNotExists(
                         turnContext.Activity.ChannelId,
                         member.Id,
                         member.Name

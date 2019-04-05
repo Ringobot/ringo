@@ -1,48 +1,37 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 
 namespace RingoBotNet.Models
 {
-    public class UserState : CosmosDocument
+    /// <summary>
+    /// Stores state values for Users
+    /// </summary>
+    public class UserState : TableEntity
     {
         public UserState() { }
 
-        public UserState(string channelUserId, string state)
+        public UserState(string userId, string state)
         {
-            ChannelUserId = channelUserId;
-            Id = State = state;
-            PartitionKey = Id;
-            CreatedDate = DateTime.UtcNow;
-        }
+            PartitionKey = state;
+            RowKey = state;
 
-        public UserState(string channelId, string userId, string state)
-        {
-            ChannelUserId = ChannelUser.EncodeId(channelId, userId);
-            Id = State = state;
-            PartitionKey = Id;
+            UserId = userId;
+            State = state;
             CreatedDate = DateTime.UtcNow;
         }
 
         /// <summary>
-        /// The document Id of the ChannelUser (not the UserId)
+        /// UserId
         /// </summary>
-        public string ChannelUserId { get; set; }
+        public string UserId { get; set; }
 
+        /// <summary>
+        /// State Token
+        /// </summary>
         public string State { get; set; }
 
+        /// <summary>
+        /// The date this entity was first created
+        /// </summary>
         public DateTime CreatedDate { get; set; }
-
-        ///// <summary>
-        ///// Time to live (TTL) in seconds. Used to set expiration policy 
-        ///// </summary>
-        ///// <remarks> https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-time-to-live#set-time-to-live-on-an-item </remarks>
-        //[JsonProperty(PropertyName = "ttl", NullValueHandling = NullValueHandling.Ignore)]
-        //public int? TimeToLive { get; set; }
-
-        public override void EnforceInvariants()
-        {
-            base.EnforceInvariants();
-            if (State != Id) throw new InvariantException("Id must equal State");
-        }
     }
 }

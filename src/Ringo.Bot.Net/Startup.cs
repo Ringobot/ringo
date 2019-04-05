@@ -127,7 +127,7 @@ namespace RingoBotNet
                 };
             });
 
-            services.AddSingleton<IRingoService, RingoService>();
+            services.AddSingleton<ISpotifyService, SpotifyService>();
             services.AddSingleton<IAlbumsApi, AlbumsApi>();
             services.AddSingleton<IArtistsApi, ArtistsApi>();
             services.AddSingleton<IPlaylistsApi, PlaylistsApi>();

@@ -17,13 +17,7 @@ namespace RingoBotNet.Data
             : base(configuration, logger, configuration[ConfigHelper.CosmosDBUserCollectionName])
         { }
 
-        public async Task<BearerAccessToken2> GetUserAccessToken(string channelUserId)
-            => (await GetUser(channelUserId))?.SpotifyAuth?.BearerAccessToken;
-
-        private async Task<User> GetUser(string channelUserId)
-        {
-            return await Read<User>(channelUserId);
-        }
+        public async Task<User> GetUser(string userId) => await Read<User>(userId);
 
         public async Task SaveUserAccessToken(string channelUserId, BearerAccessToken2 token)
         {

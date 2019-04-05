@@ -15,9 +15,9 @@ namespace RingoBotNet.Tests.Services
         public async Task GetOffset_SameThreeRoundtripResults_ReturnsMin()
         {
             // arrange
-            var mockLogger = new Mock<ILogger<RingoService>>();
+            var mockLogger = new Mock<ILogger<SpotifyService>>();
             // ClassUnderTest
-            var cut = new Mock<RingoService>(null, null, null, null, null, null, null, mockLogger.Object)
+            var cut = new Mock<SpotifyService>(null, null, null, null, null, null, null, mockLogger.Object)
             { CallBase = true };
             cut.Setup(c => c.GetRoundTrip(It.IsAny<string>())).ReturnsAsync((null, 1000, 1000, DateTime.UtcNow));
 
@@ -39,9 +39,9 @@ namespace RingoBotNet.Tests.Services
                     (null, 3000, 3000, DateTime.UtcNow)
                 });
 
-            var mockLogger = new Mock<ILogger<RingoService>>();
+            var mockLogger = new Mock<ILogger<SpotifyService>>();
             // ClassUnderTest
-            var cut = new Mock<RingoService>(null, null, null, null, null, null, null, mockLogger.Object)
+            var cut = new Mock<SpotifyService>(null, null, null, null, null, null, null, mockLogger.Object)
                 { CallBase = true };
             cut.Setup(c => c.GetRoundTrip(It.IsAny<string>())).ReturnsAsync(results.Pop);
 

@@ -16,14 +16,14 @@ namespace RingoBotNet.Controllers
         //private readonly UserAuthService _authService;
         //private readonly AuthStateService _stateService;
         private readonly IUserData _userData;
-        private readonly IUserStateData _userStateData;
+        private readonly IStateData _userStateData;
 
         public SpotifyController(
             IUserAccountsService userAccounts,
             //UserAuthService authService,
             //AuthStateService stateService,
             IUserData channelUserData,
-            IUserStateData userStateData)
+            IStateData userStateData)
         {
             _userAccounts = userAccounts;
             //_authService = authService;
@@ -49,7 +49,7 @@ namespace RingoBotNet.Controllers
             if (!AuthService.RingoBotStateRegex.IsMatch(state)) throw new ArgumentException("Invalid State Argument", nameof(state));
 
             // get the userId from state
-            string channelUserId = await _userStateData.GetChannelUserIdFromStateToken(state);
+            string channelUserId = await _userStateData.GetUserIdFromStateToken(state);
 
             if (channelUserId == null)
             {
@@ -75,8 +75,8 @@ namespace RingoBotNet.Controllers
             };
         }
 
-        private Models.BearerAccessToken MapToBearerAccessToken(BearerAccessRefreshToken token) =>
-            new Models.BearerAccessToken
+        private Models.BearerAccessToken2 MapToBearerAccessToken(BearerAccessRefreshToken token) =>
+            new Models.BearerAccessToken2
             {
                 AccessToken = token.AccessToken,
                 Expires = token.Expires,
