@@ -34,7 +34,13 @@ namespace RingoBotNet.Data
         {
             string channelUserId = User.EncodeId(channelId, userId);
             var user = await GetUser(channelUserId);
-            if (user == null) return await Create(new User(channelId, userId, username));
+
+            if (user == null)
+            {
+                user = new User(channelId, userId, username);
+                await Create(user);
+            }
+
             return user;
         }
 

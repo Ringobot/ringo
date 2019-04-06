@@ -4,6 +4,8 @@ using RingoBotNet.Data;
 using RingoBotNet.Helpers;
 using RingoBotNet.Models;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace RingoBotNet.Services
@@ -56,10 +58,35 @@ namespace RingoBotNet.Services
             // get user
             var user = await _userData.GetUser(userId);
 
-            // save station
-            var station = await _stationData.CreateStation(uri, user, album, playlist, hashtag);
+            // get station
+            var station = await _stationData.GetStation(uri);
 
-            _logger.LogInformation($"CreateStation: {station}");
+            // save station
+            if (station == null)
+            {
+                // new station
+                station = await _stationData.CreateStation(uri, user, album, playlist, hashtag);
+            }
+            else
+            {
+                // update station context and owner
+                station.Name = album?.Name ?? playlist?.Name;
+                station.Owner = user;
+                station.Album = album;
+                station.Playlist = playlist;
+                station.Hashtag = hashtag;
+
+                if (!station.ActiveListeners.Any(l => l.User.Id == userId))
+                {
+                    // add the new owner to the listeners
+                    station.ActiveListeners = new List<Listener>(station.ActiveListeners)
+                    {
+                        new Listener(station, user)
+                    }.ToArray();
+                }
+
+                await _stationData.ReplaceStation(uri, station);
+            }
 
             return station;
         }

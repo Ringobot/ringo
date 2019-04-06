@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using RingoBotNet.Helpers;
 using RingoBotNet.Models;
+using System;
 using System.Threading.Tasks;
 
 namespace RingoBotNet.Data
@@ -24,14 +25,23 @@ namespace RingoBotNet.Data
             var station = new Station(stationUri, album, playlist, owner, hashtag);
             await Create(station);
 
-            _logger.LogInformation($"Created Station, Uri = \"{station.Uri}");
+            _logger.LogDebug($"CreateStation: {station}");
 
             return station;
         }
 
+        public async Task ReplaceStation(string stationUri, Station station)
+        {
+            if (station == null) throw new ArgumentNullException(nameof(station));
+            if (stationUri != station.Uri)
+                throw new InvalidOperationException($"stationUri \"{stationUri}\" is not the same as Station.Uri \"{station.Uri}\".");
+            await Replace(station);
+            _logger.LogDebug($"UpdateStation: {station}");
+        }
+
         public async Task<Station> GetStation(string stationUri)
         {
-            return await Read<Station>(stationUri);
+            return await Read<Station>(stationUri, Station.EncodePK(stationUri));
         }
     }
 }

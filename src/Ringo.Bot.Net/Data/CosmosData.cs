@@ -33,35 +33,38 @@ namespace RingoBotNet.Data
                         configuration[ConfigHelper.CosmosDBPrimaryKey]);
         }
 
-        protected async Task<T> Create<T>(T document) where T : CosmosEntity
+        protected async Task Create(CosmosEntity document) //where T : CosmosEntity
         {
             document.EnforceInvariants();
-            return await _client.CreateDocumentAsync(
+            var response = await _client.CreateDocumentAsync(
                 _collectionUri,
                 document,
                 options: new RequestOptions { PartitionKey = new PartitionKey(document.PartitionKey) },
-                disableAutomaticIdGeneration: true) as T;
+                disableAutomaticIdGeneration: true);
+            _logger.LogDebug($"Create: Type = {document.Type} id = \"{document.Id}\" PK = \"{document.PartitionKey}\" RequestCharge = {response.RequestCharge}");
         }
 
         protected async Task Upsert(CosmosEntity document)
         {
             document.EnforceInvariants();
             // last write wins
-            await _client.UpsertDocumentAsync(
+            var response = await _client.UpsertDocumentAsync(
                 _collectionUri,
                 document,
                 options: new RequestOptions { PartitionKey = new PartitionKey(document.PartitionKey) },
                 disableAutomaticIdGeneration: true);
+            _logger.LogDebug($"Upsert: Type = {document.Type} id = \"{document.Id}\" PK = \"{document.PartitionKey}\" RequestCharge = {response.RequestCharge}");
         }
 
         protected internal virtual async Task Replace(CosmosEntity document)
         {
             document.EnforceInvariants();
             // last write wins
-            await _client.ReplaceDocumentAsync(
+            var response = await _client.ReplaceDocumentAsync(
                 UriFactory.CreateDocumentUri(_databaseName, _collectionName, document.Id),
                 document,
                 options: new RequestOptions { PartitionKey = new PartitionKey(document.PartitionKey) });
+            _logger.LogDebug($"Replace: Type = {document.Type} id = \"{document.Id}\" PK = \"{document.PartitionKey}\" RequestCharge = {response.RequestCharge}");
         }
 
         /// <summary>
@@ -78,6 +81,8 @@ namespace RingoBotNet.Data
                 DocumentResponse<T> documentResponse = await _client.ReadDocumentAsync<T>(
                                UriFactory.CreateDocumentUri(_databaseName, _collectionName, id),
                                options: new RequestOptions { PartitionKey = new PartitionKey(partitionKey ?? id) });
+                _logger.LogDebug($"Read: {documentResponse.Document.GetType().Name} id = \"{id}\" PK = \"{partitionKey ?? id}\" RequestCharge = {documentResponse.RequestCharge}");
+
                 return documentResponse.Document;
             }
             catch (DocumentClientException ex)

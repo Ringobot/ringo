@@ -11,12 +11,13 @@ namespace RingoBotNet.Models
 
         public Listener(Station station, User user)
         {
-            Id = user.UserId;
-            PartitionKey = Station.EncodePK(station.Uri);
+            Id = user.Id;
+            PartitionKey = station.PartitionKey;
             Type = TypeName;
 
             User = user;
             Station = station;
+            CreatedDate = DateTime.UtcNow;
         }
 
         /// <summary>

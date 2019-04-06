@@ -16,6 +16,8 @@ namespace RingoBotNet.Data
             Playlist playlist = null,
             string hashtag = null);
 
+        Task ReplaceStation(string stationUri, Station station);
+
         Task<Station> GetStation(string stationUri);
 
     }

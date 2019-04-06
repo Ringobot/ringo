@@ -68,6 +68,7 @@
 1. 🐞 Two spaces between `@ringo` and `play`
 1. 🐞 sync when no station = error
 1. 🐞 Spotify API: `Can't have offset for context type: COLLECTION_ALBUM"` - from Album collection 
+1. 🐞 Bearer tokens in Entity.ToString()
 
 ### dan/endless-stations
 
