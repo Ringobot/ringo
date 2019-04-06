@@ -19,11 +19,13 @@ namespace RingoBotNet.Data
 
         public async Task<User> GetUser(string userId) => await Read<User>(userId);
 
-        public async Task SaveUserAccessToken(string channelUserId, BearerAccessToken2 token)
+        public async Task SaveUserAccessToken(string channelUserId, BearerAccessToken token)
         {
             var user = await GetUser(channelUserId);
             if (user == null) throw new InvalidOperationException($"User not found. Id = {channelUserId}");
-            user.SpotifyAuth = new Auth(token);
+            if (user.SpotifyAuth == null) user.SpotifyAuth = new Auth(token);
+            else user.SpotifyAuth.BearerAccessToken = token;
+
             // optimistic concurrency... :\
             await Replace(user);
         }
@@ -60,6 +62,17 @@ namespace RingoBotNet.Data
             user.SpotifyAuth = null;
             await Replace(user);
             _logger.LogInformation($"Reset User.SpotifyAuth = null for User.Id = \"{channelUserId}\"");
+        }
+
+        
+        public async Task SaveStateToken(string userId, string state)
+        {
+            // looking forward to Patch!
+            var user = await GetUser(userId);
+            user.SpotifyAuth = new Auth(state);
+            await Replace(user);
+
+            _logger.LogDebug($"Reset User.SpotifyAuth, state = {state} for User.Id = \"{userId}\"");
         }
     }
 }

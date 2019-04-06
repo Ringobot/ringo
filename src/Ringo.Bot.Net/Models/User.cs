@@ -17,7 +17,7 @@ namespace RingoBotNet.Models
             string channelId,
             string userId,
             string username,
-            BearerAccessToken2 spotifyAccessToken = null)
+            BearerAccessToken spotifyAccessToken = null)
         {
             var now = DateTime.UtcNow;
 
@@ -95,16 +95,22 @@ namespace RingoBotNet.Models
 
         }
 
-        public Auth(BearerAccessToken2 accessToken)
+        public Auth(BearerAccessToken accessToken)
         {
             BearerAccessToken = accessToken;
+            CreatedDate = DateTime.UtcNow;
+        }
+
+        public Auth(string state)
+        {
+            State = state;
             CreatedDate = DateTime.UtcNow;
         }
 
         /// <summary>
         /// Bearer access Token details
         /// </summary>
-        public BearerAccessToken2 BearerAccessToken { get; set; }
+        public BearerAccessToken BearerAccessToken { get; set; }
 
         /// <summary>
         /// Date this entity was first created.
@@ -131,7 +137,7 @@ namespace RingoBotNet.Models
     /// <summary>
     /// Bearer access Token details
     /// </summary>
-    public class BearerAccessToken2
+    public class BearerAccessToken
     {
         /// <summary>
         /// The Refresh token for this user/service.

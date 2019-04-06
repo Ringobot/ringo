@@ -13,7 +13,7 @@ namespace RingoBotNet.Services
         Task<bool> JoinPlaylist(
             string query,
             string token,
-            Station2 station,
+            Station station,
             string stationToken,
             CancellationToken cancellationToken);
 

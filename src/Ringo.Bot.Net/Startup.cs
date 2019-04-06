@@ -19,6 +19,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using RingoBotNet.Data;
 using RingoBotNet.Helpers;
 using RingoBotNet.Services;
@@ -83,6 +84,13 @@ namespace RingoBotNet
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+            // don't serialise self-referencing loops
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+
+
             services.AddBot<RingoBot3>(options =>
             {
                 services.AddSingleton(sp => botConfig ?? throw new InvalidOperationException($"The .bot config file could not be loaded. ({botConfig})"));
@@ -128,6 +136,7 @@ namespace RingoBotNet
             });
 
             services.AddSingleton<ISpotifyService, SpotifyService>();
+            services.AddSingleton<IRingoService, RingoService>();
             services.AddSingleton<IAlbumsApi, AlbumsApi>();
             services.AddSingleton<IArtistsApi, ArtistsApi>();
             services.AddSingleton<IPlaylistsApi, PlaylistsApi>();
@@ -140,6 +149,7 @@ namespace RingoBotNet
             services.AddSingleton<IUserData, UserData>();
             services.AddSingleton<IStationData, StationData>();
             services.AddSingleton<IListenerData, ListenerData>();
+            services.AddSingleton<IStateData, StateData>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

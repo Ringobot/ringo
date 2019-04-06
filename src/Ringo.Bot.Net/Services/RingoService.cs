@@ -33,10 +33,10 @@ namespace RingoBotNet.Services
             return await _userData.CreateUserIfNotExists(channelId, userId, username);
         }
 
-        public async Task<Station2> GetUserStation(ConversationInfo info, string username)
+        public async Task<Station> GetUserStation(ConversationInfo info, string username)
             => await _stationData.GetStation(RingoBotHelper.ToUserStationUri(info, username));
 
-        public async Task<Station2> GetChannelStation(ConversationInfo info, string conversationName = null)
+        public async Task<Station> GetChannelStation(ConversationInfo info, string conversationName = null)
         {
             if (!info.IsGroup && string.IsNullOrEmpty(conversationName))
             {
@@ -46,7 +46,7 @@ namespace RingoBotNet.Services
             return await _stationData.GetStation(RingoBotHelper.ToChannelStationUri(info, conversationName));
         }
 
-        private async Task<Station2> CreateStation(
+        private async Task<Station> CreateStation(
             string userId,
             string uri,
             string hashtag,
@@ -64,7 +64,7 @@ namespace RingoBotNet.Services
             return station;
         }
 
-        public async Task<Station2> CreateChannelStation(
+        public async Task<Station> CreateChannelStation(
             string channelUserId,
             ConversationInfo info,
             Models.Album album = null,
@@ -76,7 +76,7 @@ namespace RingoBotNet.Services
                 album: album,
                 playlist: playlist);
 
-        public async Task<Station2> CreateUserStation(
+        public async Task<Station> CreateUserStation(
             string channelUserId,
             ConversationInfo info,
             Models.Album album = null,

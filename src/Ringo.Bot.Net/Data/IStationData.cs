@@ -9,14 +9,14 @@ namespace RingoBotNet.Data
 
         //Task<StationUri> GetStationUri(string uri);
 
-        Task<Station2> CreateStation(
+        Task<Station> CreateStation(
             string stationUri,
             User owner,
             Album album = null,
             Playlist playlist = null,
             string hashtag = null);
 
-        Task<Station2> GetStation(string stationUri);
+        Task<Station> GetStation(string stationUri);
 
     }
 }

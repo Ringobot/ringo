@@ -30,5 +30,14 @@ namespace RingoBotNet.Models
             if (string.IsNullOrEmpty(PartitionKey)) throw new InvariantNullException(nameof(PartitionKey));
             if (string.IsNullOrEmpty(Type)) throw new InvariantNullException(nameof(Type));
         }
+
+        public override string ToString()
+        {
+#if DEBUG
+            return $"{GetType().FullName} {JsonConvert.SerializeObject(this)}";
+#else
+            return $"{GetType().FullName} ( Id = {Id}, PartitionKey = {PartitionKey}, Type = {Type})";
+#endif
+        }
     }
 }

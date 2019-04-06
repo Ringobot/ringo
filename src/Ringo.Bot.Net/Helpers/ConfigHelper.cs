@@ -9,7 +9,7 @@ namespace RingoBotNet.Helpers
         public const string CosmosDBDatabaseName = "CosmosDBDatabaseName";
         public const string CosmosDBUserCollectionName = "CosmosDBUserCollectionName";
         public const string StorageConnectionString = "StorageConnectionString";
-        public const string StorageStateContainer = "StorageStateContainer";
+        public const string StorageStateContainer = "StorageStateContainer";    // bot state storage container
         public const string BotServiceEndpointAppId = "BotServiceEndpointAppId";
         public const string BotServiceEndpointAppPassword = "BotServiceEndpointAppPassword";
         public const string StateTableName = "StateTableName";

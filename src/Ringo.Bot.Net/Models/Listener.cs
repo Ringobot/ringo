@@ -9,10 +9,10 @@ namespace RingoBotNet.Models
 
         public Listener() { }
 
-        public Listener(Station2 station, User user)
+        public Listener(Station station, User user)
         {
             Id = user.UserId;
-            PartitionKey = Station2.EncodePK(station.Uri);
+            PartitionKey = Station.EncodePK(station.Uri);
             Type = TypeName;
 
             User = user;
@@ -27,7 +27,7 @@ namespace RingoBotNet.Models
         /// <summary>
         /// Station.
         /// </summary>
-        public Station2 Station { get; set; }
+        public Station Station { get; set; }
 
         /// <summary>
         /// The date this entity was first created.

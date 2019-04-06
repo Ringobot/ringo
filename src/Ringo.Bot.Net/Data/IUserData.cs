@@ -9,10 +9,12 @@ namespace RingoBotNet.Data
 
         Task<User> GetUser(string userId);
 
-        Task ResetAuthorization(string channelUserId);
+        Task ResetAuthorization(string userId);
 
-        Task SaveUserAccessToken(string channelUserId, BearerAccessToken2 token);
+        Task SaveStateToken(string userId, string state);
 
-        Task SetTokenValidated(string channelUserId, string state);
+        Task SaveUserAccessToken(string userId, BearerAccessToken token);
+
+        Task SetTokenValidated(string userId, string state);
     }
 }

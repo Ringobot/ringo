@@ -54,7 +54,7 @@ namespace RingoBotNet.Data
                 disableAutomaticIdGeneration: true);
         }
 
-        protected async Task Replace(CosmosEntity document)
+        protected internal virtual async Task Replace(CosmosEntity document)
         {
             document.EnforceInvariants();
             // last write wins
@@ -71,7 +71,7 @@ namespace RingoBotNet.Data
         /// <param name="id">The document Id</param>
         /// <param name="partitionKey">Optional. A partition key for the document. If null, Id will be used.</param>
         /// <returns>The document as T</returns>
-        protected async Task<T> Read<T>(string id, string partitionKey = null) where T : class
+        protected internal virtual async Task<T> Read<T>(string id, string partitionKey = null) where T : class
         {
             try
             {

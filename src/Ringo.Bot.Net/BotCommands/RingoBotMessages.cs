@@ -107,7 +107,7 @@ namespace RingoBotNet
                 "Unfortunately Ringo does not support playing single Tracks or endless Playlists (including Daily Mixes) 😢 Play a Playlist or an Album in Spotify and try again.");
         }
 
-        public static IMessageActivity NowPlayingStation(ConversationInfo info, Station2 station)
+        public static IMessageActivity NowPlayingStation(ConversationInfo info, Station station)
         {
             var heroCard = NewHeroCard();
 
@@ -158,7 +158,7 @@ namespace RingoBotNet
                 $"Ringo can't talk to Spotify right now 🤔 Please try again in a minute. Spotify says: \"{ex.Message}\"");
         }
 
-        public static IMessageActivity StationNoLongerPlaying(ConversationInfo info, Station2 station)
+        public static IMessageActivity StationNoLongerPlaying(ConversationInfo info, Station station)
         {
             var heroCard = NewHeroCard();
             string uri = station.Album?.Uri ?? station.Playlist?.Uri;
@@ -176,7 +176,7 @@ namespace RingoBotNet
                 $"#{station.Hashtag} is no longer playing. Would you like to play \"{station.Name}\"?");
         }
 
-        public static IMessageActivity UserHasJoined(ConversationInfo info, Station2 station)
+        public static IMessageActivity UserHasJoined(ConversationInfo info, Station station)
         {
             var heroCard = NewHeroCard();
             string messageText = null;

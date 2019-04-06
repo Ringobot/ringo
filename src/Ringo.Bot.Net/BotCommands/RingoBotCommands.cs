@@ -117,7 +117,7 @@ namespace RingoBotNet
                 return;
             }
 
-            Station2 station = null;
+            Station station = null;
 
             if (string.IsNullOrEmpty(query))
             {
@@ -228,7 +228,7 @@ namespace RingoBotNet
                 return;
             }
 
-            Station2 station = null;
+            Station station = null;
 
             if (string.IsNullOrEmpty(query))
             {
@@ -297,7 +297,7 @@ namespace RingoBotNet
             await turnContext.SendActivityAsync(RingoBotMessages.NowPlayingStation(info, station), cancellationToken);
         }
 
-        private async Task<Station2> PlayNowPlaying(ITurnContext turnContext, string token, CancellationToken cancellationToken)
+        private async Task<Station> PlayNowPlaying(ITurnContext turnContext, string token, CancellationToken cancellationToken)
         {
             // no query so start / resume station
             // Play whatever the user is currently playing on Spotify
@@ -328,7 +328,7 @@ namespace RingoBotNet
 
             await _spotifyService.TurnOffShuffleRepeat(token, nowPlaying);
 
-            Station2 station = null;
+            Station station = null;
 
             switch (nowPlaying.Context.Type)
             {

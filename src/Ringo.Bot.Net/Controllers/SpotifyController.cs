@@ -75,8 +75,8 @@ namespace RingoBotNet.Controllers
             };
         }
 
-        private Models.BearerAccessToken2 MapToBearerAccessToken(BearerAccessRefreshToken token) =>
-            new Models.BearerAccessToken2
+        private Models.BearerAccessToken MapToBearerAccessToken(BearerAccessRefreshToken token) =>
+            new Models.BearerAccessToken
             {
                 AccessToken = token.AccessToken,
                 Expires = token.Expires,
