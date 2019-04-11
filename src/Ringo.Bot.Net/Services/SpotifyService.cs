@@ -45,53 +45,50 @@ namespace RingoBotNet.Services
 
         public async Task<Models.Playlist[]> FindPlaylists(string searchText, string accessToken, CancellationToken cancellationToken)
         {
-            Models.Playlist[] playlists = null;
-
             string uriOrId = null;
+            var uri = new SpotifyUri(searchText);
+
+            if (uri.IsValid && uri.ItemType == "playlist") uriOrId = uri.Uri;
+            
+            //if (uri.IsValid) 
+            //{
+            //    // spotify:user:daniellarsennz:playlist:5JOGypafQPEx0GkXyLb948
+            //    MatchCollection matchesUserUri = SpotifyUriHelper.SpotifyUserPlaylistUriRegEx.Matches(searchText);
+            //    if (matchesUserUri.Any()) uriOrId = matchesUserUri[0].Value;
+            //}
+
+            //if (uriOrId == null)
+            //{
+            //    // spotify:playlist:5JOGypafQPEx0GkXyLb948
+            //    MatchCollection matchesUri = SpotifyUriHelper.SpotifyUriRegEx.Matches(searchText);
+            //    if (matchesUri.Any() && SpotifyUriHelper.SpotifyUriType(matchesUri[0].Value) == "playlist")
+            //    {
+            //        uriOrId = matchesUri[0].Value;
+            //    }
+            //}
 
             if (uriOrId == null)
             {
-                // spotify:user:daniellarsennz:playlist:5JOGypafQPEx0GkXyLb948
-                MatchCollection matchesUserUri = SpotifyUriHelper.SpotifyUserPlaylistUriRegEx.Matches(searchText);
-                if (matchesUserUri.Any()) uriOrId = matchesUserUri[0].Value;
-            }
-
-            if (uriOrId == null)
-            {
-                // spotify:playlist:5JOGypafQPEx0GkXyLb948
-                MatchCollection matchesUri = SpotifyUriHelper.SpotifyUriRegEx.Matches(searchText);
-                if (matchesUri.Any() && SpotifyUriHelper.SpotifyUriType(matchesUri[0].Value) == "playlist")
-                {
-                    uriOrId = matchesUri[0].Value;
-                }
-            }
-
-            if (uriOrId == null)
-            {
+                // Spotify URL
                 // https://open.spotify.com/user/daniellarsennz/playlist/3dzMCDJTULeZ7IgbWvotSB?si=bm-3giiVS76AW5yXplr-pQ
                 MatchCollection matchesPlaylistUri = SpotifyPlaylistUrlRegex.Matches(searchText);
                 if (matchesPlaylistUri.Any()) uriOrId = matchesPlaylistUri[0].Value.Split('/').Last();
             }
 
-            if (uriOrId == null)
-            {
-                // search for the Playlist
-                var results = await RetryHelper.RetryAsync(
-                    () => _playlists.SearchPlaylists(searchText, accessToken: accessToken),
-                    logger: _logger,
-                    cancellationToken: cancellationToken);
+            if (uriOrId != null) return new[] { await GetPlaylist(accessToken, uriOrId) };
 
-                if (results.Total > 0)
-                {
-                    playlists = results.Items.Take(3).Select(ItemMappers.MapToPlaylist).ToArray();
-                }
-            }
-            else
+            // search for the Playlist
+            var results = await RetryHelper.RetryAsync(
+                () => _playlists.SearchPlaylists(searchText, accessToken: accessToken),
+                logger: _logger,
+                cancellationToken: cancellationToken);
+
+            if (results.Total > 0)
             {
-                playlists = new[] { await GetPlaylist(accessToken, uriOrId) };
+                return results.Items.Take(3).Select(ItemMappers.MapToPlaylist).ToArray();
             }
 
-            return playlists;
+            return null;
         }
 
         public async Task<Models.Album> GetAlbum(string token, string uri)
@@ -142,7 +139,7 @@ namespace RingoBotNet.Services
                 || info.Context == null
                 || SpotifyUriHelper.NormalizeUri(info.Context.Uri) != SpotifyUriHelper.NormalizeUri(station.SpotifyUri))
             {
-                _logger.LogInformation($"JoinPlaylist: No longer playing station {station}", station);
+                _logger.LogInformation($"JoinPlaylist: No longer playing station {station}");
                 _logger.LogDebug($"JoinPlaylist: station.Playlist.Uri = {station.Playlist.Uri}");
                 _logger.LogDebug($"JoinPlaylist: info = {JsonConvert.SerializeObject(info)}");
                 return false;
@@ -168,7 +165,7 @@ namespace RingoBotNet.Services
             try
             {
                 // mute joining player
-                await _player.Volume(0, accessToken: token, deviceId: info.Device.Id);
+                await Volume(token, 0, info.Device.Id);
 
                 // play from offset
                 switch (station.SpotifyContextType)
@@ -202,7 +199,7 @@ namespace RingoBotNet.Services
             finally
             {
                 // unmute joining player
-                await _player.Volume((int)info.Device.VolumePercent, accessToken: token, deviceId: info.Device.Id);
+                await Volume(token, (int)info.Device.VolumePercent, info.Device.Id);
             }
 
             return true;
@@ -213,12 +210,27 @@ namespace RingoBotNet.Services
             // turn off shuffle and repeat
             if (info.ShuffleState)
             {
-                await _player.Shuffle(false, accessToken: token, deviceId: info.Device.Id);
+                await _player.Shuffle(false, accessToken: token);
+                //await _player.Shuffle(false, accessToken: token, deviceId: info.Device.Id);
             }
 
             if (info.RepeatState != RepeatStates.Off)
             {
-                await _player.Repeat(RepeatStates.Off, accessToken: token, deviceId: info.Device.Id);
+                await _player.Repeat(RepeatStates.Off, accessToken: token);
+                //await _player.Repeat(RepeatStates.Off, accessToken: token, deviceId: info.Device.Id);
+            }
+        }
+
+        private async Task Volume(string token, int volumePercent, string deviceId = null)
+        {
+            try
+            {
+                await _player.Volume(volumePercent, accessToken: token, deviceId: deviceId);
+            }
+            catch(Exception ex)
+            {
+                // log and continue
+                _logger.LogError(ex, ex.Message);
             }
         }
 

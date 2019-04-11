@@ -69,6 +69,7 @@
 1. 🐞 sync when no station = error
 1. 🐞 Spotify API: `Can't have offset for context type: COLLECTION_ALBUM"` - from Album collection 
 1. 🐞 Bearer tokens in Entity.ToString()
+1. ✅🐞 `play spotify:playlist:0k5hJzzAvLllBUJYEJddJT` = `No playlists found!`
 
 ### dan/endless-stations
 

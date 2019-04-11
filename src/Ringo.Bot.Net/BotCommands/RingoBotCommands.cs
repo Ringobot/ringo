@@ -149,7 +149,7 @@ namespace RingoBotNet
                 return;
             }
 
-            TokenResponse stationToken = await _authService.GetAccessToken(station.Owner.UserId);
+            TokenResponse stationToken = await _authService.GetAccessToken(station.Owner.Id);
 
             // get user and their token
             token = token ?? await _authService.Authorize(turnContext, cancellationToken);

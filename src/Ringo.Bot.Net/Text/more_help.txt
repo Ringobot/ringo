@@ -1,28 +1,57 @@
-﻿**Start a station**
+﻿**Start a Station**
 
-```play (search term)            // Start playing the first playlist found by the search term, e.g.
+Start a Station based on whatever Spotify is playing now.
 
-play Michael Jackson
+`start`
 
-play (Spotify Playlist URI)   // Start playing a Spotify Playlist by its URI. Example:
+Start a Station based on a Playlist or Album.
 
-play spotify:user:daniellarsennz:playlist:3dzMCDJTULeZ7IgbWvotSB
+`play (search term)`
 
-play (Spotify Playlist Link)  // Start playing a Spotify Playlist by its Link.```
+`play Jill Scott`
 
+`play (Spotify URI)`
 
-**Join a station**
+`play spotify:user:daniellarsennz:playlist:3dzMCDJTULeZ7IgbWvotSB`
 
-```join (@username)              // Start playing the Playlist that @username is playing, e.g.
+`play (Spotify Link)`
 
-join @alice```
+`play https://open.spotify.com/user/gillespetersonofficial/playlist/3fIDUAzZzfezyiu3FeYSy2?si=9yN7ITAlRZOi7MYMYqld9w`
+
+**Join a Station**
+
+Joining a Station will sync your Spotify with everyone else who is listening to that Station. 
+
+`join`
+
+`join #hashtag`
+
+`join #ElvisLives`
+
+`join (@username)`
+
+`join @alice`
+
+You can re-sync at anytime.
+
+`sync #hashtag`
+
+`sync @username`
 
 **Other commands**
 
-```authorize                     // Authorize Ringo bot to use your Spotify account
+Authorize Ringo bot to control Spotify
 
-authorize reset               // Deletes your Spotify authorization token. You should also login to Spotify to de-authorize the Ringo bot app
+`auth` 
 
-help                          // Read help message on how to use Ringo bot
+Tell Ringo to forget you. (You should also login to Spotify and de-authorize the Ringo bot app).
 
-more help                     // Read this message```
+`auth reset`
+
+Read help message on how to use Ringo bot.
+
+`help`
+
+Read this message
+
+`more help`
