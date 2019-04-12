@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using RingoBotNet.Helpers;
 
 namespace RingoBotNet.Models
 {
@@ -19,6 +20,18 @@ namespace RingoBotNet.Models
         /// The type of this Entity.
         /// </summary>
         public string Type { get; set; }
+
+        /// <summary>
+        /// Encodes the Partition Key for this entity.
+        /// </summary>
+        /// <param name="pk">The Partition Key to encode</param>
+        //protected static string EncodePK(string pk) => EncodeId(pk);
+
+        /// <summary>
+        /// Encodes an Id.
+        /// </summary>
+        /// <param name="id">The identifier to encode</param>
+        protected static string EncodeId(string id) => CryptoHelper.Sha256(id);
 
         /// <summary>
         /// When called, checks that the state of the entity is valid, based on a set of rules called invariants.

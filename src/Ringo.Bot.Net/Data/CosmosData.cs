@@ -74,14 +74,14 @@ namespace RingoBotNet.Data
         /// <param name="id">The document Id</param>
         /// <param name="partitionKey">Optional. A partition key for the document. If null, Id will be used.</param>
         /// <returns>The document as T</returns>
-        protected internal virtual async Task<T> Read<T>(string id, string partitionKey = null) where T : class
+        protected internal virtual async Task<T> Read<T>((string id, string pk) idPK) where T : class
         {
             try
             {
                 DocumentResponse<T> documentResponse = await _client.ReadDocumentAsync<T>(
-                               UriFactory.CreateDocumentUri(_databaseName, _collectionName, id),
-                               options: new RequestOptions { PartitionKey = new PartitionKey(partitionKey ?? id) });
-                _logger.LogDebug($"Read: {documentResponse.Document.GetType().Name} id = \"{id}\" PK = \"{partitionKey ?? id}\" RequestCharge = {documentResponse.RequestCharge}");
+                               UriFactory.CreateDocumentUri(_databaseName, _collectionName, idPK.id),
+                               options: new RequestOptions { PartitionKey = new PartitionKey(idPK.pk) });
+                _logger.LogDebug($"Read: {documentResponse.Document.GetType().Name} idPK = \"{idPK}\" RequestCharge = {documentResponse.RequestCharge}");
 
                 return documentResponse.Document;
             }
@@ -90,9 +90,7 @@ namespace RingoBotNet.Data
                 if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
                     Logger.Error(ex.Message, ex, nameof(CosmosData));
-                    Logger.Information(
-                        $"Document not found. Returning null. id = \"{id}\" partition key = \"{partitionKey}\".",
-                        nameof(CosmosData));
+                    Logger.Information($"Document not found. Returning null. idPK = \"{idPK}\".");
                     return null;
                 }
 

@@ -20,15 +20,16 @@ namespace RingoBotNet.Models
             BearerAccessToken spotifyAccessToken = null)
         {
             var now = DateTime.UtcNow;
+            (string id, string pk) = EncodeIds(channelId, userId);
 
-            Id = EncodeId(channelId, userId);
-            PartitionKey = Id;
+            Id = id;
+            PartitionKey = pk;
             Type = TypeName;
+
             UserId = userId;
             Username = username;
             ChannelId = channelId;
             CreatedDate = now;
-
 
             if (spotifyAccessToken != null)
             {
@@ -63,15 +64,15 @@ namespace RingoBotNet.Models
         public DateTime? CreatedDate { get; set; }
 
         /// <summary>
-        /// Encode a User.Id from a ChannelId and UserId provided by the bot channel. This is a one-way hash.
+        /// Encodes the Id and Partition Key into a format suitable for a <see cref="CosmosEntity"/>
         /// </summary>
-        /// <param name="channelId">ChannelID for the bot services, e.g. "msteams". Not case sensitive.</param>
-        /// <param name="userId">UserId as provided by the bot service. Not case sensitive.</param>
-        /// <returns></returns>
-        public static string EncodeId(string channelId, string userId)
+        /// <param name="channelId">A Channel Id that identifies the Bot channel, i.e. "msteams", "slack".</param>
+        /// <param name="userId">The User Id provided by the Bot Channel</param>
+        /// <returns>An Id, PK tuple.</returns>
+        public static (string id, string pk) EncodeIds(string channelId, string userId)
         {
-            string uid = $"{channelId.Trim()}:{userId.Trim()}";
-            return CryptoHelper.Sha256(uid.ToLower());
+            string id = EncodeId($"{channelId.Trim()}:{userId.Trim()}".ToLower());
+            return (id, id);
         }
 
         public override void EnforceInvariants(bool isRoot = false)
@@ -80,7 +81,7 @@ namespace RingoBotNet.Models
             if (Type != TypeName) throw new InvariantException("Type must not be null or empty");
             if (string.IsNullOrEmpty(UserId)) throw new InvariantException("UserId must not be null or empty");
             if (string.IsNullOrEmpty(ChannelId)) throw new InvariantException("ChannelId must not be null or empty");
-            if (Id != EncodeId(ChannelId, UserId))
+            if (Id != EncodeIds(ChannelId, UserId).id)
                 throw new InvariantException("Id must be a hash of ChannelId and UserId. See `EncodeId`.");
         }
     }

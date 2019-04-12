@@ -39,9 +39,6 @@ namespace RingoBotNet.Data
             _logger.LogDebug($"UpdateStation: {station}");
         }
 
-        public async Task<Station> GetStation(string stationUri)
-        {
-            return await Read<Station>(stationUri, Station.EncodePK(stationUri));
-        }
+        public async Task<Station> GetStation(string stationUri) => await Read<Station>(Station.EncodeIds(stationUri));
     }
 }

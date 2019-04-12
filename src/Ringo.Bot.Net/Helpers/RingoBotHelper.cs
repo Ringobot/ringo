@@ -20,7 +20,7 @@ namespace RingoBotNet.Helpers
             => ChannelUserId(context.Activity.ChannelId, context.Activity.From.Id);
 
         public static string ChannelUserId(string channelId, string userId)
-            => User.EncodeId(channelId, userId);
+            => User.EncodeIds(channelId, userId).id;
 
         public static ConversationInfo NormalizedConversationInfo(ITurnContext turnContext)
         {

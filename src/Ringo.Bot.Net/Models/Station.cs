@@ -15,8 +15,9 @@ namespace RingoBotNet.Models
         {
             if (string.IsNullOrEmpty(uri)) throw new ArgumentNullException(uri);
 
-            Id = uri;
-            PartitionKey = EncodePK(Id);
+            (string id, string pk) = EncodeIds(uri);
+            Id = id;
+            PartitionKey = pk;
             Type = TypeName;
 
             string name = album?.Name ?? playlist?.Name;
@@ -104,16 +105,20 @@ namespace RingoBotNet.Models
         }
 
         /// <summary>
-        /// Encodes the Partition Key for this entity.
-        /// </summary>
-        /// <param name="stationUri">The Station URI</param>
-        public static string EncodePK(string stationUri) => CryptoHelper.Sha256(stationUri);
-
-        /// <summary>
         /// Derives the Spotify URI for the context that this Station is currently playing.
         /// </summary>
         [JsonIgnore]
         public string SpotifyUri => Album?.Uri ?? Playlist?.Uri;
+
+        /// <summary>
+        /// Encodes the Id and Partition Key into a format suitable for a <see cref="CosmosEntity"/>
+        /// </summary>
+        /// <param name="stationUri">The Station URI</param>
+        public static (string id, string pk) EncodeIds(string stationUri)
+        {
+            string id = EncodeId(stationUri);
+            return (id, id);
+        }
 
         public override void EnforceInvariants(bool isRoot = false)
         {

@@ -17,10 +17,10 @@ namespace RingoBotNet.Tests.Models
             const string lower = "daniel";
             const string channelId = "msteams";
 
-            string expected = User.EncodeId(channelId, lower);
+            string expected = User.EncodeIds(channelId, lower).id;
 
             // act
-            string actual = User.EncodeId(channelId, upper);
+            string actual = User.EncodeIds(channelId, upper).id;
 
             // assert
             Assert.AreEqual(expected, actual);
@@ -34,10 +34,10 @@ namespace RingoBotNet.Tests.Models
             const string lower = "msteams";
             const string userId = "daniel";
 
-            string expected = User.EncodeId(lower, userId);
+            string expected = User.EncodeIds(lower, userId).id;
 
             // act
-            string actual = User.EncodeId(upper, userId);
+            string actual = User.EncodeIds(upper, userId).id;
 
             // assert
             Assert.AreEqual(expected, actual);

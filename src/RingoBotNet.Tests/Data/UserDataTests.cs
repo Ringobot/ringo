@@ -34,7 +34,7 @@ namespace RingoBotNet.Tests.Data
             
             // Use Moq to create a Class Under Test. Mock out the Read and Replace methods
             var dataCut = new Mock<UserData>(mockConfiguration.Object, mockLogger.Object) { CallBase = true };
-            dataCut.Setup(d => d.Read<User>(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(user);
+            dataCut.Setup(d => d.Read<User>(It.IsAny<(string, string)>())).ReturnsAsync(user);
             dataCut.Setup(d => d.Replace(It.IsAny<CosmosEntity>())).Returns(Task.CompletedTask);
 
             // act

@@ -1,5 +1,4 @@
-﻿//using Microsoft.Azure.Documents;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RingoBotNet.Helpers;
 using RingoBotNet.Models;
@@ -17,7 +16,17 @@ namespace RingoBotNet.Data
             : base(configuration, logger, configuration[ConfigHelper.CosmosDBUserCollectionName])
         { }
 
-        public async Task<User> GetUser(string userId) => await Read<User>(userId);
+        /// <summary>
+        /// Get a User.
+        /// </summary>
+        /// <param name="userId">The <see cref="CosmosEntity"/> Id for this User Entity.</param>
+        public async Task<User> GetUser(string userId) => await Read<User>((userId, userId));
+
+        /// <summary>
+        /// Get a User.
+        /// </summary>
+        /// <param name="idPK">An Id Partition Key tuple.</param>
+        public async Task<User> GetUser((string id, string pk) idPK) => await Read<User>(idPK);
 
         public async Task SaveUserAccessToken(string channelUserId, BearerAccessToken token)
         {
@@ -32,8 +41,7 @@ namespace RingoBotNet.Data
 
         public async Task<User> CreateUserIfNotExists(string channelId, string userId, string username)
         {
-            string channelUserId = User.EncodeId(channelId, userId);
-            var user = await GetUser(channelUserId);
+            var user = await GetUser(User.EncodeIds(channelId, userId));
 
             if (user == null)
             {
@@ -70,7 +78,7 @@ namespace RingoBotNet.Data
             _logger.LogInformation($"Reset User.SpotifyAuth = null for User.Id = \"{channelUserId}\"");
         }
 
-        
+
         public async Task SaveStateToken(string userId, string state)
         {
             // looking forward to Patch!

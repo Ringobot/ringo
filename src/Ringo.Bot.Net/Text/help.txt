@@ -1,4 +1,4 @@
-﻿Hi, I'm Ringo! 👋 To get started, open Spotify and start playing music. Then type \"Start\".
+﻿Hi, I'm Ringo! 👋 To get started, open Spotify and start playing music. Then type `Start`.
 
 Ringo syncs your music with friends, no matter where they are on the planet. You and your friends will each need a Spotify Premium account, and the Spotify App open and active (used recently).
 
