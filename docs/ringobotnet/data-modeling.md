@@ -16,8 +16,12 @@
 * Q5. Get the token for a `Listener` -> `User`
 * Q6. Get `Station` ListenerCount
 * Q7. Get `Station` by Hashtag
+* Q8. Get all Stations for a Channel, ordered by Listeners (desc), Created (desc) 
 
 ### XXX
+
+    // The following characters are restricted and cannot be used in the Id 
+    // property: '/', '\\', '?', '#'
 
     // User
     {

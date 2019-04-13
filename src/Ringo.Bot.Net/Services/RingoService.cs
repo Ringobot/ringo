@@ -96,12 +96,16 @@ namespace RingoBotNet.Services
             ConversationInfo info,
             Models.Album album = null,
             Models.Playlist playlist = null)
-            => await CreateStation(
-                channelUserId,
-                RingoBotHelper.ToChannelStationUri(info),
-                RingoBotHelper.ToHashtag(info.ConversationName),
-                album: album,
-                playlist: playlist);
+        {
+            string hashtag = RingoBotHelper.ToHashtag(album?.Name ?? playlist?.Name);
+
+            return await CreateStation(
+                           channelUserId,
+                           RingoBotHelper.ToChannelStationUri(info, hashtag: hashtag),
+                           hashtag,
+                           album: album,
+                           playlist: playlist);
+        }
 
         public async Task<Station> CreateUserStation(
             string channelUserId,

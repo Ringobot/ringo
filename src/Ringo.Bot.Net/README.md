@@ -111,7 +111,7 @@
 
 ### Unplanned
 
-1. Support albums
+1. ✅ Support albums
 1. Port Ringo JS features
 1. List devices and choose one
 1. Speech
@@ -157,57 +157,6 @@ may not always be the case but is a reasonable assumption on a LAN connection.
 
 Further accuracy can be gained by making multiple requests to S and using the response with the shortest 
 RTT. 
-
-## Ringo Station URI
-
-### v2
-
-    ringo:slack/TA0VBN61L:station:channel/testing3
-    ringo:msteams/def9374638:station:channel/testing4
-    ringo:twitter:station:hashtag/datenight
-
-    ringo:slack/TA0VBN61L:station:user/daniel312
-    ringo:msteams/def9374638:station:user/abcdef12452
-
-### v1
-
-    # These could all refer to the same station
-    # Stations are global to a realm
-    # Realms are Slack/Team, Teams/Team, Twitter, Skype/User
-
-    channelId.lower()/team_id/@username.lower()
-    slack/TA0VBN61L/@daniel
-
-    channelId.lowr()/team_id/#conversation.name.replace(\W).lower()/SlackMessage.event.channel
-    slack/TA0VBN61L/#testing3/CFX3U3TCJ
-
-    channelId.lower()/team_id/#hashtag.lower()
-    slack/TA0VBN61L/#heatwave
-
-    channelId.lower()/team_id/#playlist_name.replace(\W).lower()
-    slack/TA0VBN61L/#heatwave2019
-
-
-    # StationUri
-    {
-        id: (base64(uri)),
-        pk: (hash(uri)),
-        uri: uri,
-        channelUserId: channelUserId,
-        stationId: stationId,
-        hashtag: (hashtag)
-    }
-
-    # ChannelUser.Station
-    {
-        id: (guid),
-        playlist: [playlist],
-        created: (utc),
-        modified: (utc),
-        isActive: (bool),
-        listenerCount: (int)
-    }
-
 
 ## Links
 
