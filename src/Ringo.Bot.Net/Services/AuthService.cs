@@ -63,10 +63,7 @@ namespace RingoBotNet.Services
 
             _logger.LogInformation($"Requesting Spotify Authorization for UserId {userId}");
 
-            await _userData.CreateUserIfNotExists(
-                turnContext.Activity.ChannelId,
-                turnContext.Activity.From.Id,
-                turnContext.Activity.From.Name);
+            await _userData.CreateUserIfNotExists(info);
 
             // create state token
             string state = $"{RingoBotStatePrefix}{Guid.NewGuid().ToString("N")}".ToLower();
@@ -117,7 +114,7 @@ namespace RingoBotNet.Services
             CancellationToken cancellationToken)
         {
             string channelUserId = await _userStateData.GetUserIdFromStateToken(text);
-            if (channelUserId == RingoBotHelper.ChannelUserId(turnContext.Activity.ChannelId, turnContext.Activity.From.Id))
+            if (channelUserId == RingoBotHelper.ChannelUserId(turnContext))
             {
                 await turnContext.SendActivityAsync(
                     $"Magic Number OK. Ringo is authorized to play Spotify. Ready to rock! 😎",

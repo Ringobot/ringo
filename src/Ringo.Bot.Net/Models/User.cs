@@ -7,28 +7,29 @@ namespace RingoBotNet.Models
     /// <summary>
     /// A User entity.
     /// </summary>
-    public class User : CosmosEntity
+    public partial class User : CosmosEntity
     {
         private const string TypeName = "User";
 
         public User() { }
 
         public User(
-            string channelId,
-            string userId,
-            string username,
+            ConversationInfo info,
+            string userId = null, 
+            string username = null,
             BearerAccessToken spotifyAccessToken = null)
         {
             var now = DateTime.UtcNow;
-            (string id, string pk) = EncodeIds(channelId, userId);
+            (string id, string pk) = EncodeIds(info, userId);
 
             Id = id;
             PartitionKey = pk;
             Type = TypeName;
 
-            UserId = userId;
-            Username = username;
-            ChannelId = channelId;
+            UserId = userId ?? info.FromId;
+            Username = username ?? info.FromName;
+            ChannelId = info.ChannelId;
+            ChannelTeamId = info.ChannelTeamId;
             CreatedDate = now;
 
             if (spotifyAccessToken != null)
@@ -52,6 +53,8 @@ namespace RingoBotNet.Models
         /// </summary>
         public string ChannelId { get; set; }
 
+        public string ChannelTeamId { get; set; }
+
         /// <summary>
         /// Authentication/Authorization details for Spotify service.
         /// </summary>
@@ -62,28 +65,6 @@ namespace RingoBotNet.Models
         /// </summary>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public DateTime? CreatedDate { get; set; }
-
-        /// <summary>
-        /// Encodes the Id and Partition Key into a format suitable for a <see cref="CosmosEntity"/>
-        /// </summary>
-        /// <param name="channelId">A Channel Id that identifies the Bot channel, i.e. "msteams", "slack".</param>
-        /// <param name="userId">The User Id provided by the Bot Channel</param>
-        /// <returns>An Id, PK tuple.</returns>
-        public static (string id, string pk) EncodeIds(string channelId, string userId)
-        {
-            string id = EncodeId($"{channelId.Trim()}:{userId.Trim()}".ToLower());
-            return (id, id);
-        }
-
-        public override void EnforceInvariants(bool isRoot = false)
-        {
-            base.EnforceInvariants();
-            if (Type != TypeName) throw new InvariantException("Type must not be null or empty");
-            if (string.IsNullOrEmpty(UserId)) throw new InvariantException("UserId must not be null or empty");
-            if (string.IsNullOrEmpty(ChannelId)) throw new InvariantException("ChannelId must not be null or empty");
-            if (Id != EncodeIds(ChannelId, UserId).id)
-                throw new InvariantException("Id must be a hash of ChannelId and UserId. See `EncodeId`.");
-        }
     }
 
     /// <summary>

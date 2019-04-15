@@ -289,8 +289,8 @@ namespace RingoBotNet
 
                 // Playlist is playing, now create a station
                 station = info.IsGroup
-                    ? await _ringoService.CreateChannelStation(channelUserId, info, playlist: playlist)
-                    : await _ringoService.CreateUserStation(channelUserId, info, playlist: playlist);
+                    ? await _ringoService.CreateConversationStation(info, playlist: playlist)
+                    : await _ringoService.CreateUserStation(info, playlist: playlist);
 
             }
 
@@ -335,15 +335,15 @@ namespace RingoBotNet
                 case "playlist":
                     var playlist = await _spotifyService.GetPlaylist(token, nowPlaying.Context.Uri);
                     station = info.IsGroup
-                        ? await _ringoService.CreateChannelStation(channelUserId, info, playlist:playlist)
-                        : await _ringoService.CreateUserStation(channelUserId, info, playlist:playlist);
+                        ? await _ringoService.CreateConversationStation(info, playlist:playlist)
+                        : await _ringoService.CreateUserStation(info, playlist:playlist);
                     break;
 
                 case "album":
                     var album = await _spotifyService.GetAlbum(token, nowPlaying.Context.Uri);
                     station = info.IsGroup
-                        ? await _ringoService.CreateChannelStation(channelUserId, info, album: album)
-                        : await _ringoService.CreateUserStation(channelUserId, info, album: album);
+                        ? await _ringoService.CreateConversationStation(info, album: album)
+                        : await _ringoService.CreateUserStation(info, album: album);
                     break;
 
                 default:

@@ -15,24 +15,18 @@
     // The following characters are restricted and cannot be used in the Id 
     // property: '/', '\\', '?', '#'
 
-    // Tenant
-    {channelId}/{tenantId}
-    slack/TA0VBN61L
-    msteams/c55b2bf1bf2648c8975245f6658f5a48
-    skype
-    twitter
-
     // User.Id
-    ringo:{base64(tenant)}:user:{base64(user_id)}
-    ringo:c2xhY2svVEEwVkJONjFM:user:VTlaRFM1MkcwOlRBMFZCTjYxTA==
+    ringo:{channel_id}:{channel_team_id.ToLower()}:user:user_id.ToLower()}
+    ringo:slack:ta0vbn61l:user:abc123def456
     
     // Station.Id (Conversation)
-    ringo:{base64(tenant)}:station:conversation:{lower_word(conversation_name)}:hashtag:{lower_word(hashtag)}
-    ringo:c2xhY2svVEEwVkJONjFM:station:conversation:musiclovers:hashtag:loveplaydance8scenesfromthefloor
+    ringo:{channel_id}:{channel_team_id.ToLower()}:station:conversation:{lower_word(conversation_name)}:hashtag:{lower_word(hashtag)}
+    ringo:slack:ta0vbn61l:station:conversation:musiclovers:hashtag:loveplaydance8scenesfromthefloor
+    ringo:skype::station:conversation:musiclovers:hashtag:loveplaydance8scenesfromthefloor
     
     // Station.Id (User)
-    ringo:{base64(tenant)}:station:user:{lower_word(user_name)}
-    ringo:c2xhY2svVEEwVkJONjFM:station:user:daniel
+    ringo:{channel_id}:{channel_team_id.ToLower()}:station:user:{lower_word(user_name)}
+    ringo:slack:ta0vbn61l:station:user:daniel
 
     // Station.PK 
     ringo:{base64(tenant)}:station:conversation:{lower_word(conversation_name)}

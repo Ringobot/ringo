@@ -5,20 +5,10 @@ namespace RingoBotNet.Data
 {
     public interface IStationData
     {
-        //Task CreateStationUri(string stationId, string channelUserId, string uri, string hashtag = null);
+        Task CreateStation(Station station);
 
-        //Task<StationUri> GetStationUri(string uri);
+        Task ReplaceStation(Station station);
 
-        Task<Station> CreateStation(
-            string stationUri,
-            User owner,
-            Album album = null,
-            Playlist playlist = null,
-            string hashtag = null);
-
-        Task ReplaceStation(string stationUri, Station station);
-
-        Task<Station> GetStation(string stationUri);
-
+        Task<Station> GetStation((string id, string pk) stationIds);
     }
 }

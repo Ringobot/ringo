@@ -1,50 +1,35 @@
 ﻿using Newtonsoft.Json;
-using RingoBotNet.Helpers;
 using System;
-using System.Linq;
 
 namespace RingoBotNet.Models
 {
-    public class Station : CosmosEntity
+    public partial class Station : CosmosEntity
     {
         private const string TypeName = "Station";
 
         public Station() { }
 
-        public Station(string uri, Album album, Playlist playlist, User owner, string hashtag = null)
+        public Station(ConversationInfo info, string hashtag, Album album, Playlist playlist, User owner, string username = null)
         {
-            if (string.IsNullOrEmpty(uri)) throw new ArgumentNullException(uri);
-
-            (string id, string pk) = EncodeIds(uri);
+            (string id, string pk) = EncodeIds(info, hashtag, username);
             Id = id;
             PartitionKey = pk;
             Type = TypeName;
 
             string name = album?.Name ?? playlist?.Name;
 
-            Uri = uri;
-            Uid = Guid.NewGuid().ToString("N");
             Name = name;
-            Hashtag = hashtag ?? RingoBotHelper.ToHashtag(name);
+            Hashtag = hashtag;
             Album = album;
             Playlist = playlist;
             Owner = owner;
             CreatedDate = DateTime.UtcNow;
             IsActive = true;
+            IsUserStation = !string.IsNullOrEmpty(username);
             ListenerCount = 1;
 
             ActiveListeners = new[] { new Listener(this, owner) };
         }
-
-        /// <summary>
-        /// A GUID for this Station.
-        /// </summary>
-        public string Uid { get; set; }
-
-        /// <summary>
-        /// A globally unique resource id for this Station.
-        /// </summary>
-        public string Uri { get; set; }
 
         /// <summary>
         /// The name of this Station.
@@ -81,6 +66,11 @@ namespace RingoBotNet.Models
         public bool IsActive { get; set; }
 
         /// <summary>
+        /// True when this is a User Station. False when this is a Conversation Station.
+        /// </summary>
+        public bool IsUserStation { get; set; }
+
+        /// <summary>
         /// An estimate of the number of users that are currently listening to this station.
         /// </summary>
         public int ListenerCount { get; set; }
@@ -109,37 +99,5 @@ namespace RingoBotNet.Models
         /// </summary>
         [JsonIgnore]
         public string SpotifyUri => Album?.Uri ?? Playlist?.Uri;
-
-        /// <summary>
-        /// Encodes the Id and Partition Key into a format suitable for a <see cref="CosmosEntity"/>
-        /// </summary>
-        /// <param name="stationUri">The Station URI</param>
-        public static (string id, string pk) EncodeIds(string stationUri)
-        {
-            string id = EncodeId(stationUri);
-            return (id, id);
-        }
-
-        public override void EnforceInvariants(bool isRoot = false)
-        {
-            base.EnforceInvariants();
-            if (string.IsNullOrEmpty(Uri)) throw new InvariantException("Uri must not be null");
-            if (string.IsNullOrEmpty(Hashtag)) throw new InvariantException("Hashtag must not be null");
-            if (string.IsNullOrEmpty(Name)) throw new InvariantException("Name must not be null");
-            if (Album == null && Playlist == null) throw new InvariantException("Station must have Album or Playlist property set.");
-
-            if (Album != null && Playlist != null)
-            {
-                throw new InvariantException("Station must have only one of Album or Playlist property set.");
-            }
-
-            if (ListenerCount < 0) throw new InvariantException("ListenerCount must not be less than Zero");
-
-            if (isRoot)
-            {
-                Owner.EnforceInvariants();
-                foreach (var listener in ActiveListeners) listener.EnforceInvariants();
-            }
-        }
     }
 }

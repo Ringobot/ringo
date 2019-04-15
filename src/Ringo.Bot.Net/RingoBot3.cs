@@ -219,15 +219,15 @@ namespace RingoBotNet
 
         private async Task CreateChannelUsers(ITurnContext turnContext, CancellationToken cancellationToken)
         {
+            var info = RingoBotHelper.NormalizedConversationInfo(turnContext);
             foreach (var member in turnContext.Activity.MembersAdded)
             {
                 if (member.Id != turnContext.Activity.Recipient.Id)
                 {
                     await _ringoService.CreateUserIfNotExists(
-                        turnContext.Activity.ChannelId,
+                        info,
                         member.Id,
-                        member.Name
-                        );
+                        member.Name);
                 }
             }
         }

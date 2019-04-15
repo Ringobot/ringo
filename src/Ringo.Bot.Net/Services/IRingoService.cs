@@ -5,19 +5,17 @@ namespace RingoBotNet.Services
 {
     public interface IRingoService
     {
-        Task<Station> CreateChannelStation(
-            string userId,
+        Task<Station> CreateConversationStation(
             ConversationInfo info,
             Album album = null,
             Playlist playlist = null);
 
         Task<Station> CreateUserStation(
-            string userId,
             ConversationInfo info,
             Album album = null,
             Playlist playlist = null);
 
-        Task<User> CreateUserIfNotExists(string channelId, string userId, string username);
+        Task<User> CreateUserIfNotExists(ConversationInfo info, string userId = null, string username = null);
 
         Task<Station> GetChannelStation(ConversationInfo info, string conversationName = null);
 

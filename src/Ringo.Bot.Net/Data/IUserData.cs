@@ -5,7 +5,7 @@ namespace RingoBotNet.Data
 {
     public interface IUserData
     {
-        Task<User> CreateUserIfNotExists(string channelId, string userId, string username);
+        Task<User> CreateUserIfNotExists(ConversationInfo info, string userId = null, string username = null);
 
         Task<User> GetUser(string userId);
 

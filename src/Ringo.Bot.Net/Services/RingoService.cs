@@ -14,7 +14,7 @@ namespace RingoBotNet.Services
     {
         private readonly IConfiguration _config;
         private readonly IUserData _userData;
-        private IStationData _stationData;
+        private readonly IStationData _stationData;
         private readonly ILogger _logger;
 
         public RingoService(
@@ -30,13 +30,13 @@ namespace RingoBotNet.Services
             _logger = logger;
         }
 
-        public async Task<User> CreateUserIfNotExists(string channelId, string userId, string username)
+        public async Task<User> CreateUserIfNotExists(ConversationInfo info, string userId = null, string username = null)
         {
-            return await _userData.CreateUserIfNotExists(channelId, userId, username);
+            return await _userData.CreateUserIfNotExists(info, userId, username);
         }
 
         public async Task<Station> GetUserStation(ConversationInfo info, string username)
-            => await _stationData.GetStation(RingoBotHelper.ToUserStationUri(info, username));
+            => await _stationData.GetStation(Station.EncodeIds(info, RingoBotHelper.ToHashtag(username), username));
 
         public async Task<Station> GetChannelStation(ConversationInfo info, string conversationName = null)
         {
@@ -45,77 +45,79 @@ namespace RingoBotNet.Services
                 throw new ArgumentException("Must provide conversationName if not in group chat", nameof(conversationName));
             }
 
-            return await _stationData.GetStation(RingoBotHelper.ToChannelStationUri(info, conversationName));
+            return await _stationData.GetStation(Station.EncodeIds(info, RingoBotHelper.ToHashtag(conversationName)));
         }
 
         private async Task<Station> CreateStation(
-            string userId,
-            string uri,
+            ConversationInfo info,
             string hashtag,
+            string ownerUserId,
+            string username = null,
             Album album = null,
             Playlist playlist = null)
         {
             // get user
-            var user = await _userData.GetUser(userId);
+            var ownerUser = await _userData.GetUser(ownerUserId);
 
             // get station
-            var station = await _stationData.GetStation(uri);
+            var stationIds = Station.EncodeIds(info, hashtag);
+            var station = await _stationData.GetStation(stationIds);
 
             // save station
             if (station == null)
             {
                 // new station
-                station = await _stationData.CreateStation(uri, user, album, playlist, hashtag);
+                station = new Station(info, hashtag, album, playlist, ownerUser);
+                await _stationData.CreateStation(station);
             }
             else
             {
                 // update station context and owner
                 station.Name = album?.Name ?? playlist?.Name;
-                station.Owner = user;
+                station.Owner = ownerUser;
                 station.Album = album;
                 station.Playlist = playlist;
                 station.Hashtag = hashtag;
 
-                if (!station.ActiveListeners.Any(l => l.User.Id == userId))
+                if (!station.ActiveListeners.Any(l => l.User.Id == ownerUserId))
                 {
                     // add the new owner to the listeners
                     station.ActiveListeners = new List<Listener>(station.ActiveListeners)
                     {
-                        new Listener(station, user)
+                        new Listener(station, ownerUser)
                     }.ToArray();
                 }
 
-                await _stationData.ReplaceStation(uri, station);
+                await _stationData.ReplaceStation(station);
             }
 
             return station;
         }
 
-        public async Task<Station> CreateChannelStation(
-            string channelUserId,
+        public async Task<Station> CreateConversationStation(
             ConversationInfo info,
-            Models.Album album = null,
-            Models.Playlist playlist = null)
+            Album album = null,
+            Playlist playlist = null)
         {
             string hashtag = RingoBotHelper.ToHashtag(album?.Name ?? playlist?.Name);
 
             return await CreateStation(
-                           channelUserId,
-                           RingoBotHelper.ToChannelStationUri(info, hashtag: hashtag),
+                           info,
                            hashtag,
+                           User.EncodeIds(info).id,
                            album: album,
                            playlist: playlist);
         }
 
         public async Task<Station> CreateUserStation(
-            string channelUserId,
             ConversationInfo info,
-            Models.Album album = null,
-            Models.Playlist playlist = null)
+            Album album = null,
+            Playlist playlist = null)
             => await CreateStation(
-                channelUserId,
-                RingoBotHelper.ToUserStationUri(info, info.FromName),
+                info,
                 RingoBotHelper.ToHashtag(info.FromName),
+                User.EncodeIds(info).id,
+                username: info.FromName,
                 album: album,
                 playlist: playlist);
     }

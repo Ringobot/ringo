@@ -39,13 +39,13 @@ namespace RingoBotNet.Data
             await Replace(user);
         }
 
-        public async Task<User> CreateUserIfNotExists(string channelId, string userId, string username)
+        public async Task<User> CreateUserIfNotExists(ConversationInfo info, string userId = null, string username = null)
         {
-            var user = await GetUser(User.EncodeIds(channelId, userId));
+            var user = await GetUser(User.EncodeIds(info, userId));
 
             if (user == null)
             {
-                user = new User(channelId, userId, username);
+                user = new User(info);
                 await Create(user);
             }
 

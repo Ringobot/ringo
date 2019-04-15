@@ -14,13 +14,18 @@ namespace RingoBotNet.Helpers
 
         public static readonly Regex NonWordRegex = new Regex("\\W");
 
+        /// <summary>
+        /// Used to remove any non alpha-numeric chars (including underscore).
+        /// </summary>
         public static readonly Regex HashtagRegex = new Regex("[^a-zA-Z0-9]");
 
         public static string ChannelUserId(ITurnContext context)
-            => ChannelUserId(context.Activity.ChannelId, context.Activity.From.Id);
+            => ChannelUserId(NormalizedConversationInfo(context));
 
-        public static string ChannelUserId(string channelId, string userId)
-            => User.EncodeIds(channelId, userId).id;
+        public static string ChannelUserId(ConversationInfo info)
+            => User.EncodeIds(info).id;
+
+        public static string LowerWord(string word) => HashtagRegex.Replace(word, string.Empty).ToLower();
 
         public static ConversationInfo NormalizedConversationInfo(ITurnContext turnContext)
         {
@@ -47,7 +52,10 @@ namespace RingoBotNet.Helpers
 
                     if (ids.Length < 2) throw new InvalidOperationException("Expecting Conversation Id like BBBBBBBBB:TTTTTTTTTT:CCCCCCCCCC");
 
+                    // ChannelTeamId
                     info.ChannelTeamId = ids[1];
+
+                    // ConversationId
                     if (ids.Length > 2) info.ConversationId = ids[2];
 
                     break;
@@ -57,11 +65,6 @@ namespace RingoBotNet.Helpers
                     info.ChannelTeamId = teamsChannelData.tenant?.id;
 
                     break;
-
-                //case "emulator":
-                //    dynamic emulatorChannelData = activity.ChannelData;
-
-                //    break;
             }
 
             return info;

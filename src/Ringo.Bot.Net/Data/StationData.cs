@@ -15,30 +15,17 @@ namespace RingoBotNet.Data
             : base(configuration, logger, configuration[ConfigHelper.CosmosDBStationCollectionName])
         { }
 
-        public async Task<Station> CreateStation(
-            string stationUri,
-            User owner,
-            Album album = null,
-            Playlist playlist = null,
-            string hashtag = null)
+        public async Task CreateStation(Station station)
         {
-            var station = new Station(stationUri, album, playlist, owner, hashtag);
             await Create(station);
-
-            _logger.LogDebug($"CreateStation: {station}");
-
-            return station;
         }
 
-        public async Task ReplaceStation(string stationUri, Station station)
+        public async Task ReplaceStation(Station station)
         {
             if (station == null) throw new ArgumentNullException(nameof(station));
-            if (stationUri != station.Uri)
-                throw new InvalidOperationException($"stationUri \"{stationUri}\" is not the same as Station.Uri \"{station.Uri}\".");
             await Replace(station);
-            _logger.LogDebug($"UpdateStation: {station}");
         }
 
-        public async Task<Station> GetStation(string stationUri) => await Read<Station>(Station.EncodeIds(stationUri));
+        public async Task<Station> GetStation((string id, string pk) stationIds) => await Read<Station>(stationIds);
     }
 }

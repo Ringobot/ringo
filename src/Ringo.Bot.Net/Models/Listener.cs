@@ -41,7 +41,7 @@ namespace RingoBotNet.Models
         [JsonIgnore]
         public DateTime? LastActiveDate { get; set; }
 
-        public override void EnforceInvariants(bool isRoot = false)
+        internal override void EnforceInvariants(bool isRoot = false)
         {
             base.EnforceInvariants();
             if (User == null) throw new InvariantNullException(nameof(User));
