@@ -20,7 +20,7 @@ namespace RingoBotNet.Models
             BearerAccessToken spotifyAccessToken = null)
         {
             var now = DateTime.UtcNow;
-            (string id, string pk) = EncodeIds(info, userId);
+            (string id, string pk) = EncodeIds(info, userId ?? info.FromId);
 
             Id = id;
             PartitionKey = pk;

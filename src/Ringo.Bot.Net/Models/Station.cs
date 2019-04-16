@@ -3,6 +3,9 @@ using System;
 
 namespace RingoBotNet.Models
 {
+    //TODO public class UserStation : Station
+    //TODO public class ConversationStation : Station
+
     public partial class Station : CosmosEntity
     {
         private const string TypeName = "Station";

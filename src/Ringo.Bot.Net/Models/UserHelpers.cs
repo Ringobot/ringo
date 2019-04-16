@@ -1,15 +1,12 @@
 ﻿using RingoBotNet.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace RingoBotNet.Models
 {
     public partial class User
     {
-        internal static Regex UserIdRegex = new Regex($"^{RingoBotHelper.RingoBotName}:(slack|msteams|skype):[a-zA-Z0-9=]*:user:[a-z0-9-:]+$");
+        internal static Regex UserIdRegex = new Regex(
+            $"^{RingoBotHelper.RingoBotName}:({string.Join('|', RingoBotHelper.SupportedChannelIds)}):[a-zA-Z0-9=]*:user:[a-z0-9-:]+$");
 
         /// <summary>
         /// Encodes the Id and Partition Key into a format suitable for a <see cref="CosmosEntity"/>
@@ -25,8 +22,7 @@ namespace RingoBotNet.Models
             return (id, id);
         }
 
-        internal static (string id, string pk) EncodeIds(ConversationInfo info) 
-            => EncodeIds(info, info.FromId);
+        internal static (string id, string pk) EncodeIds(ConversationInfo info) => EncodeIds(info, info.FromId);
 
         internal override void EnforceInvariants(bool isRoot = false)
         {

@@ -10,14 +10,27 @@ namespace RingoBotNet.Helpers
         /// <summary>
         /// The system name for Ringobot. This should never change. For bot user name, see <see cref="ConversationInfo"/>
         /// </summary>
-        public const string RingoBotName = "ringo";
+        internal const string RingoBotName = "ringo";
 
-        public static readonly Regex NonWordRegex = new Regex("\\W");
+        internal const string ChannelIdEmulator = "emulator";
+        internal const string ChannelIdSkype = "skype";
+        internal const string ChannelIdSlack = "slack";
+        internal const string ChannelIdTeams = "msteams";
+
+        internal static string[] SupportedChannelIds = new[]
+        {
+            ChannelIdEmulator,
+            ChannelIdSkype,
+            ChannelIdSlack,
+            ChannelIdTeams
+        };
+
+        internal static readonly Regex NonWordRegex = new Regex("\\W");
 
         /// <summary>
         /// Used to remove any non alpha-numeric chars (including underscore).
         /// </summary>
-        public static readonly Regex HashtagRegex = new Regex("[^a-zA-Z0-9]");
+        internal static readonly Regex HashtagRegex = new Regex("[^a-zA-Z0-9]");
 
         public static string ChannelUserId(ITurnContext context)
             => ChannelUserId(NormalizedConversationInfo(context));
@@ -47,7 +60,7 @@ namespace RingoBotNet.Helpers
             // channel specific overrides
             switch (info.ChannelId)
             {
-                case "slack":
+                case ChannelIdSlack:
                     string[] ids = activity.Conversation.Id.Split(':');
 
                     if (ids.Length < 2) throw new InvalidOperationException("Expecting Conversation Id like BBBBBBBBB:TTTTTTTTTT:CCCCCCCCCC");
@@ -60,7 +73,7 @@ namespace RingoBotNet.Helpers
 
                     break;
 
-                case "msteams":
+                case ChannelIdTeams:
                     dynamic teamsChannelData = activity.ChannelData;
                     info.ChannelTeamId = teamsChannelData.tenant?.id;
 
@@ -68,29 +81,6 @@ namespace RingoBotNet.Helpers
             }
 
             return info;
-        }
-
-        public static string ToUserStationUri(ConversationInfo info, string username, string hashtag = null)
-        {
-            if (info == null) throw new ArgumentNullException(nameof(info));
-            if (string.IsNullOrEmpty(username)) throw new ArgumentNullException(nameof(username));
-
-            // ringo:{tenant62}:station:user:{username62}[:hashtag:{hashtag}]
-            string uri = $"{RingoBotName}:{TeamChannelPart(info)}:station:user:{CryptoHelper.Base62Encode(NonWordRegex.Replace(username.ToLower(), string.Empty))}";
-            if (!string.IsNullOrEmpty(hashtag)) uri += $":hashtag:{ToHashtag(hashtag).ToLower()}";
-            return uri;
-        }
-
-        public static string ToChannelStationUri(ConversationInfo info, string conversationName = null, string hashtag = null)
-        {
-            if (info == null) throw new ArgumentNullException(nameof(info));
-            if (string.IsNullOrEmpty(conversationName) && string.IsNullOrEmpty(info.ConversationName))
-                throw new ArgumentNullException(nameof(conversationName));
-
-            // ringo:{tenant62}:station:channel:{channelName62}[:hashtag:{hashtag}]
-            string uri = $"{RingoBotName}:{TeamChannelPart(info)}:station:channel:{CryptoHelper.Base62Encode(ToHashtag(conversationName ?? info.ConversationName).ToLower())}";
-            if (!string.IsNullOrEmpty(hashtag)) uri += $":hashtag:{ToHashtag(hashtag).ToLower()}";
-            return uri;
         }
 
         private static string TeamChannelPart(ConversationInfo info)

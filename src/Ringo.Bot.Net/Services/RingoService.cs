@@ -48,14 +48,15 @@ namespace RingoBotNet.Services
             return await _stationData.GetStation(Station.EncodeIds(info, RingoBotHelper.ToHashtag(conversationName)));
         }
 
-        private async Task<Station> CreateStation(
+        public async Task<Station> CreateConversationStation(
             ConversationInfo info,
-            string hashtag,
-            string ownerUserId,
-            string username = null,
             Album album = null,
             Playlist playlist = null)
         {
+            string name = album?.Name ?? playlist?.Name;
+            string hashtag = RingoBotHelper.ToHashtag(name);
+            string ownerUserId = RingoBotHelper.ChannelUserId(info);
+
             // get user
             var ownerUser = await _userData.GetUser(ownerUserId);
 
@@ -73,7 +74,7 @@ namespace RingoBotNet.Services
             else
             {
                 // update station context and owner
-                station.Name = album?.Name ?? playlist?.Name;
+                station.Name = name;
                 station.Owner = ownerUser;
                 station.Album = album;
                 station.Playlist = playlist;
@@ -94,31 +95,51 @@ namespace RingoBotNet.Services
             return station;
         }
 
-        public async Task<Station> CreateConversationStation(
-            ConversationInfo info,
-            Album album = null,
-            Playlist playlist = null)
-        {
-            string hashtag = RingoBotHelper.ToHashtag(album?.Name ?? playlist?.Name);
-
-            return await CreateStation(
-                           info,
-                           hashtag,
-                           User.EncodeIds(info).id,
-                           album: album,
-                           playlist: playlist);
-        }
-
         public async Task<Station> CreateUserStation(
             ConversationInfo info,
             Album album = null,
             Playlist playlist = null)
-            => await CreateStation(
-                info,
-                RingoBotHelper.ToHashtag(info.FromName),
-                User.EncodeIds(info).id,
-                username: info.FromName,
-                album: album,
-                playlist: playlist);
+        {
+            string name = album?.Name ?? playlist?.Name;
+            string ownerUserId = RingoBotHelper.ChannelUserId(info);
+
+            // get user
+            var ownerUser = await _userData.GetUser(ownerUserId);
+            string hashtag = RingoBotHelper.ToHashtag(ownerUser.Username);
+
+            // get station
+            var stationIds = Station.EncodeIds(info, hashtag, ownerUser.Username);
+            var station = await _stationData.GetStation(stationIds);
+
+            // save station
+            if (station == null)
+            {
+                // new station
+                station = new Station(info, hashtag, album, playlist, ownerUser, ownerUser.Username);
+                await _stationData.CreateStation(station);
+            }
+            else
+            {
+                // update station context and owner
+                station.Name = name;
+                station.Owner = ownerUser;
+                station.Album = album;
+                station.Playlist = playlist;
+                station.Hashtag = hashtag;
+
+                if (!station.ActiveListeners.Any(l => l.User.Id == ownerUserId))
+                {
+                    // add the new owner to the listeners
+                    station.ActiveListeners = new List<Listener>(station.ActiveListeners)
+                    {
+                        new Listener(station, ownerUser)
+                    }.ToArray();
+                }
+
+                await _stationData.ReplaceStation(station);
+            }
+
+            return station;
+        }
     }
 }

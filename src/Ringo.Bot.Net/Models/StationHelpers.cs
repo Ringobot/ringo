@@ -9,8 +9,10 @@ namespace RingoBotNet.Models
     /// </summary>
     public partial class Station
     {
-        internal static Regex StationPKRegex = new Regex($"^{RingoBotHelper.RingoBotName}:(slack|msteams|skype):[a-zA-Z0-9=]*:station:(conversation|user):[a-z0-9]+$");
-        internal static Regex StationIdRegex = new Regex($"^{RingoBotHelper.RingoBotName}:(slack|msteams|skype):[a-zA-Z0-9=]*:station:(conversation:[a-z0-9]+:hashtag:[a-z0-9]+|user:[a-z0-9]+)$");
+        internal static Regex StationPKRegex = new Regex(
+            $"^{RingoBotHelper.RingoBotName}:({string.Join('|', RingoBotHelper.SupportedChannelIds)}):[a-zA-Z0-9=]*:station:(conversation|user):[a-z0-9]+$");
+        internal static Regex StationIdRegex = new Regex(
+            $"^{RingoBotHelper.RingoBotName}:({string.Join('|', RingoBotHelper.SupportedChannelIds)}):[a-zA-Z0-9=]*:station:(conversation:[a-z0-9]+:hashtag:[a-z0-9]+|user:[a-z0-9]+)$");
 
         /// <summary>
         /// Encodes the Id and Partition Key into a format suitable for a <see cref="CosmosEntity"/>
