@@ -1,8 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RingoBotNet.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace RingoBotNet.Tests.Models
 {
@@ -15,12 +12,17 @@ namespace RingoBotNet.Tests.Models
             // arrange
             const string upper = "Daniel";
             const string lower = "daniel";
-            const string channelId = "msteams";
 
-            string expected = User.EncodeIds(channelId, lower).id;
+            var info = new ConversationInfo
+            {
+                ChannelId = "msteams",
+                ChannelTeamId = "abc123"
+            };
+
+            var expected = User.EncodeIds(info, lower);
 
             // act
-            string actual = User.EncodeIds(channelId, upper).id;
+            var actual = User.EncodeIds(info, upper);
 
             // assert
             Assert.AreEqual(expected, actual);
@@ -30,14 +32,24 @@ namespace RingoBotNet.Tests.Models
         public void EncodeId_UpperCaseChannelId_EncodedSameAsLowerCaseChannelId()
         {
             // arrange
-            const string upper = "MSTEAMS";
-            const string lower = "msteams";
             const string userId = "daniel";
 
-            string expected = User.EncodeIds(lower, userId).id;
+            var lower = new ConversationInfo
+            {
+                ChannelId = "msteams",
+                ChannelTeamId = "abc123"
+            };
+
+            var upper = new ConversationInfo
+            {
+                ChannelId = "MSTEAMS",
+                ChannelTeamId = "abc123"
+            };
+
+            var expected = User.EncodeIds(lower, userId);
 
             // act
-            string actual = User.EncodeIds(upper, userId).id;
+            var actual = User.EncodeIds(upper, userId);
 
             // assert
             Assert.AreEqual(expected, actual);
