@@ -206,7 +206,6 @@ namespace RingoBotNet
             TokenResponse token = null)
         {
             var info = RingoBotHelper.NormalizedConversationInfo(turnContext);
-            string channelUserId = RingoBotHelper.ChannelUserId(turnContext);
 
             // User authorised?
             token = token ?? await _authService.Authorize(turnContext, cancellationToken);

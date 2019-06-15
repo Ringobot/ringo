@@ -132,8 +132,8 @@ namespace RingoBotNet
                 heroCard.Buttons.Add(
                     new CardAction
                     {
-                        Title = $"Join \"{station.Name}\" in #{station.Hashtag}",
-                        Value = "join",
+                        Title = $"Join #{station.Hashtag}",
+                        Value = $"join #{station.Hashtag}",
                         Type = ActionTypes.ImBack,
                     });
             }
