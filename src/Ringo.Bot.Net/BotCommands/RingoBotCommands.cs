@@ -187,9 +187,28 @@ namespace RingoBotNet
                 }
                 else
                 {
-                    await turnContext.SendActivityAsync(
-                        RingoBotMessages.StationNoLongerPlaying(info, station),
-                        cancellationToken: cancellationToken);
+                    // station no longer playing. Start it up!
+                    //await turnContext.SendActivityAsync(
+                    //    RingoBotMessages.StationNoLongerPlaying(info, station),
+                    //    cancellationToken: cancellationToken);
+
+                    _logger.LogInformation($"RingobotNet.RingoBotCommands: User {station.Owner.Username} is no longer playing station \"{station.Name}\". Starting station up again with {info.FromName} as owner.");
+
+                    switch (station.SpotifyContextType)
+                    {
+                        case Station.SpotifyContextTypeAlbum:
+                            await _spotifyService.PlayAlbum(station.SpotifyUri, token.Token, cancellationToken);
+                            break;
+                        case Station.SpotifyContextTypePlaylist:
+                            await _spotifyService.PlayPlaylist(station.SpotifyUri, token.Token, cancellationToken);
+                            break;
+                        default:
+                            throw new NotSupportedException($"{station.SpotifyContextType} is not a supported SpotifyContextType");
+                    }
+
+                    await _ringoService.ChangeStationOwner(station, info);
+
+                    await turnContext.SendActivityAsync(RingoBotMessages.NowPlayingStation(info, station), cancellationToken);
                 }
             }
             catch (SpotifyApi.NetCore.SpotifyApiErrorException ex)

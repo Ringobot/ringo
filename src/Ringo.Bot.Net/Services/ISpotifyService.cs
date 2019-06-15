@@ -8,15 +8,6 @@ namespace RingoBotNet.Services
     {
         Task<Playlist[]> FindPlaylists(string searchText, string accessToken, CancellationToken cancellationToken);
 
-        Task PlayPlaylist(string playlistId, string accessToken, CancellationToken cancellationToken);
-
-        Task<bool> JoinPlaylist(
-            string query,
-            string token,
-            Station station,
-            string stationToken,
-            CancellationToken cancellationToken);
-
         Task<SpotifyApi.NetCore.Device[]> GetDevices(string accessToken);
 
         Task<SpotifyApi.NetCore.CurrentPlaybackContext> GetUserNowPlaying(string token);
@@ -28,6 +19,17 @@ namespace RingoBotNet.Services
         Task<Playlist> GetPlaylist(string token, string uri);
 
         Task<string> GetPlaylistTrackOneUrl(string token, Playlist playlist);
+
+        Task<bool> JoinPlaylist(
+            string query,
+            string token,
+            Station station,
+            string stationToken,
+            CancellationToken cancellationToken);
+
+        Task PlayAlbum(string albumId, string accessToken, CancellationToken cancellationToken);
+
+        Task PlayPlaylist(string playlistId, string accessToken, CancellationToken cancellationToken);
 
         Task TurnOffShuffleRepeat(string token, SpotifyApi.NetCore.CurrentPlaybackContext info);
     }

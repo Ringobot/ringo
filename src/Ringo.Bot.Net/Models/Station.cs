@@ -9,6 +9,9 @@ namespace RingoBotNet.Models
     public partial class Station : CosmosEntity
     {
         private const string TypeName = "Station";
+        public const string SpotifyContextTypeAlbum = "album";
+        public const string SpotifyContextTypePlaylist = "playlist";
+
 
         public Station() { }
 
@@ -91,8 +94,8 @@ namespace RingoBotNet.Models
         {
             get
             {
-                if (Album != null) return "album";
-                if (Playlist != null) return "playlist";
+                if (Album != null) return SpotifyContextTypeAlbum;
+                if (Playlist != null) return SpotifyContextTypePlaylist;
                 return null;
             }
         }

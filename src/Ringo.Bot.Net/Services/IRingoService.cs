@@ -5,6 +5,11 @@ namespace RingoBotNet.Services
 {
     public interface IRingoService
     {
+        /// <summary>
+        /// Changes the station owner to the current conversation From user
+        /// </summary>
+        Task ChangeStationOwner(Station station, ConversationInfo info);
+
         Task<Station> CreateConversationStation(
             ConversationInfo info,
             Album album = null,

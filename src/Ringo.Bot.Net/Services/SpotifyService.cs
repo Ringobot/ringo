@@ -110,6 +110,14 @@ namespace RingoBotNet.Services
                 cancellationToken: cancellationToken);
         }
 
+        public async Task PlayAlbum(string albumId, string accessToken, CancellationToken cancellationToken)
+        {
+            await RetryHelper.RetryAsync(
+                () => _player.PlayAlbum(albumId, accessToken:accessToken),
+                logger: _logger,
+                cancellationToken: cancellationToken);
+        }
+
         public async Task<Device[]> GetDevices(string accessToken)
         {
             return await _player.GetDevices<Device[]>(accessToken);
@@ -140,7 +148,7 @@ namespace RingoBotNet.Services
                 || SpotifyUriHelper.NormalizeUri(info.Context.Uri) != SpotifyUriHelper.NormalizeUri(station.SpotifyUri))
             {
                 _logger.LogInformation($"JoinPlaylist: No longer playing station {station}");
-                _logger.LogDebug($"JoinPlaylist: station.Playlist.Uri = {station.Playlist.Uri}");
+                _logger.LogDebug($"JoinPlaylist: station.SpotifyUri = {station.SpotifyUri}");
                 _logger.LogDebug($"JoinPlaylist: info = {JsonConvert.SerializeObject(info)}");
                 return false;
             }

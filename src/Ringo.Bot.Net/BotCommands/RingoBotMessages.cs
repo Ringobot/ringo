@@ -124,7 +124,7 @@ namespace RingoBotNet
             }
 
             string messageText = info.IsGroup
-                ? $"@{info.FromName} is now playing \"{station.Name}\" in #{info.ConversationName}! 📢"
+                ? $"@{info.FromName} is now playing \"{station.Name}\" #{station.Hashtag} 📢"
                 : $"Now playing \"{station.Name}\". Friends can type `\"join @{RingoBotHelper.ToHashtag(info.FromName)}\"` to join in! 🎉";
 
             if (info.IsGroup)
@@ -196,7 +196,7 @@ namespace RingoBotNet
                 return MessageAttachment(heroCard, messageText);
             }
 
-            return MessageFactory.Text($"You have joined @{station.Hashtag}! 🎉");
+            return MessageFactory.Text($"You have joined @{station.Hashtag} playing \"{station.Name}\" 🎉");
         }
 
         public static IMessageActivity Welcome(ConversationInfo info, string memberName)

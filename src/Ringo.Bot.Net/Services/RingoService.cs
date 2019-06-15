@@ -80,14 +80,7 @@ namespace RingoBotNet.Services
                 station.Playlist = playlist;
                 station.Hashtag = hashtag;
 
-                if (!station.ActiveListeners.Any(l => l.User.Id == ownerUserId))
-                {
-                    // add the new owner to the listeners
-                    station.ActiveListeners = new List<Listener>(station.ActiveListeners)
-                    {
-                        new Listener(station, ownerUser)
-                    }.ToArray();
-                }
+                AddOwnerToListeners(station, ownerUser, ownerUserId);
 
                 await _stationData.ReplaceStation(station);
             }
@@ -127,19 +120,43 @@ namespace RingoBotNet.Services
                 station.Playlist = playlist;
                 station.Hashtag = hashtag;
 
-                if (!station.ActiveListeners.Any(l => l.User.Id == ownerUserId))
-                {
-                    // add the new owner to the listeners
-                    station.ActiveListeners = new List<Listener>(station.ActiveListeners)
-                    {
-                        new Listener(station, ownerUser)
-                    }.ToArray();
-                }
+                AddOwnerToListeners(station, ownerUser, ownerUserId);
 
                 await _stationData.ReplaceStation(station);
             }
 
             return station;
+        }
+
+        /// <summary>
+        /// Changes the station owner to the current conversation From user
+        /// </summary>
+        public async Task ChangeStationOwner(Station station, ConversationInfo info)
+        {
+            var oldOwner = station.Owner;
+            string ownerUserId = RingoBotHelper.ChannelUserId(info);
+
+            // get user
+            var ownerUser = await _userData.GetUser(ownerUserId);
+            station.Owner = ownerUser;
+
+            AddOwnerToListeners(station, ownerUser, ownerUserId);
+
+            await _stationData.ReplaceStation(station);
+
+            _logger.LogInformation($"RingoBotNet.Services.RingoService.ChangeStationOwner: Station {station} has changed owner from {oldOwner} to {ownerUser}.");
+        }
+
+        public void AddOwnerToListeners(Station station, User ownerUser, string ownerUserId)
+        {
+            if (!station.ActiveListeners.Any(l => l.User.Id == ownerUserId))
+            {
+                // add the new owner to the listeners
+                station.ActiveListeners = new List<Listener>(station.ActiveListeners)
+                {
+                    new Listener(station, ownerUser)
+                }.ToArray();
+            }
         }
     }
 }
