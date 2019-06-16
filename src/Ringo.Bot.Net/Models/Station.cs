@@ -43,9 +43,14 @@ namespace RingoBotNet.Models
         public string Name { get; set; }
 
         /// <summary>
-        /// A hastag for this Station. Must not include "#".
+        /// A hashtag for this Station. Must not include "#".
         /// </summary>
         public string Hashtag { get; set; }
+
+        /// <summary>
+        /// Returns a Hashtag suitable for rendering to a user, including the hash (#) or at sign (@)
+        /// </summary>
+        public string HashtagHandle => IsUserStation ? $"@{Hashtag}" : $"#{Hashtag}";
 
         /// <summary>
         /// The Album that this Station is currently playing.

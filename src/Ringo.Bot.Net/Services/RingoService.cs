@@ -139,8 +139,10 @@ namespace RingoBotNet.Services
             // get user
             var ownerUser = await _userData.GetUser(ownerUserId);
             station.Owner = ownerUser;
-
             AddOwnerToListeners(station, ownerUser, ownerUserId);
+
+            // TODO: if a user station, change the hashtag
+            if (station.IsUserStation) station.Hashtag = RingoBotHelper.ToHashtag(info.FromName);
 
             await _stationData.ReplaceStation(station);
 

@@ -124,7 +124,7 @@ namespace RingoBotNet
             }
 
             string messageText = info.IsGroup
-                ? $"@{info.FromName} is now playing \"{station.Name}\" #{station.Hashtag} 📢"
+                ? $"@{info.FromName} is now playing \"{station.Name}\" {station.HashtagHandle} 📢"
                 : $"Now playing \"{station.Name}\". Friends can type `\"join @{RingoBotHelper.ToHashtag(info.FromName)}\"` to join in! 🎉";
 
             if (info.IsGroup)
@@ -132,8 +132,8 @@ namespace RingoBotNet
                 heroCard.Buttons.Add(
                     new CardAction
                     {
-                        Title = $"Join #{station.Hashtag}",
-                        Value = $"join #{station.Hashtag}",
+                        Title = $"Join {station.HashtagHandle}",
+                        Value = $"join {station.HashtagHandle}",
                         Type = ActionTypes.ImBack,
                     });
             }
@@ -173,7 +173,7 @@ namespace RingoBotNet
 
             return MessageAttachment(
                 heroCard, 
-                $"#{station.Hashtag} is no longer playing. Would you like to play \"{station.Name}\"?");
+                $"{station.HashtagHandle} is no longer playing. Would you like to play \"{station.Name}\"?");
         }
 
         public static IMessageActivity UserHasJoined(ConversationInfo info, Station station)
@@ -183,20 +183,20 @@ namespace RingoBotNet
 
             if (info.IsGroup)
             {
-                messageText = $"@{info.FromName} has joined \"{station.Name}\" #{station.Hashtag} 🎉";
+                messageText = $"@{info.FromName} has joined \"{station.Name}\" {station.HashtagHandle} 🎉";
 
                 heroCard.Buttons.Add(
                     new CardAction
                     {
-                        Title = $"Join #{station.Hashtag}",
-                        Value = $"join #{station.Hashtag}",
+                        Title = $"Join {station.HashtagHandle}",
+                        Value = $"join {station.HashtagHandle}",
                         Type = ActionTypes.ImBack,
                     });
 
                 return MessageAttachment(heroCard, messageText);
             }
 
-            return MessageFactory.Text($"You have joined @{station.Hashtag} playing \"{station.Name}\" 🎉");
+            return MessageFactory.Text($"You have joined {station.HashtagHandle} playing \"{station.Name}\" 🎉");
         }
 
         public static IMessageActivity Welcome(ConversationInfo info, string memberName)
@@ -213,20 +213,19 @@ namespace RingoBotNet
                     Type = ActionTypes.ImBack,
                 });
 
-            if (info.IsGroup)
-            {
-                messageText += " Or click/tap \"Join\" to join in with others!";
+            // TODO: Uncomment when feature enabled to choose station on `join`
+            //if (info.IsGroup)
+            //{
+            //    messageText += " Or click/tap \"Join\" to join in with others!";
 
-                heroCard.Buttons.Add(
-                    new CardAction
-                    {
-                        Title = "Join",
-                        Value = "join",
-                        Type = ActionTypes.ImBack,
-                    });
-
-                
-            }
+            //    heroCard.Buttons.Add(
+            //        new CardAction
+            //        {
+            //            Title = "Join",
+            //            Value = "join",
+            //            Type = ActionTypes.ImBack,
+            //        });                
+            //}
 
             messageText += " Also, you can type \"`help`\" at any time for help.";
             return MessageAttachment(heroCard, messageText);

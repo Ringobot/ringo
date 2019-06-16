@@ -108,7 +108,7 @@ namespace RingoBotNet
         {
             ConversationInfo info = RingoBotHelper.NormalizedConversationInfo(turnContext);
 
-            if (!info.IsGroup && (string.IsNullOrEmpty(query) || (!query.StartsWith('#') && !query.StartsWith('@'))))
+            if (string.IsNullOrEmpty(query) || (!query.StartsWith('#') && !query.StartsWith('@')))
             {
                 // must specify #channel or @username in DM to join a Station
                 await turnContext.SendActivityAsync(
@@ -119,12 +119,13 @@ namespace RingoBotNet
 
             Station station = null;
 
-            if (string.IsNullOrEmpty(query))
-            {
-                // just `join` in group chat: Play the current channel station
-                station = await _ringoService.GetChannelStation(info);
-            }
-            else if (query.StartsWith('@'))
+            //if (string.IsNullOrEmpty(query))
+            //{
+            //    // just `join` in group chat: Play the current channel station
+            //    station = await _ringoService.GetChannelStation(info);
+            //}
+            //else if (query.StartsWith('@'))
+            if (query.StartsWith('@'))
             {
                 // user station
                 station = await _ringoService.GetUserStation(info, query.Substring(1));
