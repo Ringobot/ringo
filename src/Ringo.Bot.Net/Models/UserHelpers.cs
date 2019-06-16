@@ -6,7 +6,7 @@ namespace RingoBotNet.Models
     public partial class User
     {
         internal static Regex UserIdRegex = new Regex(
-            $"^{RingoBotHelper.RingoBotName}:({string.Join('|', RingoBotHelper.SupportedChannelIds)}):[a-zA-Z0-9=]*:user:[a-z0-9-:]+$");
+            $"^{RingoBotHelper.RingoBotName}:({string.Join('|', RingoBotHelper.SupportedChannelIds)}):[a-zA-Z0-9=]*:user:[a-z0-9:]+$");
 
         /// <summary>
         /// Encodes the Id and Partition Key into a format suitable for a <see cref="CosmosEntity"/>
@@ -17,7 +17,7 @@ namespace RingoBotNet.Models
         internal static (string id, string pk) EncodeIds(ConversationInfo info, string userId)
         {
             // ringo:{channel_id}:{channel_team_id.ToLower()}:user:user_id.ToLower()}
-            string id = $"{RingoBotHelper.RingoBotName}:{info.ChannelId}:{info.ChannelTeamId}:user:{RingoBotHelper.LowerWord(userId)}"
+            string id = $"{RingoBotHelper.RingoBotName}:{info.ChannelId}:{info.ChannelTeamId}:user:{CryptoHelper.Base62Encode(userId)}"
                 .ToLower();
             return (id, id);
         }

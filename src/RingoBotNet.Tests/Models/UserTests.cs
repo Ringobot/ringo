@@ -7,32 +7,10 @@ namespace RingoBotNet.Tests.Models
     public class UserTests
     {
         [TestMethod]
-        public void EncodeId_UpperCaseUsername_EncodedSameAsLowerCaseUsername()
-        {
-            // arrange
-            const string upper = "Daniel";
-            const string lower = "daniel";
-
-            var info = new ConversationInfo
-            {
-                ChannelId = "msteams",
-                ChannelTeamId = "abc123"
-            };
-
-            var expected = User.EncodeIds(info, lower);
-
-            // act
-            var actual = User.EncodeIds(info, upper);
-
-            // assert
-            Assert.AreEqual(expected, actual);
-        }
-
-        [TestMethod]
         public void EncodeId_UpperCaseChannelId_EncodedSameAsLowerCaseChannelId()
         {
             // arrange
-            const string userId = "daniel";
+            const string userId = "27:abc1234XYZ";
 
             var lower = new ConversationInfo
             {
@@ -53,6 +31,28 @@ namespace RingoBotNet.Tests.Models
 
             // assert
             Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void EncodeId_UserIdsWithDifferentCases_SameSame()
+        {
+            // arrange
+            const string userId1 = "27:abc1234XYZ";
+            const string userId2 = "27:ABC1234xyz";
+
+            var info = new ConversationInfo
+            {
+                ChannelId = "msteams",
+                ChannelTeamId = "abc123"
+            };
+
+            var encoded1 = User.EncodeIds(info, userId1);
+
+            // act
+            var encoded2 = User.EncodeIds(info, userId2);
+
+            // assert
+            Assert.AreNotEqual(encoded1, encoded2, "User Ids provided by channels are case sensitive");
         }
     }
 }
