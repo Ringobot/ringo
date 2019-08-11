@@ -25,12 +25,12 @@ namespace RingoBotNet.Models
     public partial class Image
     {
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public int Height { get; set; }
+        public int? Height { get; set; }
 
         public string Url { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public int Width { get; set; }
+        public int? Width { get; set; }
     }
 
 }

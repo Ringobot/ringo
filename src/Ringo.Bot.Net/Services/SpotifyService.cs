@@ -153,7 +153,7 @@ namespace RingoBotNet.Services
                 return false;
             }
 
-            (string itemId, (long positionMs, DateTime atUtc) position) itemPosition = (info.Item?.Id, (info.ProgressMs, DateTime.UtcNow));
+            (string itemId, (long positionMs, DateTime atUtc) position) itemPosition = (info.Item?.Id, (info.ProgressMs ?? 0, DateTime.UtcNow));
 
 
             if (!SupportedSpotifyItemTypes.Contains(station.SpotifyContextType))
@@ -360,7 +360,7 @@ namespace RingoBotNet.Services
             CurrentPlaybackContext info1 = await _player.GetCurrentPlaybackInfo(token);
             var finish = DateTime.UtcNow;
             double rtt = finish.Subtract(start).TotalMilliseconds;
-            return (info1.Item.Id, info1.ProgressMs, Convert.ToInt64(rtt), finish);
+            return (info1.Item.Id, info1.ProgressMs ?? 0, Convert.ToInt64(rtt), finish);
         }
 
         public async Task<CurrentPlaybackContext> GetUserNowPlaying(string token)

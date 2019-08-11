@@ -29,7 +29,7 @@
   <ItemGroup>
     <PackageReference Include="Base62" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.1.6" />
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.6" />
+    <PackageReference Include="Microsoft.AspNetCore.All" />
     <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="0.10.1-preview" />
     <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="2.2.1" />
     <PackageReference Include="Microsoft.Bot.Builder" Version="4.2.0" />
@@ -41,7 +41,7 @@
     <PackageReference Include="Microsoft.Bot.Schema" Version="4.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.1.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.6" />
-    <PackageReference Include="SpotifyApi.NetCore" Version="2.4.6-beta" />
+    <PackageReference Include="SpotifyApi.NetCore" Version="3.0.1-preview" />
     <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
   </ItemGroup>
 

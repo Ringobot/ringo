@@ -6,6 +6,7 @@ using RingoBotNet.Data;
 using RingoBotNet.Helpers;
 using RingoBotNet.Models;
 using SpotifyApi.NetCore;
+using SpotifyApi.NetCore.Authorization;
 using System;
 using System.Net.Http;
 using System.Text.RegularExpressions;

@@ -25,6 +25,7 @@ using RingoBotNet.Helpers;
 using RingoBotNet.Services;
 using RingoBotNet.State;
 using SpotifyApi.NetCore;
+using SpotifyApi.NetCore.Authorization;
 
 namespace RingoBotNet
 {

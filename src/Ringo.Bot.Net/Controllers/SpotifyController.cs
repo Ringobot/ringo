@@ -2,6 +2,7 @@
 using RingoBotNet.Data;
 using RingoBotNet.Services;
 using SpotifyApi.NetCore;
+using SpotifyApi.NetCore.Authorization;
 using System;
 using System.Net;
 using System.Threading.Tasks;
