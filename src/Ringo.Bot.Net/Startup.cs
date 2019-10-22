@@ -83,6 +83,8 @@ namespace RingoBotNet
             // Creates a logger for the application to use.
             // services.AddSingleton<ILogger>(_logger);
 
+            services.AddApplicationInsightsTelemetry();
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // don't serialise self-referencing loops

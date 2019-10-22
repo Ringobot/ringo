@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.ApplicationInsights;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RingoBotNet.Helpers;
 using RingoBotNet.Models;
@@ -12,8 +13,9 @@ namespace RingoBotNet.Data
     {
         public UserData(
             IConfiguration configuration,
-            ILogger<UserData> logger)
-            : base(configuration, logger, configuration[ConfigHelper.CosmosDBUserCollectionName])
+            ILogger<UserData> logger,
+            TelemetryClient telemetry)
+            : base(configuration, logger, telemetry, configuration[ConfigHelper.CosmosDBUserCollectionName])
         { }
 
         /// <summary>

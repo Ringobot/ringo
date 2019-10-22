@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.ApplicationInsights;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RingoBotNet.Helpers;
 using RingoBotNet.Models;
@@ -11,8 +12,9 @@ namespace RingoBotNet.Data
     {
         public StationData(
             IConfiguration configuration,
-            ILogger<StationData> logger)
-            : base(configuration, logger, configuration[ConfigHelper.CosmosDBStationCollectionName])
+            ILogger<StationData> logger,
+            TelemetryClient telemetry)
+            : base(configuration, logger, telemetry, configuration[ConfigHelper.CosmosDBStationCollectionName])
         { }
 
         public async Task CreateStation(Station station)
